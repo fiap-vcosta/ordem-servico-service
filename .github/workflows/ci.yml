@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -221,3 +222,54 @@ jobs:
             /p:EnforceCodeStyleInBuild=false \
             /p:RunAnalyzersDuringBuild=false \
             --logger "console;verbosity=normal"
+
+  sonar:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet tool run dotnet-sonarscanner begin \
+            /k:"fiap-vcosta_ordem-servico-service" \
+            /o:"fiap-vcosta" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.qualitygate.wait=true \
+            /d:sonar.cs.cobertura.reportsPaths="${GITHUB_WORKSPACE}/test-results/coverage/coverage.cobertura.xml"
+
+      - name: Build
+        run: dotnet build TechChallenge.sln -c Release
+
+      - name: Run unit tests with coverage
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/test-results/coverage"
+          dotnet test tests/UnitTests/UnitTests.csproj \
+            -c Release \
+            --no-build \
+            /p:EnableNETAnalyzers=false \
+            /p:EnforceCodeStyleInBuild=false \
+            /p:RunAnalyzersDuringBuild=false \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput="${GITHUB_WORKSPACE}/test-results/coverage/coverage" \
+            '/p:Exclude=[*]*Migrations.*'
+
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet tool run dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
