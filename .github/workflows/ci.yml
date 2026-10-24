@@ -245,7 +245,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           dotnet tool run dotnet-sonarscanner begin \
-            /k:"ordem-servico-service" \
+            /k:"fiap-vcosta_ordem-servico-service" \
             /o:"fiap-vcosta" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.token="${SONAR_TOKEN}" \
