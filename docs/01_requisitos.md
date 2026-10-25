@@ -162,3 +162,47 @@ Objetivos desta sessão: autenticação do cliente por CPF (JWT) **por cima** do
   * **RF21.6:** Consulta `GET` de OS continua para **staff**. Sem área nova de autoatendimento nesta sessão (um `GET` cliente só se o professor exigir além deste escopo).
   * Endpoints (paths podem ser ajustados na implementação + Swagger): `POST …/ordens-servico/aprovar?token=` e `…/rejeitar?token=` com Bearer JWT cliente.
 * **RF23 (Consulta de cliente por CPF — serviço):** A API deve expor endpoint de serviço para a Function `auth` consultar existência/status de cliente por CPF, autenticado por **secret de serviço** (ou ID token de SA, se adotado). Não é rota anônima pública.
+
+---
+
+## Sessão — Outubro 2026 (evolução — orçamento, estoque e pagamento)
+
+Objetivos desta sessão: a finalização do diagnóstico espera o orçamento antes de rotear a OS; a reserva de peças deixa de ser calculada neste serviço; o pagamento deixa de ser um endpoint de staff. As regras das sessões anteriores permanecem, salvo os itens abaixo.
+
+Nomes, payloads e chaves de idempotência: [eventos](https://github.com/fiap-vcosta/e2e/blob/main/docs/eventos.md) e [saga](https://github.com/fiap-vcosta/e2e/blob/main/docs/saga.md).
+
+### 10. Máquina de estados da OS
+
+* **RF02 (Finalização do diagnóstico):** *(substitui o roteamento imediato do RF02 de Maio/2025)* Finalizar o diagnóstico, com a OS em `EmDiagnostico` e com ao menos um serviço, transita para `AguardandoOrcamento` e publica `DiagnosticoFinalizado`. O roteamento abaixo ocorre ao consumir `OrcamentoGerado`, sobre os status de serviço que a OS já tem:
+  * **RF02.1:** Se houver serviço `Sugerido`, a OS transita para `AguardandoAprovacao`.
+  * **RF02.2:** Se não houver `Sugerido` e houver `Aprovado`, a OS transita para `ChecandoEstoque`, grava `aprovadaEm` e publica `OrdemServicoAprovada`.
+  * **RF02.3:** Se não houver `Sugerido` nem `Aprovado`, a OS transita para `Entregue`.
+  * **RF02.4:** `OrcamentoFalhou` em `AguardandoOrcamento` devolve a OS a `EmDiagnostico`. Uma nova finalização incrementa `versaoDiagnostico` (a primeira vale 1) e publica outro `DiagnosticoFinalizado`.
+* **RF05 (Máquina de estados da OS):** *(substitui o fluxo do RF05 de Maio/2025)* A ordem do enum, que também é a prioridade da listagem, é: `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca`, `LiberadaParaExecucao`, `EmExecucao`, `Finalizada`, `AguardandoPagamento`, `Descartada`, `Entregue`.
+  * `Recebida` → `EmDiagnostico` ou `Descartada`.
+  * `EmDiagnostico` → `AguardandoOrcamento` ou `Descartada`.
+  * `AguardandoOrcamento` → `AguardandoAprovacao`, `ChecandoEstoque`, `Entregue`, `EmDiagnostico` ou `Descartada`.
+  * `AguardandoAprovacao` → `EmDiagnostico` (rejeição) ou `ChecandoEstoque` (aprovação).
+  * `ChecandoEstoque` → `LiberadaParaExecucao` (`EstoqueReservado`), `AguardandoPeca` (`EstoqueEmFalta`) ou `Descartada`.
+  * `AguardandoPeca` → `LiberadaParaExecucao` (`EstoqueReservado`) ou `Descartada`.
+  * `LiberadaParaExecucao` → `EmExecucao`, `Finalizada` ou `Descartada`.
+  * `EmExecucao` → `EmExecucao` ou `Finalizada`.
+  * `Finalizada` → `AguardandoPagamento`.
+  * `AguardandoPagamento` → `Entregue`.
+* **RF10 (Descarte):** *(substitui o RF10 de Maio/2025)* A OS pode ser descartada em `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca` e `LiberadaParaExecucao`. O descarte publica `OrdemServicoDescartada`. Não pode ser descartada em `EmExecucao`, `Finalizada`, `AguardandoPagamento` nem `Entregue`.
+* **RF16 (Pagamento e entrega):** *(substitui o RF16 de Maio/2025)* A execução que conclui todos os serviços transita para `Finalizada` e publica `OrdemServicoFinalizada`. Execução parcial permanece em `EmExecucao` e não publica esse evento.
+  * **RF16.1:** `CobrancaGerada` em `Finalizada` transita para `AguardandoPagamento`. Uma nova `CobrancaGerada` com a OS já em `AguardandoPagamento` mantém o status.
+  * **RF16.2:** `PagamentoRecusado` mantém `AguardandoPagamento`.
+  * **RF16.3:** `PagamentoConfirmado` em `AguardandoPagamento` transita para `Entregue`. Este serviço não expõe confirmação de pagamento por staff.
+  * O caminho RF02.3 continua indo a `Entregue` sem cobrança.
+* **RF20 (Listagem de OS):** *(substitui RF20.1 e RF20.2)*
+  * **RF20.1:** Não incluir OS em `Finalizada`, `AguardandoPagamento`, `Entregue` ou `Descartada`.
+  * **RF20.2:** Prioridade pelo valor do enum, do maior para o menor, e depois as mais antigas (`RecebidaEm`). `AguardandoOrcamento` fica imediatamente acima de `EmDiagnostico`.
+
+### 11. Estoque, aprovação e paths
+
+* **RF07 (Checagem de estoque):** *(substitui a comparação de saldo dentro da OS no RF07)* Este serviço não compara saldo. Ao entrar em `ChecandoEstoque` publica `OrdemServicoAprovada` com os itens dos serviços `Aprovado` e `aprovadaEm`. `EstoqueReservado` marca esses itens como `EstoqueTravado` e transita para `LiberadaParaExecucao`. `EstoqueEmFalta` marca cada item como `EstoqueDisponivel` ou `EstoqueEmFalta` e transita para `AguardandoPeca`. Falta de peça não é falha do fluxo. Os dois eventos são aceitos também a partir de `AguardandoPeca`.
+* **RF21 (Aprovação pelo cliente):** *(complementa o RF21 de Setembro/2026)* Os endpoints do cliente são `POST /ordem-servico/aprovar?token=` e `POST /ordem-servico/rejeitar?token=`. Os do staff são `POST /ordem-servico/{id}/aprovar`, `POST /ordem-servico/{id}/aprovar-parcialmente` e `POST /ordem-servico/{id}/rejeitar`. Ownership e token opaco permanecem os do RF21.4 e RF21.2.
+* **RF24 (Snapshot na abertura):** Na criação da OS e ao adicionar serviço, este serviço lê veículo, cliente e catálogo no administrativo e o item no estoque, e copia o retorno para o snapshot local. O snapshot do cliente inclui `documento`, usado no RF21.4. Adicionar serviço continua permitido só em `Recebida` e `EmDiagnostico`.
+* **RF25 (Paths deste serviço):** As rotas públicas usam o prefixo `/ordem-servico`, sem `/api`. Além das rotas de RF21 e RF16, permanecem criação, consulta, listagem, tempo médio de execução, adicionar serviço, finalizar diagnóstico, confirmar execução e descartar, nos paths já usados sob esse prefixo. Consulta de cliente por documento, cadastro administrativo, estoque e login não são rotas deste serviço (o RF23 deixa de valer aqui).
+* **RNF24 (JWT):** *(substitui o emissor descrito no RNF21)* Este serviço não assina JWT. Valida o JWT staff e o JWT cliente pela chave pública (JWKS). O claim `documento` e a expiração de 1800 segundos do JWT cliente permanecem.
