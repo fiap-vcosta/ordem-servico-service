@@ -5,7 +5,7 @@ Comece pelo [`README.md`](../README.md) na raiz.
 | Doc | Conteúdo |
 |-----|----------|
 | [00_linguagem-onipresente.md](00_linguagem-onipresente.md) | Vocabulário do domínio |
-| [01_requisitos.md](01_requisitos.md) | Requisitos (sessões Maio/2025, Julho/2026 e Setembro/2026) |
+| [01_requisitos.md](01_requisitos.md) | Requisitos (sessões Maio/2025, Julho/2026, Setembro/2026 e Outubro/2026) |
 | `02_*.egn` | Histórias de domínio (EventStorming) |
 | `03_01_event-storming-linha-do-tempo.jpg` | Linha do tempo |
 | `03_02_event-storming-agregados.jpg` | Agregados |
