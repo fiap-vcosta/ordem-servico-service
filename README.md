@@ -135,46 +135,13 @@ Entrada pública: **HTTPS** em `https://api.vcosta-fiap.online` (Ingress GCE + c
 
 Não há Job de migration: a aplicação roda `db.Database.Migrate()` no start, e o sidecar nativo garante que o túnel esteja pronto antes disso.
 
-| Workflow | Quando | O que faz |
-|----------|--------|-----------|
-| [`build-push`](.github/workflows/build-push.yml) | Merge em `main` | Build da imagem e push no Artifact Registry (`:latest` + SHA curto) |
-| [`deploy`](.github/workflows/deploy.yml) | Só manual | Aplica os manifests com a imagem `:latest` e faz smoke em `https://api.vcosta-fiap.online/health` |
+Os workflows `build-push` e `deploy` deste monólito foram **removidos**. Não há CD automático nem `workflow_dispatch` de deploy neste repositório enquanto a API legada não for recortada em microsserviço. Quando o CD voltar, os callers usarão [`fiap-vcosta/actions`](https://github.com/fiap-vcosta/actions) (`build-push` / `deploy`).
 
-O `build-push` mantém o registry sempre com a imagem da `main`, e é independente de cluster e banco — roda fora da janela de demo. O `deploy` sempre usa `:latest`.
+Os manifests em [`k8s/`](k8s/) e a documentação de Ingress/HPA abaixo descrevem o shape ainda presente no repo; não dispare apply manual desses manifests na janela atual (a entrada pública já é Gateway API + API Gateway no `infra-k8s`).
 
-Ordem típica na janela (detalhe no README do `infra-k8s`):
+Issuer/Audience de funcionário e de cliente ficam no ConfigMap (`tech-challenge-api` × `tech-challenge-cliente`) — dois emissores, dois materiais (RNF21). Localmente (Compose), use `JWT_FUNCIONARIO_*` e `JWT_CLIENTE_*` no `.env` — ver `.env.example`.
 
-1. `infra-db` → `tf-apply`, depois `infra-k8s` → `tf-apply` (cluster + IP estático + records Cloud DNS `api`/`auth`/apex + Gateway)
-2. Este repo → **`deploy`** (Ingress + ManagedCertificate)
-3. Esperar ManagedCertificate **Active** em `api.…` e o cert do apex (o smoke do workflow tenta ~15 min; se falhar, reexecute após o cert)
-4. Smoke: `https://api.vcosta-fiap.online/health` e `https://vcosta-fiap.online/auth`
-A cada deploy o workflow:
-- lê a senha do banco no Secret Manager;
-- **gera** uma chave JWT de **funcionário** nova (`JwtFuncionario__Key`);
-- injeta `JwtCliente__Key` e `ServiceAuth__Key` a partir de **GitHub Secrets do repo** (valores **estáveis** — a Function `auth` precisa do mesmo material).
-
-Nada disso vai para o Git ou tfstate. Em troca, o JWT de staff rotaciona a cada redeploy (basta logar de novo); o JWT cliente e o secret de serviço **não** mudam entre deploys.
-
-Issuer/Audience de funcionário e de cliente ficam no ConfigMap (`tech-challenge-api` × `tech-challenge-cliente`) — dois emissores, dois materiais (RNF21). **Não** use secrets GitHub `JWT_KEY` / `JWT_ISSUER` / `JWT_AUDIENCE` (legado sem sufixo): o deploy não os lê; pode removê-los do repo. Também **não** precisa de `JWT_FUNCIONARIO_KEY` no GitHub — a chave de staff é gerada no workflow.
-
-Pré-requisitos: cluster no ar (`infra-k8s` → `tf-apply`), banco no ar (`infra-db` → `tf-apply`), as org vars `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_AR_REPOSITORY`, `GCP_GKE_CLUSTER_NAME`, `GCP_DB_PASSWORD_SECRET`, `GCP_WORKLOAD_IDENTITY_PROVIDER` e `GCP_SERVICE_ACCOUNT_EMAIL`, e os **repo secrets** abaixo (criar uma vez em Settings → Secrets do `fiap-vcosta/api`):
-
-| Secret | Uso |
-|--------|-----|
-| `JWT_CLIENTE_KEY` | Assinatura/validação do JWT cliente (mesma chave que o Cloud Run `auth`) |
-| `SERVICE_AUTH_KEY` | Header `X-Service-Key` no endpoint `GET /api/system/clientes/por-documento/{documento}` |
-| `DD_API_KEY` | Datadog Agent sidecar + sink de logs (org ou repo) |
-
-Gerar valores (exemplo):
-
-```bash
-openssl rand -base64 48   # JWT_CLIENTE_KEY
-openssl rand -base64 32   # SERVICE_AUTH_KEY
-```
-
-Localmente (Compose), use `JWT_FUNCIONARIO_*` e `JWT_CLIENTE_*` no `.env` — ver `.env.example`.
-
-Evidência de HPA depois do deploy:
+Evidência de HPA (quando houver deploy ativo):
 
 ```bash
 ./scripts/stress-hpa.sh https://api.vcosta-fiap.online
@@ -236,8 +203,8 @@ dotnet test tests/IntegrationTests/IntegrationTests.csproj   # requer Docker
 
 - Estratégia: [`docs/06_testes.md`](docs/06_testes.md)
 - Collections HTTP: [`docs/07_api.md`](docs/07_api.md) (Swagger + Requestly; e2e Gateway em `12-gateway-cliente-aprovar`)
-- CI: lint + unit + integration em paralelo ([`ci.yml`](.github/workflows/ci.yml))
-- CD: `build-push` em merge na `main`, `deploy` manual (ver [Deploy na GCP](#deploy-na-gcp))
+- CI: lint + unit + integration + Sonar via caller de [`fiap-vcosta/actions`](https://github.com/fiap-vcosta/actions) ([`ci.yml`](.github/workflows/ci.yml))
+- CD: desativado neste monólito; volta com callers de `build-push` / `deploy` do mesmo repo `actions` no recorte em microsserviço
 
 ---
 
