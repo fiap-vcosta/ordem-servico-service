@@ -25,7 +25,7 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
                     ItensNecessarios = new[] { new { IdItemEstoque = idItemSemSaldo, Quantidade = 1m } }
                 }
             ]);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AprovarInternamenteAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoPeca");
 
@@ -55,7 +55,7 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
                     ItensNecessarios = new[] { new { IdItemEstoque = idItemSemSaldo, Quantidade = 1m } }
                 }
             ]);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         var token = await GetTokenAprovacaoAsync(ordemId);

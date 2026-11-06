@@ -7,9 +7,10 @@ alwaysApply: false
 # Domínio Ordem de Serviço
 
 - Máquina de estados centralizada no agregado; adapters só disparam use cases.
-- Status finais fora da listagem da API: `Finalizada`, `Entregue`, `Descartada`.
+- Status fora da listagem da API: `Finalizada`, `AguardandoPagamento`, `Entregue`, `Descartada`. `AguardandoOrcamento` entra na listagem.
 - Adicionar serviços/peças (`AdicionarItemServico`) **somente** em `Recebida` e `EmDiagnostico`; qualquer outro status é proibido.
+- Finalizar diagnóstico → `AguardandoOrcamento` (+ `versaoDiagnostico`); RF02 só ao aplicar `OrcamentoGerado`.
 - Estoque insuficiente → item `EstoqueEmFalta` e OS `AguardandoPeca` (já implementado).
-- Prioridade de listagem: usa a ordem evolutiva do próprio enum `StatusOrdemServico` (`OrderByDescending`); depois mais antigas. Excluir Finalizada/Entregue/Descartada.
+- Prioridade de listagem: ordem evolutiva do enum `StatusOrdemServico` (`OrderByDescending`); depois mais antigas.
 - Não aceitar status arbitrário vindo de fora do domínio.
 - Aprovação externa: localizar OS por token opaco; não expor o token nas responses.

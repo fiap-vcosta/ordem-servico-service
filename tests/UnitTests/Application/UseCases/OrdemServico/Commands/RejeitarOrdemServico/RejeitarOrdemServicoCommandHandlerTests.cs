@@ -23,6 +23,7 @@ public class RejeitarOrdemServicoCommandHandlerTests
         var servicoCatalogo = new ServicoCatalogo() { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
         ordemServico.AdicionarItemServico("Troca", 100m, servicoCatalogo, new List<ItemNecessario.CriarItemNecessarioParams>());
         ordemServico.FinalizarDiagnostico();
+        ordemServico.AplicarOrcamentoGerado(1);
 
         var command = new RejeitarOrdemServicoCommand { IdOrdemServico = 1 };
 

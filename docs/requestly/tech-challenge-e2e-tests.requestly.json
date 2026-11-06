@@ -346,34 +346,6 @@
       "rank": "a9"
     },
     {
-      "id": "84bff59e-a214-419f-a2e3-19bf877de8d0",
-      "name": "10-confirmar-pagamento",
-      "type": "api",
-      "parentId": "d2e99374-c469-4833-87cd-ac9ebef2875c",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "aa"
-    },
-    {
       "id": "c0030618-2009-453d-81b0-afa8af14c7a3",
       "name": "11-assert-entregue",
       "type": "api",
@@ -763,34 +735,6 @@
         }
       },
       "rank": "aa"
-    },
-    {
-      "id": "8884bbcf-d504-418e-8564-782a713bc8cb",
-      "name": "11-confirmar-pagamento",
-      "type": "api",
-      "parentId": "121c6c9f-a57b-4450-9554-afe2c1e3a406",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "ab"
     },
     {
       "id": "74249011-c925-4c10-9a01-d360f6e24715",
@@ -1752,34 +1696,6 @@
       "rank": "aa"
     },
     {
-      "id": "b62f109e-2e68-4036-96b5-6e55d7daa10a",
-      "name": "11-confirmar-pagamento",
-      "type": "api",
-      "parentId": "d0c07e78-8e12-4611-851d-64a642ebe1ab",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "ab"
-    },
-    {
       "id": "d8c7f801-d837-4781-8f1c-82b502ea36db",
       "name": "12-assert-entregue",
       "type": "api",
@@ -2171,34 +2087,6 @@
         }
       },
       "rank": "aa"
-    },
-    {
-      "id": "b75adbeb-2052-4dc6-8254-ed3a9027058a",
-      "name": "11-confirmar-pagamento",
-      "type": "api",
-      "parentId": "606087c4-f9f1-4d1d-83bd-52006ae22e39",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "ab"
     },
     {
       "id": "f8807bc4-5de9-4dd9-b907-0a5dc1270e89",
@@ -3090,34 +2978,6 @@
       "rank": "ao"
     },
     {
-      "id": "569ec055-d8bc-4725-adad-8e5bd1321f88",
-      "name": "25-confirmar-pagamento",
-      "type": "api",
-      "parentId": "74e0fefa-0da2-4699-aa7a-b1abec98e7c7",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "ap"
-    },
-    {
       "id": "fe32436e-4d28-4826-9c6c-209a14549498",
       "name": "26-assert-entregue",
       "type": "api",
@@ -3857,34 +3717,6 @@
         }
       },
       "rank": "ah"
-    },
-    {
-      "id": "b704faed-7c0a-496d-b0be-2a9cc2cb148d",
-      "name": "18-confirmar-pagamento-entregue",
-      "type": "api",
-      "parentId": "f683e6a6-db64-4c6b-ac9b-10dcf6566aff",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        },
-        "scripts": {
-          "postResponse": "rq.test(\"Transição retorna sucesso\", function () {\n  rq.expect((rq.response.code != null ? rq.response.code : rq.response.status)).to.be.oneOf([200, 201, 204]);\n});"
-        }
-      },
-      "rank": "ai"
     },
     {
       "id": "9447e2a9-3f15-47ff-ae70-1b8fafdcb890",

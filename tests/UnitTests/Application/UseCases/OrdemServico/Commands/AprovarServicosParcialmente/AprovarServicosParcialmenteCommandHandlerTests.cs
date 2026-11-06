@@ -84,6 +84,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         ordem.AdicionarItemServico("Troca", 200m, catalogo, []);
         ordem.AdicionarItemServico("Alinhamento", 150m, catalogo, []);
         ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
         return ordem;
     }
 }

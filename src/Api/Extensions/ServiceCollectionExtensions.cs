@@ -26,11 +26,13 @@ using Api.Presenters.ItemEstoque;
 using Api.Presenters.OrdemServico;
 using Api.Presenters.Servico;
 using Api.Presenters.Veiculo;
+using Application.Abstractions.Messaging;
 using Application.Abstractions.Services;
 using Application.UseCases.Administrativo.Usuario.Commands.Login;
 using Application.Abstractions.Gateways;
 using Infrastructure.Database;
 using Infrastructure.Database.Gateways;
+using Infrastructure.Messaging;
 
 namespace Api.Extensions;
 
@@ -121,6 +123,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IOrdemServicoGateway, OrdemServicoGateway>();
         services.AddScoped<IItemServicoGateway, ItemServicoGateway>();
+        services.AddSingleton<IDiagnosticoFinalizadoPublisher, NullDiagnosticoFinalizadoPublisher>();
         services.AddScoped<OrdemServicoPresenter>();
         services.AddSingleton<IValidator<CriarOrdemServicoRequest>, CriarOrdemServicoRequestValidator>();
         services.AddSingleton<IValidator<AdicionarItemServicoRequest>, AdicionarItemServicoRequestValidator>();

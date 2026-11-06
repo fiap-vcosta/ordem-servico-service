@@ -26,7 +26,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
                     ItensNecessarios = Array.Empty<object>()
                 }
             ]);
-        await FinalizarDiagnosticoAsync(aguardandoId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(aguardandoId);
 
         var descartadaId = await CriarOrdemAsync(idVeiculo: 3);
         await DescartarAsync(descartadaId);
@@ -45,6 +45,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         Assert.DoesNotContain(descartadaId, ids);
         Assert.DoesNotContain("Descartada", statuses);
         Assert.DoesNotContain("Finalizada", statuses);
+        Assert.DoesNotContain("AguardandoPagamento", statuses);
         Assert.DoesNotContain("Entregue", statuses);
 
         var indexAguardando = ids.IndexOf(aguardandoId);

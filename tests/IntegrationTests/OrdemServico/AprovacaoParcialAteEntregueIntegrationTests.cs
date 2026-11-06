@@ -33,20 +33,20 @@ public class AprovacaoParcialAteEntregueIntegrationTests(CustomWebApplicationFac
         await AssertStatusAsync(ordemId, "EmDiagnostico");
         Assert.Equal(2, await GetServicosCountAsync(ordemId));
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         var idsServicos = await GetServicoIdsAsync(ordemId);
         await AprovarParcialmenteAsync(ordemId, idsServicos[0]);
         await AssertStatusAsync(ordemId, "EmDiagnostico");
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
 
         // Assert
         await ConfirmarExecucaoAsync(ordemId, idsServicos[0]);
         await AssertStatusAsync(ordemId, "Finalizada");
-        await ConfirmarPagamentoAsync(ordemId);
+        await AplicarCobrancaEPagamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "Entregue");
     }
 }

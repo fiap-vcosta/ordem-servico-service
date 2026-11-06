@@ -39,6 +39,7 @@ public class ItemServicoGatewayTests : IDisposable
         var catalogo = new ServicoCatalogo { Id = 10, Nome = "Troca", Codigo = "TRC-001" };
         ordem.AdicionarItemServico("Troca", 100m, catalogo, []);
         ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
         ordem.ChecarItensNecessarios(new Dictionary<int, decimal>());
         var servicoId = ordem.Servicos.First().Id;

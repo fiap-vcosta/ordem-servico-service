@@ -12,7 +12,6 @@ using Application.UseCases.OrdemServico.Commands.AdicionarItemOrdemServico;
 using Application.UseCases.OrdemServico.Commands.AprovarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.AprovarServicosParcialmente;
 using Application.UseCases.OrdemServico.Commands.ConfirmarExecucaoOrdemServico;
-using Application.UseCases.OrdemServico.Commands.ConfirmarPagamentoOrdemServico;
 using Application.UseCases.OrdemServico.Commands.CriarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.DescartarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.FinalizarDiagnostico;
@@ -273,37 +272,6 @@ public class OrdemServicoControllerTests
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task ConfirmarPagamento_ReturnsOk()
-    {
-        // Arrange
-        var response = new OrdemServicoResponse
-        {
-            Id = 1,
-            Status = StatusOrdemServico.Entregue,
-            ValorTotal = 100m,
-            RecebidaEm = DateTime.UtcNow,
-            EntregueEm = DateTime.UtcNow,
-            Cliente = new ClienteOrdemServicoResponse { Id = 1, Nome = "Maria", Email = "m@t.com" },
-            Veiculo = new VeiculoOrdemServicoResponse { Placa = "ABC", Marca = "VW", Modelo = "Gol" },
-            Servicos = [],
-            ItensNecessariosParaExecucao = []
-        };
-
-        _mediatorMock
-            .Setup(m => m.Send(It.IsAny<ConfirmarPagamentoOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response);
-
-        // Act
-        var result = await _controller.ConfirmarPagamento(1);
-
-        // Assert
-        var ok = Assert.IsType<OkObjectResult>(result);
-        var viewModel = Assert.IsType<OrdemServicoViewModel>(ok.Value);
-        Assert.Equal(response.Id, viewModel.Id);
-        Assert.Equal(response.Status, viewModel.Status);
     }
 
     [Fact]

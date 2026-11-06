@@ -18,7 +18,7 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
 
         var idServicoInicialAprovado = await AdicionarServicoERetornarIdAsync(ordemId, idServico: 1, valorCobrado: 100m);
         await AdicionarServicoERetornarIdAsync(ordemId, idServico: 2, valorCobrado: 50m);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarParcialmenteAsync(ordemId, idServicoInicialAprovado);
@@ -33,7 +33,7 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
             ordemId, idServico: 2, valorCobrado: 80m, idItemEstoque: idItemEmFalta2, quantidade: 2m);
         var idServicoParaRejeitar = await AdicionarServicoERetornarIdAsync(ordemId, idServico: 1, valorCobrado: 40m);
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarParcialmenteAsync(ordemId, idServicoComFalta1, idServicoComFalta2);
@@ -42,7 +42,7 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
         Assert.Contains(idServicoComFalta2, await GetServicoIdsPorStatusAsync(ordemId, "Aprovado"));
         Assert.Contains(idServicoParaRejeitar, await GetServicoIdsPorStatusAsync(ordemId, "Rejeitado"));
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoPeca");
         await AssertListagemContemOrdemComStatusAsync(ordemId, "AguardandoPeca");
 

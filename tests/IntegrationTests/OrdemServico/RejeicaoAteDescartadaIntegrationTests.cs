@@ -26,7 +26,7 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
             ]);
         await AssertStatusAsync(ordemId, "EmDiagnostico");
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await RejeitarInternamenteAsync(ordemId);
@@ -56,7 +56,7 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
                     ItensNecessarios = Array.Empty<object>()
                 }
             ]);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         var token = await GetTokenAprovacaoAsync(ordemId);
@@ -78,11 +78,13 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 4);
         await AdicionarServicoAsync(ordemId, idServico: 2, valorCobrado: 50m);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await RejeitarInternamenteAsync(ordemId);
         await AssertStatusAsync(ordemId, "EmDiagnostico");
 
         await FinalizarDiagnosticoAsync(ordemId);
+        await AssertStatusAsync(ordemId, "AguardandoOrcamento");
+        await AplicarOrcamentoGeradoAsync(ordemId);
 
         // Assert
         await AssertStatusAsync(ordemId, "Entregue");

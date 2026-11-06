@@ -81,6 +81,7 @@ public class OrdemServicoGatewayTests : IDisposable
             new(1, 10m, new ItemEstoqueOrdemServico { Id = 1, Codigo = "ITM-001", Nome = "Filtro", UnidadeMedida = "Unidade" })
         });
         ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
         ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [1] = 0m });
         await _gateway.CriarAsync(ordem);
@@ -200,6 +201,7 @@ public class OrdemServicoGatewayTests : IDisposable
         liberada.EnviarParaDiagnostico();
         liberada.AdicionarItemServico("svc", 10m, catalogo, []);
         liberada.FinalizarDiagnostico();
+        liberada.AplicarOrcamentoGerado(1);
         liberada.AprovarServicosSugeridos();
         liberada.ChecarItensNecessarios(new Dictionary<int, decimal>());
         await _gateway.CriarAsync(liberada);

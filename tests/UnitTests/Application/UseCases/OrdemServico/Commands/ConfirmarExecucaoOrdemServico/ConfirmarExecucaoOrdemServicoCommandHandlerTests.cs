@@ -25,6 +25,7 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
         var servicoCatalogo = new ServicoCatalogo() { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
         ordemServico.AdicionarItemServico("Troca", 100m, servicoCatalogo, new List<ItemNecessario.CriarItemNecessarioParams>());
         ordemServico.FinalizarDiagnostico();
+        ordemServico.AplicarOrcamentoGerado(1);
         ordemServico.AprovarServicosSugeridos();
         ordemServico.ChecarItensNecessarios(new Dictionary<int, decimal>());
 
