@@ -247,6 +247,82 @@ public class OrdemServicoAggregateRootTests
     }
 
     [Fact]
+    public void AplicarOrcamentoGerado_WhenNotAguardandoOrcamento_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdem();
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.AplicarOrcamentoGerado(1));
+    }
+
+    [Fact]
+    public void AplicarOrcamentoGerado_WithOnlyApprovedServices_GoesToChecandoEstoque()
+    {
+        // Arrange
+        var ordem = CriarOrdem();
+        var catalogo = new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
+        ordem.EnviarParaDiagnostico();
+        ordem.AdicionarItemServico("A", 100m, catalogo, []);
+        ordem.AdicionarItemServico("B", 50m, catalogo, []);
+        ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
+        var primeiro = ordem.Servicos.First().Id;
+        ordem.AprovarServicosParcialmente([primeiro]);
+        ordem.FinalizarDiagnostico();
+
+        // Act
+        ordem.AplicarOrcamentoGerado(2);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.ChecandoEstoque, ordem.Status);
+    }
+
+    [Fact]
+    public void AplicarOrcamentoFalhou_WhenWrongStatus_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdem();
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.AplicarOrcamentoFalhou(1));
+    }
+
+    [Fact]
+    public void RegistrarCobrancaGerada_WhenWrongStatus_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdem();
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.RegistrarCobrancaGerada());
+    }
+
+    [Fact]
+    public void RegistrarPagamentoRecusado_WhenWrongStatus_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdem();
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.RegistrarPagamentoRecusado());
+    }
+
+    [Fact]
+    public void Discard_WhenAguardandoAprovacao_SetsDiscardedStatus()
+    {
+        // Arrange
+        var ordem = CriarOrdemComDiagnosticoFinalizado();
+        ordem.AplicarOrcamentoGerado(1);
+
+        // Act
+        ordem.Descartar();
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.Descartada, ordem.Status);
+    }
+
+    [Fact]
     public void AplicarOrcamentoFalhou_ReturnsToEmDiagnostico()
     {
         // Arrange

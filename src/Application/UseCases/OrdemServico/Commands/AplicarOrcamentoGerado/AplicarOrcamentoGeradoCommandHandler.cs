@@ -1,7 +1,6 @@
 using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
 using Application.Logging;
-using Application.UseCases.OrdemServico.Responses;
 using Domain.Exceptions;
 using Domain.OrdemServico.Entities;
 using Domain.OrdemServico.Events;
