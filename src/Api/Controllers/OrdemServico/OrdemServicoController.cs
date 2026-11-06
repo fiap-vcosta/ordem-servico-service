@@ -8,7 +8,6 @@ using Application.UseCases.OrdemServico.Commands.AdicionarItemOrdemServico;
 using Application.UseCases.OrdemServico.Commands.AprovarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.AprovarServicosParcialmente;
 using Application.UseCases.OrdemServico.Commands.ConfirmarExecucaoOrdemServico;
-using Application.UseCases.OrdemServico.Commands.ConfirmarPagamentoOrdemServico;
 using Application.UseCases.OrdemServico.Commands.CriarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.DescartarOrdemServico;
 using Application.UseCases.OrdemServico.Commands.FinalizarDiagnostico;
@@ -176,14 +175,6 @@ public class OrdemServicoController(
             ServicosExecutados = request.ServicosExecutados
         };
 
-        var response = await mediator.Send(command);
-        return Ok(presenter.Present(response));
-    }
-
-    [HttpPost("{id:int}/confirmar-pagamento")]
-    public async Task<IActionResult> ConfirmarPagamento(int id)
-    {
-        var command = new ConfirmarPagamentoOrdemServicoCommand() { IdOrdemServico = id };
         var response = await mediator.Send(command);
         return Ok(presenter.Present(response));
     }

@@ -150,6 +150,7 @@ public class AlocarEstoqueOrdemServicoCommandHandlerTests
                 new(1, quantidadeNecessaria, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
             });
         ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
 
         return ordem;

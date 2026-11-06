@@ -10,6 +10,7 @@ public class OrdemServicoGateway(AppDbContext context) : IOrdemServicoGateway
     private static readonly StatusOrdemServico[] StatusExcluidosDaListagem =
     [
         StatusOrdemServico.Finalizada,
+        StatusOrdemServico.AguardandoPagamento,
         StatusOrdemServico.Entregue,
         StatusOrdemServico.Descartada
     ];

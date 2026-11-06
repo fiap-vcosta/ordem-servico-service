@@ -1209,31 +1209,6 @@
       "rank": "a7"
     },
     {
-      "id": "ddf88540-dab0-4333-958e-b41760c66ce3",
-      "name": "confirmar-pagamento",
-      "type": "api",
-      "parentId": "7d3d1803-5fbd-4feb-b588-e91c8585e9e4",
-      "deleted": false,
-      "data": {
-        "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/confirmar-pagamento",
-          "method": "POST",
-          "headers": [],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "none"
-          },
-          "contentType": "none"
-        },
-        "auth": {
-          "type": "inherit"
-        }
-      },
-      "rank": "a8"
-    },
-    {
       "id": "d82d8c35-a936-4802-826b-9dddb341bc99",
       "name": "descartar",
       "type": "api",

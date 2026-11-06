@@ -8,12 +8,14 @@ public enum StatusOrdemServico
 {
     Recebida,
     EmDiagnostico,
+    AguardandoOrcamento,
     AguardandoAprovacao,
     ChecandoEstoque,
     AguardandoPeca,
     LiberadaParaExecucao,
     EmExecucao,
     Finalizada,
+    AguardandoPagamento,
     Descartada,
     Entregue,
 }
@@ -21,8 +23,10 @@ public enum StatusOrdemServico
 public class OrdemServicoAggregateRoot
 {
     public int Id { get; private set; }
-    
+
     public StatusOrdemServico Status { get; private set; }
+
+    public int VersaoDiagnostico { get; private set; }
 
     public decimal ValorTotal =>
         _servicos
@@ -34,10 +38,10 @@ public class OrdemServicoAggregateRoot
     public DateTime? DescartadaEm { get; private set; }
     public DateTime? AprovadaEm { get; private set; }
     public string TokenAprovacao { get; private set; } = string.Empty;
-    
+
     public required ClienteOrdemServico Cliente { get; init; }
     public required VeiculoOrdemServico Veiculo { get; init; }
-    
+
     private readonly List<Servico> _servicos = new();
     public IReadOnlyCollection<Servico> Servicos => _servicos.AsReadOnly();
 
@@ -52,6 +56,7 @@ public class OrdemServicoAggregateRoot
             Cliente = cliente,
             Veiculo = veiculo,
             Status = StatusOrdemServico.Recebida,
+            VersaoDiagnostico = 0,
             RecebidaEm = DateTime.UtcNow,
             EntregueEm = null,
             DescartadaEm = null,
@@ -72,17 +77,24 @@ public class OrdemServicoAggregateRoot
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ser enviada para diagnóstico.");
         }
-        
+
         Status = StatusOrdemServico.EmDiagnostico;
     }
 
     public void Descartar()
     {
-        if (Status is not (StatusOrdemServico.Recebida or StatusOrdemServico.EmDiagnostico))
+        if (Status is not (
+            StatusOrdemServico.Recebida
+            or StatusOrdemServico.EmDiagnostico
+            or StatusOrdemServico.AguardandoOrcamento
+            or StatusOrdemServico.AguardandoAprovacao
+            or StatusOrdemServico.ChecandoEstoque
+            or StatusOrdemServico.AguardandoPeca
+            or StatusOrdemServico.LiberadaParaExecucao))
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ser descartada.");
         }
-        
+
         Status = StatusOrdemServico.Descartada;
         DescartadaEm = DateTime.UtcNow;
     }
@@ -100,7 +112,7 @@ public class OrdemServicoAggregateRoot
         {
             itemOrdemServico.AdicionarItemNecessario(itemNecessario);
         }
-        
+
         _servicos.Add(itemOrdemServico);
     }
 
@@ -110,30 +122,95 @@ public class OrdemServicoAggregateRoot
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ter diagnóstico finalizado.");
         }
-        
+
         if (_servicos.Count == 0)
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} não teve nenhum serviço adicionado.");
         }
-        
+
+        VersaoDiagnostico++;
+        Status = StatusOrdemServico.AguardandoOrcamento;
+    }
+
+    public void AplicarOrcamentoGerado(int versaoDiagnostico)
+    {
+        if (Status is not StatusOrdemServico.AguardandoOrcamento)
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode aplicar orçamento gerado.");
+        }
+
+        if (versaoDiagnostico != VersaoDiagnostico)
+        {
+            throw new BusinessRuleException(
+                $"Ordem de Serviço {Id} esperava versão de diagnóstico {VersaoDiagnostico}, recebeu {versaoDiagnostico}.");
+        }
+
         if (_servicos.Any(ios => ios.Status is StatusItemOrdemServico.Sugerido))
         {
             Status = StatusOrdemServico.AguardandoAprovacao;
-
             return;
         }
 
         if (_servicos.Any(ios => ios.Status is StatusItemOrdemServico.Aprovado))
         {
             EnviarParaChecagemEstoque();
-            
             return;
         }
-        
+
         Status = StatusOrdemServico.Entregue;
         EntregueEm = DateTime.UtcNow;
     }
-    
+
+    public void AplicarOrcamentoFalhou(int versaoDiagnostico)
+    {
+        if (Status is not StatusOrdemServico.AguardandoOrcamento)
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode aplicar falha de orçamento.");
+        }
+
+        if (versaoDiagnostico != VersaoDiagnostico)
+        {
+            throw new BusinessRuleException(
+                $"Ordem de Serviço {Id} esperava versão de diagnóstico {VersaoDiagnostico}, recebeu {versaoDiagnostico}.");
+        }
+
+        Status = StatusOrdemServico.EmDiagnostico;
+    }
+
+    public void RegistrarCobrancaGerada()
+    {
+        if (Status is StatusOrdemServico.AguardandoPagamento)
+        {
+            return;
+        }
+
+        if (Status is not StatusOrdemServico.Finalizada)
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode registrar cobrança gerada.");
+        }
+
+        Status = StatusOrdemServico.AguardandoPagamento;
+    }
+
+    public void ConfirmarPagamentoRecebido()
+    {
+        if (Status is not StatusOrdemServico.AguardandoPagamento)
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode confirmar pagamento.");
+        }
+
+        Status = StatusOrdemServico.Entregue;
+        EntregueEm = DateTime.UtcNow;
+    }
+
+    public void RegistrarPagamentoRecusado()
+    {
+        if (Status is not StatusOrdemServico.AguardandoPagamento)
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode registrar pagamento recusado.");
+        }
+    }
+
     public void RejeitarServicosSugeridos()
     {
         if (Status is not StatusOrdemServico.AguardandoAprovacao)
@@ -142,7 +219,7 @@ public class OrdemServicoAggregateRoot
         }
 
         Status = StatusOrdemServico.EmDiagnostico;
-        
+
         foreach (var servico in _servicos.Where(s => s.Status is StatusItemOrdemServico.Sugerido))
         {
             servico.Rejeitar();
@@ -155,12 +232,12 @@ public class OrdemServicoAggregateRoot
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ter serviços aprovados ou rejeitados.");
         }
-        
+
         foreach (var servico in _servicos.Where(s => s.Status is StatusItemOrdemServico.Sugerido))
         {
             servico.Aprovar();
         }
-        
+
         EnviarParaChecagemEstoque();
     }
 
@@ -183,17 +260,16 @@ public class OrdemServicoAggregateRoot
             RejeitarServicosSugeridos();
             return;
         }
-        
+
         EnviarParaChecagemEstoque();
     }
-    
+
     private void EnviarParaChecagemEstoque()
     {
         Status = StatusOrdemServico.ChecandoEstoque;
         AprovadaEm = DateTime.UtcNow;
     }
 
-    
     public void ChecarItensNecessarios(Dictionary<int, decimal> saldosDisponiveis)
     {
         if (Status is not (StatusOrdemServico.ChecandoEstoque or StatusOrdemServico.AguardandoPeca))
@@ -206,7 +282,7 @@ public class OrdemServicoAggregateRoot
         foreach (var item in ItensNecessariosParaExecucao)
         {
             var saldoAtual = clonedQuantidadesDisponiveis[item.ItemEstoque.Id];
-            
+
             item.ChecarEstoque(saldoAtual);
 
             if (item.Status == StatusItemEstoque.EstoqueDisponivel)
@@ -249,15 +325,5 @@ public class OrdemServicoAggregateRoot
         {
             Status = StatusOrdemServico.EmExecucao;
         }
-    }
-
-    public void ConfirmarPagamento()
-    {
-        if (Status is not StatusOrdemServico.Finalizada)
-        {
-            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ter pagamento confirmado.");
-        }
-        
-        Status = StatusOrdemServico.Entregue;
     }
 }

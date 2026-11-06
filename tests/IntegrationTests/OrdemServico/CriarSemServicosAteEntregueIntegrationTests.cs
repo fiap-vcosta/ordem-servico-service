@@ -18,7 +18,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         Assert.Equal(0, await GetServicosCountAsync(ordemId));
 
         await AdicionarServicoAsync(ordemId, idServico: 1, valorCobrado: 150m, idItemEstoque: 1, quantidade: 1m);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarInternamenteAsync(ordemId);
@@ -40,7 +40,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         Assert.Equal(0, await GetServicosCountAsync(ordemId));
 
         await AdicionarServicoAsync(ordemId, idServico: 2, valorCobrado: 50m);
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AprovarInternamenteAsync(ordemId);
         await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
 

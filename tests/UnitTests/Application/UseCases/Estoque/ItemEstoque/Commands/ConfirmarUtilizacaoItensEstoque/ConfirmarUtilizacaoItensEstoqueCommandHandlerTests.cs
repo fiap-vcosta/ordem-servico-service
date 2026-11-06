@@ -65,6 +65,7 @@ public class ConfirmarUtilizacaoItensEstoqueCommandHandlerTests
             new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.FinalizarDiagnostico();
+        ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
         ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 10m });
         ordem.TravarItensNecessarios();

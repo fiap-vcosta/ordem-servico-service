@@ -27,7 +27,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         await AssertStatusAsync(ordemId, "EmDiagnostico");
         Assert.True(await GetServicosCountAsync(ordemId) >= 1);
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarInternamenteAsync(ordemId);
@@ -57,7 +57,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
             ]);
         await AssertStatusAsync(ordemId, "EmDiagnostico");
 
-        await FinalizarDiagnosticoAsync(ordemId);
+        await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         var token = await GetTokenAprovacaoAsync(ordemId);

@@ -941,6 +941,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("VersaoDiagnostico")
+                        .HasColumnType("integer");
+
                     b.ComplexProperty<Dictionary<string, object>>("Cliente", "Domain.OrdemServico.Entities.OrdemServicoAggregateRoot.Cliente#ClienteOrdemServico", b1 =>
                         {
                             b1.IsRequired();

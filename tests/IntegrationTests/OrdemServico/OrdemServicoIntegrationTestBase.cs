@@ -1,8 +1,12 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Application.UseCases.OrdemServico.Commands.AplicarCobrancaGerada;
+using Application.UseCases.OrdemServico.Commands.AplicarOrcamentoGerado;
+using Application.UseCases.OrdemServico.Commands.AplicarPagamentoConfirmado;
 using IntegrationTests.Infrastructure;
 using Infrastructure.Database;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -69,6 +73,30 @@ public abstract class OrdemServicoIntegrationTestBase
         response.EnsureSuccessStatusCode();
     }
 
+    protected async Task AplicarOrcamentoGeradoAsync(int ordemId)
+    {
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var versao = await db.OrdensServico
+            .AsNoTracking()
+            .Where(o => o.Id == ordemId)
+            .Select(o => o.VersaoDiagnostico)
+            .FirstAsync();
+
+        await mediator.Send(new AplicarOrcamentoGeradoCommand
+        {
+            IdOrdemServico = ordemId,
+            VersaoDiagnostico = versao
+        });
+    }
+
+    protected async Task FinalizarDiagnosticoEAplicarOrcamentoAsync(int ordemId)
+    {
+        await FinalizarDiagnosticoAsync(ordemId);
+        await AplicarOrcamentoGeradoAsync(ordemId);
+    }
+
     protected async Task AprovarInternamenteAsync(int ordemId)
     {
         var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/aprovar", null);
@@ -126,10 +154,12 @@ public abstract class OrdemServicoIntegrationTestBase
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task ConfirmarPagamentoAsync(int ordemId)
+    protected async Task AplicarCobrancaEPagamentoAsync(int ordemId)
     {
-        var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/confirmar-pagamento", null);
-        response.EnsureSuccessStatusCode();
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.Send(new AplicarCobrancaGeradaCommand { IdOrdemServico = ordemId });
+        await mediator.Send(new AplicarPagamentoConfirmadoCommand { IdOrdemServico = ordemId });
     }
 
     protected async Task RegistrarEntradaEstoqueAsync(int idItemEstoque, decimal quantidade)
@@ -254,7 +284,7 @@ public abstract class OrdemServicoIntegrationTestBase
         Assert.NotEmpty(aprovados);
         await ConfirmarExecucaoAsync(ordemId, aprovados);
         await AssertStatusAsync(ordemId, "Finalizada");
-        await ConfirmarPagamentoAsync(ordemId);
+        await AplicarCobrancaEPagamentoAsync(ordemId);
         await AssertStatusAsync(ordemId, "Entregue");
     }
 

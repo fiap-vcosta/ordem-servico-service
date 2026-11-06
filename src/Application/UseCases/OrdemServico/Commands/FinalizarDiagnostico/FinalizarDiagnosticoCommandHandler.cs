@@ -1,18 +1,16 @@
-using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
+using Application.Logging;
 using Application.UseCases.OrdemServico.Responses;
 using Domain.Exceptions;
-using Domain.OrdemServico.Entities;
-using Domain.OrdemServico.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Application.Logging;
 
 namespace Application.UseCases.OrdemServico.Commands.FinalizarDiagnostico;
 
 public class FinalizarDiagnosticoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IMediator mediator,
+    IDiagnosticoFinalizadoPublisher diagnosticoFinalizadoPublisher,
     ILogger<FinalizarDiagnosticoCommandHandler> logger
 ) : IRequestHandler<FinalizarDiagnosticoCommand, FinalizarDiagnosticoCommandResponse>
 {
@@ -28,20 +26,7 @@ public class FinalizarDiagnosticoCommandHandler(
         await ordemServicoGateway.UpdateAsync(ordemServico);
         logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
 
-        switch (ordemServico.Status)
-        {
-            case StatusOrdemServico.AguardandoAprovacao:
-                await mediator.Publish(new DomainEventNotification<DiagnosticoPreenchidoEvent>(new DiagnosticoPreenchidoEvent(ordemServico.Id)), cancellationToken);
-                break;
-            case StatusOrdemServico.Entregue:
-                await mediator.Publish(new DomainEventNotification<OrdemServicoRejeitadaEvent>(new OrdemServicoRejeitadaEvent(ordemServico.Id)), cancellationToken);
-                break;
-            case StatusOrdemServico.ChecandoEstoque:
-                await mediator.Publish(new DomainEventNotification<OrdemServicoAprovadaEvent>(new OrdemServicoAprovadaEvent(ordemServico.Id)), cancellationToken);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException($"Status {ordemServico.Status} inválido após finalizar diagnóstico da ordem de serviço {ordemServico.Id}.");
-        }
+        await diagnosticoFinalizadoPublisher.PublishAsync(ordemServico, cancellationToken);
 
         return new FinalizarDiagnosticoCommandResponse()
         {
