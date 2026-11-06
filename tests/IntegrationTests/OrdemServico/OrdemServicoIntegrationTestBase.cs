@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Application.UseCases.OrdemServico.Commands.AplicarCobrancaGerada;
-using Application.UseCases.OrdemServico.Commands.AplicarOrcamentoGerado;
-using Application.UseCases.OrdemServico.Commands.AplicarPagamentoConfirmado;
+using Application.UseCases.Commands.AplicarCobrancaGerada;
+using Application.UseCases.Commands.AplicarOrcamentoGerado;
+using Application.UseCases.Commands.AplicarPagamentoConfirmado;
 using IntegrationTests.Infrastructure;
 using Infrastructure.Database;
 using MediatR;
@@ -28,15 +28,15 @@ public abstract class OrdemServicoIntegrationTestBase
         Client = factory.CreateClient();
     }
 
-    protected async Task AuthenticateAsAdminAsync() =>
-        await AuthHelper.AuthenticateAsAdminAsync(Client);
+    protected void AuthenticateAsStaff() =>
+        AuthHelper.AuthenticateAsStaff(Client);
 
     protected void ClearAuthentication() =>
         Client.DefaultRequestHeaders.Authorization = null;
 
     protected void AuthenticateAsCliente(string documento) =>
         Client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", ClienteJwtHelper.CreateToken(documento));
+            new AuthenticationHeaderValue("Bearer", TestJwt.CreateClienteToken(documento));
 
 
     protected async Task<int> CriarOrdemAsync(int idVeiculo, IEnumerable<object>? servicos = null)
@@ -45,7 +45,7 @@ public abstract class OrdemServicoIntegrationTestBase
             ? new { IdVeiculo = idVeiculo }
             : new { IdVeiculo = idVeiculo, Servicos = servicos };
 
-        var response = await Client.PostAsJsonAsync("/api/ordens-servico", request);
+        var response = await Client.PostAsJsonAsync("/ordem-servico", request);
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<IdResponse>(JsonOptions);
         Assert.NotNull(body);
@@ -63,13 +63,13 @@ public abstract class OrdemServicoIntegrationTestBase
                 ItensNecessarios = new[] { new { IdItemEstoque = idItemEstoque.Value, Quantidade = quantidade } }
             };
 
-        var response = await Client.PostAsJsonAsync($"/api/ordens-servico/{ordemId}/adicionar-servico", request);
+        var response = await Client.PostAsJsonAsync($"/ordem-servico/{ordemId}/adicionar-servico", request);
         response.EnsureSuccessStatusCode();
     }
 
     protected async Task FinalizarDiagnosticoAsync(int ordemId)
     {
-        var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/finalizar-diagnostico", null);
+        var response = await Client.PostAsync($"/ordem-servico/{ordemId}/finalizar-diagnostico", null);
         response.EnsureSuccessStatusCode();
     }
 
@@ -99,19 +99,19 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task AprovarInternamenteAsync(int ordemId)
     {
-        var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/aprovar", null);
+        var response = await Client.PostAsync($"/ordem-servico/{ordemId}/aprovar", null);
         response.EnsureSuccessStatusCode();
     }
 
     protected async Task RejeitarInternamenteAsync(int ordemId)
     {
-        var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/rejeitar", null);
+        var response = await Client.PostAsync($"/ordem-servico/{ordemId}/rejeitar", null);
         response.EnsureSuccessStatusCode();
     }
 
     protected async Task AprovarParcialmenteAsync(int ordemId, params int[] idsServicosAprovados)
     {
-        var response = await Client.PostAsJsonAsync($"/api/ordens-servico/{ordemId}/aprovar-parcialmente", new
+        var response = await Client.PostAsJsonAsync($"/ordem-servico/{ordemId}/aprovar-parcialmente", new
         {
             IdsServicosAprovados = idsServicosAprovados
         });
@@ -121,28 +121,28 @@ public abstract class OrdemServicoIntegrationTestBase
     protected async Task AprovarPublicamenteAsync(string token, string documentoCliente = DocumentoJoaoSilva)
     {
         AuthenticateAsCliente(documentoCliente);
-        var response = await Client.PostAsync($"/api/public/ordens-servico/aprovar?token={Uri.EscapeDataString(token)}", null);
+        var response = await Client.PostAsync($"/ordem-servico/aprovar?token={Uri.EscapeDataString(token)}", null);
         response.EnsureSuccessStatusCode();
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
     }
 
     protected async Task RejeitarPublicamenteAsync(string token, string documentoCliente = DocumentoJoaoSilva)
     {
         AuthenticateAsCliente(documentoCliente);
-        var response = await Client.PostAsync($"/api/public/ordens-servico/rejeitar?token={Uri.EscapeDataString(token)}", null);
+        var response = await Client.PostAsync($"/ordem-servico/rejeitar?token={Uri.EscapeDataString(token)}", null);
         response.EnsureSuccessStatusCode();
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
     }
 
     protected async Task DescartarAsync(int ordemId)
     {
-        var response = await Client.PostAsync($"/api/ordens-servico/{ordemId}/descartar", null);
+        var response = await Client.PostAsync($"/ordem-servico/{ordemId}/descartar", null);
         response.EnsureSuccessStatusCode();
     }
 
     protected async Task ConfirmarExecucaoAsync(int ordemId, params int[] idsServicos)
     {
-        var response = await Client.PostAsJsonAsync($"/api/ordens-servico/{ordemId}/confirmar-execucao", new
+        var response = await Client.PostAsJsonAsync($"/ordem-servico/{ordemId}/confirmar-execucao", new
         {
             ServicosExecutados = idsServicos.Select(idServico => new
             {
@@ -164,7 +164,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task RegistrarEntradaEstoqueAsync(int idItemEstoque, decimal quantidade)
     {
-        var response = await Client.PostAsJsonAsync($"/api/itens-estoque/{idItemEstoque}/registrar-entrada", new
+        var response = await Client.PostAsJsonAsync($"/ordem-servico/itens-estoque/{idItemEstoque}/registrar-entrada", new
         {
             Quantidade = quantidade
         });
@@ -174,7 +174,7 @@ public abstract class OrdemServicoIntegrationTestBase
     protected async Task<int> CriarItemEstoqueSemSaldoAsync(string codigoPrefixo)
     {
         var codigo = $"{codigoPrefixo}-{Guid.NewGuid():N}"[..20];
-        var response = await Client.PostAsJsonAsync("/api/itens-estoque", new
+        var response = await Client.PostAsJsonAsync("/ordem-servico/itens-estoque", new
         {
             Codigo = codigo,
             Tipo = "Peca",
@@ -191,7 +191,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task AssertStatusAsync(int ordemId, string expectedStatus)
     {
-        var response = await Client.GetAsync($"/api/ordens-servico/{ordemId}");
+        var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -201,7 +201,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task AssertListagemContemOrdemComStatusAsync(int ordemId, string expectedStatus)
     {
-        var response = await Client.GetAsync("/api/ordens-servico");
+        var response = await Client.GetAsync("/ordem-servico");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -220,7 +220,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task<int[]> GetServicoIdsAsync(int ordemId)
     {
-        var response = await Client.GetAsync($"/api/ordens-servico/{ordemId}");
+        var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -232,7 +232,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task<int[]> GetServicoIdsPorStatusAsync(int ordemId, string status)
     {
-        var response = await Client.GetAsync($"/api/ordens-servico/{ordemId}");
+        var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -258,7 +258,7 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task<int> GetServicosCountAsync(int ordemId)
     {
-        var response = await Client.GetAsync($"/api/ordens-servico/{ordemId}");
+        var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);

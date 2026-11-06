@@ -1,4 +1,4 @@
-using Application.UseCases.OrdemServico.Responses;
+using Application.UseCases.Responses;
 
 namespace Api.ViewModels.OrdemServico;
 

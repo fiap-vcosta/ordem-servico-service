@@ -10,7 +10,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
     public async Task Fluxo_CriarComServicos_AprovarInternamente_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(
@@ -41,7 +41,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
     public async Task Fluxo_CriarComServicos_AprovarPublicamente_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(

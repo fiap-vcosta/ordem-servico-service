@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Application.Abstractions.Messaging;
-using Domain.OrdemServico.Entities;
+using Domain.Entities;
 
 namespace Infrastructure.Messaging;
 

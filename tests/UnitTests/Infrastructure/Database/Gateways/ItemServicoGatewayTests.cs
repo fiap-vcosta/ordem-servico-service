@@ -1,5 +1,5 @@
-using Domain.OrdemServico.Entities;
-using Domain.OrdemServico.ValueObjects;
+using Domain.Entities;
+using Domain.ValueObjects;
 using Infrastructure.Database;
 using Infrastructure.Database.Gateways;
 using Microsoft.Data.Sqlite;

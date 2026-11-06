@@ -10,7 +10,7 @@ public class AprovacaoParcialAteEntregueIntegrationTests(CustomWebApplicationFac
     public async Task Fluxo_AprovarParcialmente_DepoisFinalizarAprovados_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(

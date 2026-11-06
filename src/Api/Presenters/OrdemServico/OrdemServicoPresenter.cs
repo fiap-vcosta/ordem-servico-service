@@ -1,13 +1,13 @@
 using Api.ViewModels.OrdemServico;
-using Application.UseCases.OrdemServico;
-using Application.UseCases.OrdemServico.Commands.AdicionarItemOrdemServico;
-using Application.UseCases.OrdemServico.Commands.AprovarOrdemServico;
-using Application.UseCases.OrdemServico.Commands.AprovarServicosParcialmente;
-using Application.UseCases.OrdemServico.Commands.CriarOrdemServico;
-using Application.UseCases.OrdemServico.Commands.DescartarOrdemServico;
-using Application.UseCases.OrdemServico.Commands.FinalizarDiagnostico;
-using Application.UseCases.OrdemServico.Commands.RejeitarOrdemServico;
-using Application.UseCases.OrdemServico.Responses;
+using Application.UseCases;
+using Application.UseCases.Commands.AdicionarItemOrdemServico;
+using Application.UseCases.Commands.AprovarOrdemServico;
+using Application.UseCases.Commands.AprovarServicosParcialmente;
+using Application.UseCases.Commands.CriarOrdemServico;
+using Application.UseCases.Commands.DescartarOrdemServico;
+using Application.UseCases.Commands.FinalizarDiagnostico;
+using Application.UseCases.Commands.RejeitarOrdemServico;
+using Application.UseCases.Responses;
 
 namespace Api.Presenters.OrdemServico;
 

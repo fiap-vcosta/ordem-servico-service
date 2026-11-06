@@ -1,5 +1,5 @@
-using Domain.OrdemServico.Entities;
-using Domain.OrdemServico.ValueObjects;
+using Domain.Entities;
+using Domain.ValueObjects;
 using Infrastructure.Database;
 using Infrastructure.Database.Gateways;
 using Microsoft.Data.Sqlite;
@@ -149,7 +149,7 @@ public class OrdemServicoGatewayTests : IDisposable
     {
         // Arrange
         var ordem = OrdemServicoAggregateRoot.Criar(
-            new ClienteOrdemServico { Id = 1, Nome = "João Silva", Email = "joao.silva@email.com" },
+            new ClienteOrdemServico { Id = 1, Nome = "João Silva", Email = "joao.silva@email.com", Documento = "86421537090" },
             new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "VW", Modelo = "Gol" });
         await _gateway.CriarAsync(ordem);
 
@@ -166,7 +166,7 @@ public class OrdemServicoGatewayTests : IDisposable
     {
         // Arrange
         var ordem = OrdemServicoAggregateRoot.Criar(
-            new ClienteOrdemServico { Id = 1, Nome = "João Silva", Email = "joao.silva@email.com" },
+            new ClienteOrdemServico { Id = 1, Nome = "João Silva", Email = "joao.silva@email.com", Documento = "86421537090" },
             new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "VW", Modelo = "Gol" });
         await _gateway.CriarAsync(ordem);
 

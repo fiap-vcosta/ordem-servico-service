@@ -1,4 +1,4 @@
-using Domain.OrdemServico.Entities;
+using Domain.Entities;
 
 namespace Api.ViewModels.OrdemServico;
 

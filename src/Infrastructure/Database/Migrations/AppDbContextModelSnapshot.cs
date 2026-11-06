@@ -23,7 +23,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Administrativo.Entities.ClienteAggregateRoot", b =>
+            modelBuilder.Entity("Domain.Entities.ItemNecessario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -31,115 +31,52 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Documento")
+                    b.Property<int>("IdItemOrdemServico")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IdOrdemServico")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Quantidade")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("numeric(10,3)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.ComplexProperty<Dictionary<string, object>>("ItemEstoque", "Domain.Entities.ItemNecessario.ItemEstoque#ItemEstoqueOrdemServico", b1 =>
+                        {
+                            b1.IsRequired();
 
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("text");
+                            b1.Property<string>("Codigo")
+                                .IsRequired()
+                                .HasColumnType("text");
 
-                    b.Property<string>("TipoDocumento")
-                        .IsRequired()
-                        .HasColumnType("text");
+                            b1.Property<int>("Id")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Nome")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("UnidadeMedida")
+                                .IsRequired()
+                                .HasColumnType("text");
+                        });
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Documento")
-                        .IsUnique();
+                    b.HasIndex("IdItemOrdemServico");
 
-                    b.HasIndex("TipoDocumento");
+                    b.HasIndex("IdOrdemServico");
 
-                    b.ToTable("Clientes");
+                    b.HasIndex("Status");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Documento = "86421537090",
-                            Email = "joao.silva@email.com",
-                            Nome = "João Silva",
-                            TipoDocumento = "Cpf"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Documento = "71284693031",
-                            Email = "maria.oliveira@email.com",
-                            Nome = "Maria Oliveira",
-                            TipoDocumento = "Cpf"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Documento = "15350946056",
-                            Email = "carlos.santos@email.com",
-                            Nome = "Carlos Santos",
-                            TipoDocumento = "Cpf"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Documento = "23100296028",
-                            Email = "ana.costa@email.com",
-                            Nome = "Ana Costa",
-                            TipoDocumento = "Cpf"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Documento = "04531783085",
-                            Email = "lucas.ferreira@email.com",
-                            Nome = "Lucas Ferreira",
-                            TipoDocumento = "Cpf"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Documento = "11222333000181",
-                            Email = "contato@autopecascentral.com.br",
-                            Nome = "Auto Peças Central Ltda",
-                            TipoDocumento = "Cnpj"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Documento = "11444777000161",
-                            Email = "oficinatoninho@email.com",
-                            Nome = "Oficina do Toninho ME",
-                            TipoDocumento = "Cnpj"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Documento = "12345678000195",
-                            Email = "logistica@rapidosul.com.br",
-                            Nome = "Transportadora Rápido Sul",
-                            TipoDocumento = "Cnpj"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Documento = "27865757000102",
-                            Email = "frota@xyzlocadora.com.br",
-                            Nome = "Locadora de Veículos XYZ",
-                            TipoDocumento = "Cnpj"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Documento = "60746948000112",
-                            Email = "vendas@bateriaspotencia.com.br",
-                            Nome = "Comercial de Baterias Potência",
-                            TipoDocumento = "Cnpj"
-                        });
+                    b.ToTable("ItemNecessario");
                 });
 
-            modelBuilder.Entity("Domain.Administrativo.Entities.ServicoAggregateRoot", b =>
+            modelBuilder.Entity("Domain.Entities.OrdemServicoAggregateRoot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -147,341 +84,134 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
+                    b.Property<DateTime?>("AprovadaEm")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Codigo")
+                    b.Property<DateTime?>("DescartadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EntregueEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("RecebidaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("TokenAprovacao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("VersaoDiagnostico")
+                        .HasColumnType("integer");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Cliente", "Domain.Entities.OrdemServicoAggregateRoot.Cliente#ClienteOrdemServico", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Documento")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<int>("Id")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Nome")
+                                .IsRequired()
+                                .HasColumnType("text");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("Veiculo", "Domain.Entities.OrdemServicoAggregateRoot.Veiculo#VeiculoOrdemServico", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Marca")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Modelo")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Placa")
+                                .IsRequired()
+                                .HasColumnType("text");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TokenAprovacao")
+                        .IsUnique();
+
+                    b.ToTable("OrdensServico");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Servico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AprovadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExecucaoFinalizadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExecucaoIniciadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IdOrdemServico")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PrecoPadrao")
+                    b.Property<DateTime?>("RejeitadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("ValorCobrado")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.HasKey("Id");
+                    b.ComplexProperty<Dictionary<string, object>>("ServicoCatalogo", "Domain.Entities.Servico.ServicoCatalogo#ServicoCatalogo", b1 =>
+                        {
+                            b1.IsRequired();
 
-                    b.HasIndex("Codigo")
-                        .IsUnique();
+                            b1.Property<string>("Codigo")
+                                .IsRequired()
+                                .HasColumnType("text");
 
-                    b.ToTable("Servicos");
+                            b1.Property<int>("Id")
+                                .HasColumnType("integer");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Ativo = true,
-                            Codigo = "MTR-001",
-                            Nome = "Troca de Óleo do Motor",
-                            PrecoPadrao = 150.00m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Ativo = true,
-                            Codigo = "FLT-002",
-                            Nome = "Troca de Filtro de Ar",
-                            PrecoPadrao = 50.00m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Ativo = true,
-                            Codigo = "FRE-003",
-                            Nome = "Troca de Pastilhas de Freio",
-                            PrecoPadrao = 200.00m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Ativo = true,
-                            Codigo = "SUS-004",
-                            Nome = "Alinhamento e Balanceamento",
-                            PrecoPadrao = 120.00m
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Ativo = true,
-                            Codigo = "MTR-005",
-                            Nome = "Limpeza de Bicos Injetores",
-                            PrecoPadrao = 180.00m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Ativo = true,
-                            Codigo = "ELT-006",
-                            Nome = "Troca de Bateria",
-                            PrecoPadrao = 80.00m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Ativo = true,
-                            Codigo = "ARC-007",
-                            Nome = "Higienização de Ar Condicionado",
-                            PrecoPadrao = 130.00m
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Ativo = true,
-                            Codigo = "SUS-008",
-                            Nome = "Troca de Amortecedores Dianteiros",
-                            PrecoPadrao = 300.00m
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Ativo = true,
-                            Codigo = "EMB-009",
-                            Nome = "Substituição do Kit de Embreagem",
-                            PrecoPadrao = 600.00m
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Ativo = true,
-                            Codigo = "GRL-010",
-                            Nome = "Revisão Preventiva Geral",
-                            PrecoPadrao = 250.00m
+                            b1.Property<string>("Nome")
+                                .IsRequired()
+                                .HasColumnType("text");
                         });
-                });
-
-            modelBuilder.Entity("Domain.Administrativo.Entities.UsuarioAggregateRoot", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Senha")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TipoUsuario")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Login")
-                        .IsUnique();
+                    b.HasIndex("IdOrdemServico");
 
-                    b.ToTable("Usuarios");
+                    b.HasIndex("Status");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Login = "admin",
-                            Senha = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-                            TipoUsuario = "Admin"
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Administrativo.Entities.VeiculoAggregateRoot", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("IdCliente")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Marca")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Modelo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Placa")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdCliente");
-
-                    b.HasIndex("Placa")
-                        .IsUnique();
-
-                    b.ToTable("Veiculos");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IdCliente = 1,
-                            Marca = "Chevrolet",
-                            Modelo = "Onix",
-                            Placa = "ABC1234"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IdCliente = 1,
-                            Marca = "Volkswagen",
-                            Modelo = "Gol",
-                            Placa = "XYZ1A23"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IdCliente = 1,
-                            Marca = "Honda",
-                            Modelo = "Civic",
-                            Placa = "DEF5678"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IdCliente = 2,
-                            Marca = "Toyota",
-                            Modelo = "Corolla",
-                            Placa = "GHI9B12"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            IdCliente = 2,
-                            Marca = "Fiat",
-                            Modelo = "Argo",
-                            Placa = "JKL3456"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            IdCliente = 3,
-                            Marca = "Hyundai",
-                            Modelo = "HB20",
-                            Placa = "MNO4C56"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            IdCliente = 3,
-                            Marca = "Ford",
-                            Modelo = "Ka",
-                            Placa = "PQR7890"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            IdCliente = 3,
-                            Marca = "Renault",
-                            Modelo = "Kwid",
-                            Placa = "STU5D78"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            IdCliente = 4,
-                            Marca = "Jeep",
-                            Modelo = "Compass",
-                            Placa = "VWX1234"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            IdCliente = 5,
-                            Marca = "Nissan",
-                            Modelo = "Kicks",
-                            Placa = "YZA6E90"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            IdCliente = 5,
-                            Marca = "Chevrolet",
-                            Modelo = "Tracker",
-                            Placa = "BCD5678"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            IdCliente = 6,
-                            Marca = "Volkswagen",
-                            Modelo = "Saveiro",
-                            Placa = "EFG7F12"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            IdCliente = 6,
-                            Marca = "Fiat",
-                            Modelo = "Fiorino",
-                            Placa = "HIJ9012"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            IdCliente = 6,
-                            Marca = "Peugeot",
-                            Modelo = "Partner",
-                            Placa = "KLM8G34"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            IdCliente = 7,
-                            Marca = "Chevrolet",
-                            Modelo = "Montana",
-                            Placa = "NOP3456"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            IdCliente = 8,
-                            Marca = "Mercedes-Benz",
-                            Modelo = "Sprinter",
-                            Placa = "QRS9H56"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            IdCliente = 8,
-                            Marca = "Iveco",
-                            Modelo = "Daily",
-                            Placa = "TUV7890"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            IdCliente = 8,
-                            Marca = "Ford",
-                            Modelo = "Transit",
-                            Placa = "WXY0I78"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            IdCliente = 9,
-                            Marca = "Fiat",
-                            Modelo = "Mobi",
-                            Placa = "ZAB1234"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            IdCliente = 10,
-                            Marca = "Volkswagen",
-                            Modelo = "Kombi",
-                            Placa = "CDE1J90"
-                        });
+                    b.ToTable("ItensServicos");
                 });
 
             modelBuilder.Entity("Domain.Estoque.Entities.ItemEstoqueAggregateRoot", b =>
@@ -860,232 +590,36 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.OrdemServico.Entities.ItemNecessario", b =>
+            modelBuilder.Entity("Domain.Entities.ItemNecessario", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("IdItemOrdemServico")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("IdOrdemServico")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Quantidade")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("numeric(10,3)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.ComplexProperty<Dictionary<string, object>>("ItemEstoque", "Domain.OrdemServico.Entities.ItemNecessario.ItemEstoque#ItemEstoqueOrdemServico", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Codigo")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<int>("Id")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Nome")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("UnidadeMedida")
-                                .IsRequired()
-                                .HasColumnType("text");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdItemOrdemServico");
-
-                    b.HasIndex("IdOrdemServico");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("ItemNecessario");
-                });
-
-            modelBuilder.Entity("Domain.OrdemServico.Entities.OrdemServicoAggregateRoot", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("AprovadaEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DescartadaEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("EntregueEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("RecebidaEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TokenAprovacao")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("VersaoDiagnostico")
-                        .HasColumnType("integer");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Cliente", "Domain.OrdemServico.Entities.OrdemServicoAggregateRoot.Cliente#ClienteOrdemServico", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Email")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<int>("Id")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Nome")
-                                .IsRequired()
-                                .HasColumnType("text");
-                        });
-
-                    b.ComplexProperty<Dictionary<string, object>>("Veiculo", "Domain.OrdemServico.Entities.OrdemServicoAggregateRoot.Veiculo#VeiculoOrdemServico", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Marca")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Modelo")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Placa")
-                                .IsRequired()
-                                .HasColumnType("text");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("TokenAprovacao")
-                        .IsUnique();
-
-                    b.ToTable("OrdensServico");
-                });
-
-            modelBuilder.Entity("Domain.OrdemServico.Entities.Servico", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("AprovadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("ExecucaoFinalizadaEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("ExecucaoIniciadaEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("IdOrdemServico")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("RejeitadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("ValorCobrado")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.ComplexProperty<Dictionary<string, object>>("ServicoCatalogo", "Domain.OrdemServico.Entities.Servico.ServicoCatalogo#ServicoCatalogo", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Codigo")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<int>("Id")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Nome")
-                                .IsRequired()
-                                .HasColumnType("text");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdOrdemServico");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("ItensServicos");
-                });
-
-            modelBuilder.Entity("Domain.Administrativo.Entities.VeiculoAggregateRoot", b =>
-                {
-                    b.HasOne("Domain.Administrativo.Entities.ClienteAggregateRoot", null)
-                        .WithMany()
-                        .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.OrdemServico.Entities.ItemNecessario", b =>
-                {
-                    b.HasOne("Domain.OrdemServico.Entities.Servico", null)
+                    b.HasOne("Domain.Entities.Servico", null)
                         .WithMany("ItensNecessarios")
                         .HasForeignKey("IdItemOrdemServico")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.OrdemServico.Entities.OrdemServicoAggregateRoot", null)
+                    b.HasOne("Domain.Entities.OrdemServicoAggregateRoot", null)
                         .WithMany()
                         .HasForeignKey("IdOrdemServico")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.OrdemServico.Entities.Servico", b =>
+            modelBuilder.Entity("Domain.Entities.Servico", b =>
                 {
-                    b.HasOne("Domain.OrdemServico.Entities.OrdemServicoAggregateRoot", null)
+                    b.HasOne("Domain.Entities.OrdemServicoAggregateRoot", null)
                         .WithMany("Servicos")
                         .HasForeignKey("IdOrdemServico")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.OrdemServico.Entities.OrdemServicoAggregateRoot", b =>
+            modelBuilder.Entity("Domain.Entities.OrdemServicoAggregateRoot", b =>
                 {
                     b.Navigation("Servicos");
                 });
 
-            modelBuilder.Entity("Domain.OrdemServico.Entities.Servico", b =>
+            modelBuilder.Entity("Domain.Entities.Servico", b =>
                 {
                     b.Navigation("ItensNecessarios");
                 });

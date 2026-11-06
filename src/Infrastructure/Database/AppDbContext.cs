@@ -1,18 +1,11 @@
-using Domain.Administrativo.Entities;
+using Domain.Entities;
 using Domain.Estoque.Entities;
-using Domain.OrdemServico.Entities;
-using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Database;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<UsuarioAggregateRoot> Usuarios { get; set; }
-    public DbSet<ClienteAggregateRoot> Clientes { get; set; }
-    public DbSet<VeiculoAggregateRoot> Veiculos { get; set; }
-    public DbSet<ServicoAggregateRoot> Servicos { get; set; }
     public DbSet<ItemEstoqueAggregateRoot> ItensEstoque { get; set; }
     public DbSet<OrdemServicoAggregateRoot> OrdensServico { get; set; }
     public DbSet<Servico> ItensServicos { get; set; }
@@ -20,59 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        // Usuários
-        var usuarios = modelBuilder.Entity<UsuarioAggregateRoot>();
-        usuarios.HasKey(u => u.Id);
-        usuarios.HasIndex(u => u.Login).IsUnique();
-        usuarios.Property(u => u.Login).IsRequired();
-        usuarios.Property(u => u.Senha).IsRequired();
-        usuarios.Property(u => u.TipoUsuario).HasConversion<string>().IsRequired();
-        usuarios.HasData(
-            new UsuarioAggregateRoot
-            {
-                Id = 1,
-                Login = "admin",
-                Senha = PasswordHasher.HashPassword("admin"),
-                TipoUsuario = TipoUsuario.Admin
-            }
-        );
 
-        // Clientes
-        var clientes = modelBuilder.Entity<ClienteAggregateRoot>();
-        clientes.HasKey(c => c.Id);
-        clientes.HasIndex(c => c.TipoDocumento);
-        clientes.Property(c => c.TipoDocumento).HasConversion<string>().IsRequired();
-        clientes.HasIndex(c => c.Documento).IsUnique();
-        clientes.Property(c => c.Documento).IsRequired();
-        clientes.Property(c => c.Nome).IsRequired();
-        clientes.Property(c => c.Email).IsRequired();
-        SeedClientes(clientes);
-
-        // Veiculos
-        var veiculos = modelBuilder.Entity<VeiculoAggregateRoot>();
-        veiculos.HasKey(v => v.Id);
-        veiculos.HasIndex(v => v.Placa).IsUnique();
-        veiculos.Property(v => v.Placa).IsRequired();
-        veiculos.Property(v => v.Modelo).IsRequired();
-        veiculos.Property(v => v.Marca).IsRequired();
-        veiculos
-            .HasOne<ClienteAggregateRoot>()
-            .WithMany()
-            .HasForeignKey(v => v.IdCliente)
-            .OnDelete(DeleteBehavior.Restrict);
-        SeedVeiculos(veiculos);
-
-        // Serviços
-        var servicos = modelBuilder.Entity<ServicoAggregateRoot>();
-        servicos.HasKey(s => s.Id);
-        servicos.HasIndex(s => s.Codigo).IsUnique();
-        servicos.Property(s => s.Codigo).IsRequired();
-        servicos.Property(s => s.Nome).IsRequired();
-        servicos.Property(s => s.PrecoPadrao).HasPrecision(10, 2).IsRequired();
-        SeedServicos(servicos);
-
-        // Itens Estoque
         var itensEstoque = modelBuilder.Entity<ItemEstoqueAggregateRoot>();
         itensEstoque.HasKey(ie => ie.Id);
         itensEstoque.HasIndex(ie => ie.Codigo).IsUnique();
@@ -86,7 +27,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         itensEstoque.Ignore(ie => ie.SaldoDisponivel);
         SeedItensEstoque(itensEstoque);
 
-        // Ordens de Serviço
         var ordensServico = modelBuilder.Entity<OrdemServicoAggregateRoot>();
         ordensServico.HasKey(os => os.Id);
         ordensServico.HasIndex(os => os.Status);
@@ -105,8 +45,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithOne()
             .HasForeignKey(ios => ios.IdOrdemServico)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        // Itens de Serviço Ordem de Serviço
+
         var servicosOrdemServico = modelBuilder.Entity<Servico>();
         servicosOrdemServico.HasKey(ios => ios.Id);
         servicosOrdemServico.HasIndex(ios => ios.Status);
@@ -120,7 +59,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(ieos => ieos.IdItemOrdemServico)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Itens de Estoque Ordem de Serviço
         var itensNecessariosOrdemServico = modelBuilder.Entity<ItemNecessario>();
         itensNecessariosOrdemServico.HasKey(inos => inos.Id);
         itensNecessariosOrdemServico.HasIndex(inos => inos.Status);
@@ -134,135 +72,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .OnDelete(DeleteBehavior.Restrict);
     }
 
-    private static void SeedClientes(EntityTypeBuilder<ClienteAggregateRoot> clientes)
-    {
-        clientes.HasData(
-            new ClienteAggregateRoot 
-            { 
-                Id = 1, 
-                TipoDocumento = 0, 
-                Documento = "86421537090", 
-                Nome = "João Silva", 
-                Email = "joao.silva@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 2, 
-                TipoDocumento = 0, 
-                Documento = "71284693031", 
-                Nome = "Maria Oliveira", 
-                Email = "maria.oliveira@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 3, 
-                TipoDocumento = 0, 
-                Documento = "15350946056", 
-                Nome = "Carlos Santos", 
-                Email = "carlos.santos@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 4, 
-                TipoDocumento = 0, 
-                Documento = "23100296028", 
-                Nome = "Ana Costa", 
-                Email = "ana.costa@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 5, 
-                TipoDocumento = 0, 
-                Documento = "04531783085", 
-                Nome = "Lucas Ferreira", 
-                Email = "lucas.ferreira@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 6, 
-                TipoDocumento = (TipoDocumento)1, 
-                Documento = "11222333000181", 
-                Nome = "Auto Peças Central Ltda", 
-                Email = "contato@autopecascentral.com.br" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 7, 
-                TipoDocumento = (TipoDocumento)1,
-                Documento = "11444777000161", 
-                Nome = "Oficina do Toninho ME", 
-                Email = "oficinatoninho@email.com" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 8, 
-                TipoDocumento = (TipoDocumento)1,
-                Documento = "12345678000195", 
-                Nome = "Transportadora Rápido Sul", 
-                Email = "logistica@rapidosul.com.br" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 9, 
-                TipoDocumento = (TipoDocumento)1,
-                Documento = "27865757000102", 
-                Nome = "Locadora de Veículos XYZ", 
-                Email = "frota@xyzlocadora.com.br" 
-            },
-            new ClienteAggregateRoot 
-            { 
-                Id = 10, 
-                TipoDocumento = (TipoDocumento)1,
-                Documento = "60746948000112", 
-                Nome = "Comercial de Baterias Potência", 
-                Email = "vendas@bateriaspotencia.com.br" 
-            }
-        );
-    }
-
-    private static void SeedVeiculos(EntityTypeBuilder<VeiculoAggregateRoot> veiculos)
-    {
-        veiculos.HasData(
-            new VeiculoAggregateRoot { Id = 1, IdCliente = 1, Placa = "ABC1234", Marca = "Chevrolet", Modelo = "Onix" },
-            new VeiculoAggregateRoot { Id = 2, IdCliente = 1, Placa = "XYZ1A23", Marca = "Volkswagen", Modelo = "Gol" },
-            new VeiculoAggregateRoot { Id = 3, IdCliente = 1, Placa = "DEF5678", Marca = "Honda", Modelo = "Civic" },
-            new VeiculoAggregateRoot { Id = 4, IdCliente = 2, Placa = "GHI9B12", Marca = "Toyota", Modelo = "Corolla" },
-            new VeiculoAggregateRoot { Id = 5, IdCliente = 2, Placa = "JKL3456", Marca = "Fiat", Modelo = "Argo" },
-            new VeiculoAggregateRoot { Id = 6, IdCliente = 3, Placa = "MNO4C56", Marca = "Hyundai", Modelo = "HB20" },
-            new VeiculoAggregateRoot { Id = 7, IdCliente = 3, Placa = "PQR7890", Marca = "Ford", Modelo = "Ka" },
-            new VeiculoAggregateRoot { Id = 8, IdCliente = 3, Placa = "STU5D78", Marca = "Renault", Modelo = "Kwid" },
-            new VeiculoAggregateRoot { Id = 9, IdCliente = 4, Placa = "VWX1234", Marca = "Jeep", Modelo = "Compass" },
-            new VeiculoAggregateRoot { Id = 10, IdCliente = 5, Placa = "YZA6E90", Marca = "Nissan", Modelo = "Kicks" },
-            new VeiculoAggregateRoot { Id = 11, IdCliente = 5, Placa = "BCD5678", Marca = "Chevrolet", Modelo = "Tracker" },
-            new VeiculoAggregateRoot { Id = 12, IdCliente = 6, Placa = "EFG7F12", Marca = "Volkswagen", Modelo = "Saveiro" },
-            new VeiculoAggregateRoot { Id = 13, IdCliente = 6, Placa = "HIJ9012", Marca = "Fiat", Modelo = "Fiorino" },
-            new VeiculoAggregateRoot { Id = 14, IdCliente = 6, Placa = "KLM8G34", Marca = "Peugeot", Modelo = "Partner" },
-            new VeiculoAggregateRoot { Id = 15, IdCliente = 7, Placa = "NOP3456", Marca = "Chevrolet", Modelo = "Montana" },
-            new VeiculoAggregateRoot { Id = 16, IdCliente = 8, Placa = "QRS9H56", Marca = "Mercedes-Benz", Modelo = "Sprinter" },
-            new VeiculoAggregateRoot { Id = 17, IdCliente = 8, Placa = "TUV7890", Marca = "Iveco", Modelo = "Daily" },
-            new VeiculoAggregateRoot { Id = 18, IdCliente = 8, Placa = "WXY0I78", Marca = "Ford", Modelo = "Transit" },
-            new VeiculoAggregateRoot { Id = 19, IdCliente = 9, Placa = "ZAB1234", Marca = "Fiat", Modelo = "Mobi" },
-            new VeiculoAggregateRoot { Id = 20, IdCliente = 10, Placa = "CDE1J90", Marca = "Volkswagen", Modelo = "Kombi" }
-        );
-    }
-
-    private static void SeedServicos(EntityTypeBuilder<ServicoAggregateRoot> servicos)
-    {
-        servicos.HasData(
-            new ServicoAggregateRoot { Id = 1, Codigo = "MTR-001", Nome = "Troca de Óleo do Motor", PrecoPadrao = 150.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 2, Codigo = "FLT-002", Nome = "Troca de Filtro de Ar", PrecoPadrao = 50.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 3, Codigo = "FRE-003", Nome = "Troca de Pastilhas de Freio", PrecoPadrao = 200.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 4, Codigo = "SUS-004", Nome = "Alinhamento e Balanceamento", PrecoPadrao = 120.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 5, Codigo = "MTR-005", Nome = "Limpeza de Bicos Injetores", PrecoPadrao = 180.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 6, Codigo = "ELT-006", Nome = "Troca de Bateria", PrecoPadrao = 80.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 7, Codigo = "ARC-007", Nome = "Higienização de Ar Condicionado", PrecoPadrao = 130.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 8, Codigo = "SUS-008", Nome = "Troca de Amortecedores Dianteiros", PrecoPadrao = 300.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 9, Codigo = "EMB-009", Nome = "Substituição do Kit de Embreagem", PrecoPadrao = 600.00m, Ativo = true },
-            new ServicoAggregateRoot { Id = 10, Codigo = "GRL-010", Nome = "Revisão Preventiva Geral", PrecoPadrao = 250.00m, Ativo = true }
-        );
-    }
-
-    private static void SeedItensEstoque(EntityTypeBuilder<ItemEstoqueAggregateRoot> itensEstoque)
+    private static void SeedItensEstoque(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<ItemEstoqueAggregateRoot> itensEstoque)
     {
         itensEstoque.HasData(
             new ItemEstoqueAggregateRoot { Id = 1, Codigo = "INS-001", Tipo = ItemTipo.Insumo, Nome = "Óleo Motor Sintético 5W30", UnidadeMedida = UnidadeMedida.Litro, PrecoVenda = 45.90m, Saldo = 50.000m, SaldoReservado = 0m },

@@ -12,7 +12,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
     public async Task Listagem_OrdersByPriorityAndExcludesFinalStatuses()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         var emDiagnosticoId = await CriarOrdemAsync(idVeiculo: 1);
         var aguardandoId = await CriarOrdemAsync(
@@ -32,7 +32,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         await DescartarAsync(descartadaId);
 
         // Act
-        var listResponse = await Client.GetAsync("/api/ordens-servico");
+        var listResponse = await Client.GetAsync("/ordem-servico");
         listResponse.EnsureSuccessStatusCode();
         await using var stream = await listResponse.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -60,7 +60,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         ClearAuthentication();
 
         // Act
-        var response = await Client.PostAsync("/api/public/ordens-servico/aprovar?token=token-qualquer", null);
+        var response = await Client.PostAsync("/ordem-servico/aprovar?token=token-qualquer", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -70,10 +70,10 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
     public async Task AprovarPublico_WithFuncionarioJwt_ReturnsUnauthorized()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
-        var response = await Client.PostAsync("/api/public/ordens-servico/aprovar?token=token-qualquer", null);
+        var response = await Client.PostAsync("/ordem-servico/aprovar?token=token-qualquer", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -83,10 +83,10 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
     public async Task RejeitarPublico_WithFuncionarioJwt_ReturnsUnauthorized()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
-        var response = await Client.PostAsync("/api/public/ordens-servico/rejeitar?token=token-qualquer", null);
+        var response = await Client.PostAsync("/ordem-servico/rejeitar?token=token-qualquer", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -99,7 +99,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         AuthenticateAsCliente(DocumentoJoaoSilva);
 
         // Act
-        var response = await Client.PostAsync("/api/public/ordens-servico/aprovar?token=token-inexistente", null);
+        var response = await Client.PostAsync("/ordem-servico/aprovar?token=token-inexistente", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -109,7 +109,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
     public async Task AprovarPublico_WithOwnershipMismatch_ReturnsNotFound()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
         var ordemId = await CriarOrdemAsync(
             idVeiculo: 2,
             servicos:
@@ -128,7 +128,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
 
         // Act
         var response = await Client.PostAsync(
-            $"/api/public/ordens-servico/aprovar?token={Uri.EscapeDataString(token)}",
+            $"/ordem-servico/aprovar?token={Uri.EscapeDataString(token)}",
             null);
 
         // Assert
@@ -142,7 +142,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         ClearAuthentication();
 
         // Act
-        var response = await Client.GetAsync("/api/ordens-servico");
+        var response = await Client.GetAsync("/ordem-servico");
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

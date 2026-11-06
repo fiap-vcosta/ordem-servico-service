@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using Api.Auth;
+using BuildingBlocks.Http.Auth;
 using IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,11 +18,11 @@ public class ClienteJwtSchemeTests
     }
 
     [Fact]
-    public async Task ClienteScheme_AcceptsTokenSignedWithJwtClienteKey()
+    public async Task ClienteScheme_AcceptsTokenSignedWithClienteKey()
     {
         // Arrange
         const string documento = "11144477735";
-        var token = ClienteJwtHelper.CreateToken(documento);
+        var token = TestJwt.CreateClienteToken(documento);
         using var scope = _factory.Services.CreateScope();
         var auth = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
         var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
@@ -43,9 +43,7 @@ public class ClienteJwtSchemeTests
     public async Task ClienteScheme_RejectsFuncionarioToken()
     {
         // Arrange
-        var client = _factory.CreateClient();
-        await AuthHelper.AuthenticateAsAdminAsync(client);
-        var funcionarioToken = client.DefaultRequestHeaders.Authorization!.Parameter!;
+        var funcionarioToken = TestJwt.CreateStaffToken();
         using var scope = _factory.Services.CreateScope();
         var auth = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
         var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
@@ -62,13 +60,13 @@ public class ClienteJwtSchemeTests
     }
 
     [Fact]
-    public async Task FuncionarioLogin_StillWorks_WithDualJwtSchemes()
+    public void FuncionarioToken_IsIssuedForStaffAuth()
     {
         // Arrange
         var client = _factory.CreateClient();
 
         // Act
-        await AuthHelper.AuthenticateAsAdminAsync(client);
+        AuthHelper.AuthenticateAsStaff(client);
 
         // Assert
         Assert.NotNull(client.DefaultRequestHeaders.Authorization);

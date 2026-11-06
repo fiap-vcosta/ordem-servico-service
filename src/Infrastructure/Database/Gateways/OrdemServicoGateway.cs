@@ -1,6 +1,6 @@
 using Application.Abstractions.Gateways;
-using Domain.Administrativo;
-using Domain.OrdemServico.Entities;
+using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Database.Gateways;
@@ -51,13 +51,7 @@ public class OrdemServicoGateway(AppDbContext context) : IOrdemServicoGateway
         var documentoNormalizado = DocumentoNormalizer.Normalize(documentoCliente);
 
         return await QueryCompleta()
-            .Join(
-                context.Clientes,
-                os => os.Cliente.Id,
-                cliente => cliente.Id,
-                (os, cliente) => new { os, cliente })
-            .Where(x => x.os.TokenAprovacao == tokenAprovacao && x.cliente.Documento == documentoNormalizado)
-            .Select(x => x.os)
+            .Where(os => os.TokenAprovacao == tokenAprovacao && os.Cliente.Documento == documentoNormalizado)
             .FirstOrDefaultAsync();
     }
 

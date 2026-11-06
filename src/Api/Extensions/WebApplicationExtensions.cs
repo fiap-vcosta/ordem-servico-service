@@ -1,4 +1,4 @@
-using Api.Middleware;
+using BuildingBlocks.Http.Middleware;
 
 namespace Api.Extensions;
 
