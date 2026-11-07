@@ -18,6 +18,7 @@ using Application.UseCases.Commands.FinalizarDiagnostico;
 using Application.UseCases.Commands.RejeitarOrdemServico;
 using Application.UseCases.Queries.GetOrdemServicoById;
 using Application.UseCases.Queries.GetTempoMedioAllServicos;
+using Application.UseCases.Queries.ListarOrdensServico;
 using Application.UseCases.Responses;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -45,6 +46,35 @@ public class OrdemServicoControllerTests
             _adicionarValidatorMock.Object,
             _aprovarParcialValidatorMock.Object,
             _confirmarExecucaoValidatorMock.Object);
+    }
+
+    [Fact]
+    public async Task Listar_ReturnsOk()
+    {
+        // Arrange
+        var response = new OrdemServicoResponse
+        {
+            Id = 1,
+            Status = StatusOrdemServico.Recebida,
+            ValorTotal = 0m,
+            RecebidaEm = DateTime.UtcNow,
+            Cliente = new ClienteOrdemServicoResponse { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
+            Veiculo = new VeiculoOrdemServicoResponse { Placa = "ABC-1234", Marca = "VW", Modelo = "Gol" },
+            Servicos = [],
+            ItensNecessariosParaExecucao = []
+        };
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<ListarOrdensServicoQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<OrdemServicoResponse> { response });
+
+        // Act
+        var result = await _controller.Listar();
+
+        // Assert
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var viewModels = Assert.IsAssignableFrom<IReadOnlyList<OrdemServicoViewModel>>(ok.Value);
+        Assert.Single(viewModels);
+        Assert.Equal(response.Id, viewModels[0].Id);
     }
 
     [Fact]
@@ -124,18 +154,44 @@ public class OrdemServicoControllerTests
             Servicos = []
         };
 
+        CriarOrdemServicoCommand? captured = null;
         _mediatorMock
             .Setup(m => m.Send(It.IsAny<CriarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<IRequest<CriarOrdemServicoCommandResponse>, CancellationToken>((cmd, _) =>
+                captured = (CriarOrdemServicoCommand)cmd)
             .ReturnsAsync(response);
 
+        var request = new CriarOrdemServicoRequest
+        {
+            IdVeiculo = 1,
+            Servicos =
+            [
+                new CriarOrdemServicoRequest.Servico
+                {
+                    IdServico = 10,
+                    ValorCobrado = 150m,
+                    ItensNecessarios =
+                    [
+                        new CriarOrdemServicoRequest.ItemNecessario { IdItemEstoque = 100, Quantidade = 2m }
+                    ]
+                }
+            ]
+        };
+
         // Act
-        var result = await _controller.CriarOrdemServico(new CriarOrdemServicoRequest { IdVeiculo = 1 });
+        var result = await _controller.CriarOrdemServico(request);
 
         // Assert
         var created = Assert.IsType<CreatedResult>(result);
         var viewModel = Assert.IsType<CriarOrdemServicoViewModel>(created.Value);
         Assert.Equal(response.Id, viewModel.Id);
         Assert.Equal(response.Status, viewModel.Status);
+        Assert.NotNull(captured);
+        Assert.Single(captured.Servicos);
+        Assert.Equal(10, captured.Servicos[0].IdServico);
+        Assert.Single(captured.Servicos[0].ItensNecessarios);
+        Assert.Equal(100, captured.Servicos[0].ItensNecessarios[0].IdItemEstoque);
+        Assert.Equal(2m, captured.Servicos[0].ItensNecessarios[0].Quantidade);
     }
 
     [Fact]
@@ -182,15 +238,21 @@ public class OrdemServicoControllerTests
             Itens = []
         };
 
+        AdicionarItemOrdemServicoCommand? captured = null;
         _mediatorMock
             .Setup(m => m.Send(It.IsAny<AdicionarItemOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<IRequest<AdicionarItemOrdemServicoCommandResponse>, CancellationToken>((cmd, _) =>
+                captured = (AdicionarItemOrdemServicoCommand)cmd)
             .ReturnsAsync(response);
 
         var request = new AdicionarItemServicoRequest
         {
             IdServico = 1,
             ValorCobrado = 100m,
-            ItensNecessarios = []
+            ItensNecessarios =
+            [
+                new AdicionarItemServicoRequest.ItemNecessario { IdItemEstoque = 55, Quantidade = 3m }
+            ]
         };
 
         // Act
@@ -198,6 +260,10 @@ public class OrdemServicoControllerTests
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(captured);
+        Assert.Single(captured.ItensNecessarios);
+        Assert.Equal(55, captured.ItensNecessarios[0].IdItemEstoque);
+        Assert.Equal(3m, captured.ItensNecessarios[0].Quantidade);
     }
 
     [Fact]
@@ -280,13 +346,20 @@ public class OrdemServicoControllerTests
         // Arrange
         _mediatorMock
             .Setup(m => m.Send(It.IsAny<GetTempoMedioExecucaoAllServicosQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .ReturnsAsync(
+            [
+                TempoMedioExecucaoResponse.From(1, 2, TimeSpan.FromHours(1.5))
+            ]);
 
         // Act
         var result = await _controller.GetTempoMedioExecucao();
 
         // Assert
-        Assert.IsType<OkObjectResult>(result);
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var viewModels = Assert.IsAssignableFrom<IEnumerable<TempoMedioExecucaoViewModel>>(ok.Value);
+        var item = Assert.Single(viewModels);
+        Assert.Equal(1, item.IdServico);
+        Assert.Equal(2, item.TotalExecucoes);
     }
 
     [Fact]

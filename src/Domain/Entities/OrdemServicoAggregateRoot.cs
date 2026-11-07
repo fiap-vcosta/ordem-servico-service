@@ -270,38 +270,48 @@ public class OrdemServicoAggregateRoot
         AprovadaEm = DateTime.UtcNow;
     }
 
-    public void ChecarItensNecessarios(Dictionary<int, decimal> saldosDisponiveis)
+    public void AplicarEstoqueReservado(IReadOnlyDictionary<int, StatusItemEstoque> statusPorItemEstoqueId)
     {
         if (Status is not (StatusOrdemServico.ChecandoEstoque or StatusOrdemServico.AguardandoPeca))
         {
-            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode ter estoque checado.");
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode aplicar estoque reservado.");
         }
-
-        var clonedQuantidadesDisponiveis = new Dictionary<int, decimal>(saldosDisponiveis);
 
         foreach (var item in ItensNecessariosParaExecucao)
         {
-            var saldoAtual = clonedQuantidadesDisponiveis[item.ItemEstoque.Id];
-
-            item.ChecarEstoque(saldoAtual);
-
-            if (item.Status == StatusItemEstoque.EstoqueDisponivel)
+            if (!statusPorItemEstoqueId.TryGetValue(item.ItemEstoque.Id, out var statusItem)
+                || statusItem is not StatusItemEstoque.EstoqueTravado)
             {
-                clonedQuantidadesDisponiveis[item.ItemEstoque.Id] = saldoAtual - item.Quantidade;
+                throw new BusinessRuleException(
+                    $"Item de estoque {item.ItemEstoque.Id} deveria vir como EstoqueTravado na reserva.");
             }
+
+            item.AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
         }
 
-        Status = ItensNecessariosParaExecucao.All(item => item.Status == StatusItemEstoque.EstoqueDisponivel)
-            ? StatusOrdemServico.LiberadaParaExecucao
-            : StatusOrdemServico.AguardandoPeca;
+        Status = StatusOrdemServico.LiberadaParaExecucao;
     }
 
-    public void TravarItensNecessarios()
+    public void AplicarEstoqueEmFalta(IReadOnlyDictionary<int, StatusItemEstoque> statusPorItemEstoqueId)
     {
+        if (Status is not (StatusOrdemServico.ChecandoEstoque or StatusOrdemServico.AguardandoPeca))
+        {
+            throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode aplicar estoque em falta.");
+        }
+
         foreach (var item in ItensNecessariosParaExecucao)
         {
-            item.TravarEstoque();
+            if (!statusPorItemEstoqueId.TryGetValue(item.ItemEstoque.Id, out var statusItem)
+                || statusItem is not (StatusItemEstoque.EstoqueDisponivel or StatusItemEstoque.EstoqueEmFalta))
+            {
+                throw new BusinessRuleException(
+                    $"Item de estoque {item.ItemEstoque.Id} deveria vir como EstoqueDisponivel ou EstoqueEmFalta.");
+            }
+
+            item.AplicarStatusEstoque(statusItem);
         }
+
+        Status = StatusOrdemServico.AguardandoPeca;
     }
 
     public void ConfirmarExecucao(List<ServicoExecutado> servicosExecutados)
@@ -319,6 +329,11 @@ public class OrdemServicoAggregateRoot
 
         if (_servicos.All(servico => servico.Status is (StatusItemOrdemServico.Concluido or StatusItemOrdemServico.Rejeitado)))
         {
+            foreach (var item in ItensNecessariosParaExecucao)
+            {
+                item.ConfirmarUtilizacao();
+            }
+
             Status = StatusOrdemServico.Finalizada;
         }
         else

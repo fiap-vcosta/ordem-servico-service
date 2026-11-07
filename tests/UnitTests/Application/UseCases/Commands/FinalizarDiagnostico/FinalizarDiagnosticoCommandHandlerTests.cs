@@ -15,7 +15,7 @@ public class FinalizarDiagnosticoCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
-        var mockPublisher = new Mock<IDiagnosticoFinalizadoPublisher>();
+        var mockPublisher = new Mock<IOrdemServicoIntegrationPublisher>();
 
         var cliente = new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" };
         var veiculo = new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" };
@@ -30,7 +30,7 @@ public class FinalizarDiagnosticoCommandHandlerTests
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         mockPublisher
-            .Setup(p => p.PublishAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
+            .Setup(p => p.PublishDiagnosticoFinalizadoAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var handler = new FinalizarDiagnosticoCommandHandler(
@@ -45,7 +45,7 @@ public class FinalizarDiagnosticoCommandHandlerTests
         Assert.NotNull(result);
         Assert.Equal(StatusOrdemServico.AguardandoOrcamento, result.Status);
         mockPublisher.Verify(
-            p => p.PublishAsync(ordemServico, It.IsAny<CancellationToken>()),
+            p => p.PublishDiagnosticoFinalizadoAsync(ordemServico, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

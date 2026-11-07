@@ -1381,27 +1381,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{{criarItemBody}}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -1543,27 +1522,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque/{{itemEstoqueId}}/registrar-entrada",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{\n  \"Quantidade\": 5\n}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -2414,27 +2372,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{{criarItemBody1}}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -2453,27 +2390,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{{criarItemBody2}}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -2787,27 +2703,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque/{{itemEmFalta1}}/registrar-entrada",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{\n  \"Quantidade\": 5\n}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -2825,27 +2720,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque/{{itemEmFalta2}}/registrar-entrada",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{\n  \"Quantidade\": 5\n}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },
@@ -3366,27 +3240,6 @@
       "deleted": false,
       "data": {
         "type": "http",
-        "request": {
-          "url": "{{baseUrl}}/api/itens-estoque",
-          "method": "POST",
-          "headers": [
-            {
-              "id": 1778221646802,
-              "key": "Content-Type",
-              "value": "application/json",
-              "isEnabled": true,
-              "description": ""
-            }
-          ],
-          "queryParams": [],
-          "pathVariables": [],
-          "body": {
-            "contentType": "raw",
-            "raw": "{{criarItemListagemBody}}",
-            "rawContentType": "application/json"
-          },
-          "contentType": "raw"
-        },
         "auth": {
           "type": "inherit"
         },

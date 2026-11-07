@@ -41,12 +41,9 @@ public class AprovacaoParcialAteEntregueIntegrationTests(CustomWebApplicationFac
         await AssertStatusAsync(ordemId, "EmDiagnostico");
 
         await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
         // Assert
-        await ConfirmarExecucaoAsync(ordemId, idsServicos[0]);
-        await AssertStatusAsync(ordemId, "Finalizada");
-        await AplicarCobrancaEPagamentoAsync(ordemId);
-        await AssertStatusAsync(ordemId, "Entregue");
+        await ExecutarAteEntregueAsync(ordemId);
     }
 }

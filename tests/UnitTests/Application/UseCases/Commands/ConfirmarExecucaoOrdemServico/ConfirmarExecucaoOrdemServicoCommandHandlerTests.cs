@@ -1,8 +1,8 @@
+using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.ConfirmarExecucaoOrdemServico;
 using Application.Abstractions.Gateways;
 using Domain.Entities;
 using Domain.ValueObjects;
-using MediatR;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -15,19 +15,19 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
-        var mockMediator = new Mock<IMediator>();
+        var mockPublisher = new Mock<IOrdemServicoIntegrationPublisher>();
 
         var cliente = new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" };
         var veiculo = new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" };
         var ordemServico = OrdemServicoAggregateRoot.Criar(cliente, veiculo);
         ordemServico.EnviarParaDiagnostico();
-        
+
         var servicoCatalogo = new ServicoCatalogo() { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
         ordemServico.AdicionarItemServico("Troca", 100m, servicoCatalogo, new List<ItemNecessario.CriarItemNecessarioParams>());
         ordemServico.FinalizarDiagnostico();
         ordemServico.AplicarOrcamentoGerado(1);
         ordemServico.AprovarServicosSugeridos();
-        ordemServico.ChecarItensNecessarios(new Dictionary<int, decimal>());
+        ordemServico.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque>());
 
         var servicoId = ordemServico.Servicos.First().Id;
 
@@ -42,9 +42,13 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
 
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
-        mockMediator.Setup(m => m.Send(It.IsAny<IRequest<Unit>>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(Unit.Value));
+        mockPublisher
+            .Setup(p => p.PublishOrdemServicoFinalizadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
-        var handler = new ConfirmarExecucaoOrdemServicoCommandHandler(mockOrdemServicoGateway.Object, mockMediator.Object,
+        var handler = new ConfirmarExecucaoOrdemServicoCommandHandler(
+            mockOrdemServicoGateway.Object,
+            mockPublisher.Object,
             NullLogger<ConfirmarExecucaoOrdemServicoCommandHandler>.Instance);
 
         // Act
@@ -53,5 +57,8 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(StatusOrdemServico.Finalizada, result.Status);
+        mockPublisher.Verify(
+            p => p.PublishOrdemServicoFinalizadaAsync(ordemServico, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

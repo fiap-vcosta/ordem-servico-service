@@ -1,13 +1,9 @@
 using System.Text.Json.Serialization;
 using Api.Contracts.Validation;
-using Api.Controllers.Staff.ItemEstoque.CreateItemEstoque;
-using Api.Controllers.Staff.ItemEstoque.RegistrarEntradaEstoque;
-using Api.Controllers.Staff.ItemEstoque.UpdateItemEstoque;
 using Api.Controllers.Staff.OrdemServico.AdicionarItemServico;
 using Api.Controllers.Staff.OrdemServico.AprovarServicosParcialmente;
 using Api.Controllers.Staff.OrdemServico.ConfirmarExecucao;
 using Api.Controllers.Staff.OrdemServico.CriarOrdemServico;
-using Api.Presenters.ItemEstoque;
 using Api.Presenters.OrdemServico;
 using Application.UseCases.Commands.CriarOrdemServico;
 using BuildingBlocks.Http.Auth;
@@ -24,15 +20,11 @@ public static class ServiceCollectionExtensions
         services.AddInfrastructure(configuration);
 
         services.AddScoped<OrdemServicoPresenter>();
-        services.AddScoped<ItemEstoquePresenter>();
 
         services.AddSingleton<IValidator<CriarOrdemServicoRequest>, CriarOrdemServicoRequestValidator>();
         services.AddSingleton<IValidator<AdicionarItemServicoRequest>, AdicionarItemServicoRequestValidator>();
         services.AddSingleton<IValidator<AprovarServicosParcialmenteRequest>, AprovarServicosParcialmenteRequestValidator>();
         services.AddSingleton<IValidator<ConfirmarExecucaoRequest>, ConfirmarExecucaoRequestValidator>();
-        services.AddSingleton<IValidator<CreateItemEstoqueRequest>, CreateItemEstoqueRequestValidator>();
-        services.AddSingleton<IValidator<UpdateItemEstoqueRequest>, UpdateItemEstoqueRequestValidator>();
-        services.AddSingleton<IValidator<RegistrarEntradaEstoqueRequest>, RegistrarEntradaEstoqueRequestValidator>();
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(CriarOrdemServicoCommand).Assembly));

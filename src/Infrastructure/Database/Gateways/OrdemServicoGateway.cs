@@ -15,17 +15,6 @@ public class OrdemServicoGateway(AppDbContext context) : IOrdemServicoGateway
         StatusOrdemServico.Descartada
     ];
 
-    public async Task<IEnumerable<OrdemServicoAggregateRoot>> GetAguardandoPecaPorItemEstoqueAsync(int idItemEstoque)
-    {
-        return await context.OrdensServico
-            .Include(os => os.Servicos)
-            .ThenInclude(s => s.ItensNecessarios)
-            .Where(os => os.Status == StatusOrdemServico.AguardandoPeca &&
-                         os.Servicos.Any(s => s.ItensNecessarios.Any(i => i.ItemEstoque.Id == idItemEstoque && i.Status == StatusItemEstoque.EstoqueEmFalta)))
-            .OrderBy(os => os.AprovadaEm)
-            .ToListAsync();
-    }
-
     public async Task CriarAsync(OrdemServicoAggregateRoot ordemServico)
     {
         context.OrdensServico.Add(ordemServico);

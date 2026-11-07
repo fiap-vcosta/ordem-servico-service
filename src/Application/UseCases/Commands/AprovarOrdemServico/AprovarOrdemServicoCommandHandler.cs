@@ -1,17 +1,17 @@
-using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
+using Application.Logging;
 using Application.UseCases.Responses;
+using Domain.Entities;
 using Domain.Exceptions;
-using Domain.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Application.Logging;
 
 namespace Application.UseCases.Commands.AprovarOrdemServico;
 
 public class AprovarOrdemServicoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IMediator mediator,
+    IOrdemServicoIntegrationPublisher integrationPublisher,
     ILogger<AprovarOrdemServicoCommandHandler> logger
 ) : IRequestHandler<AprovarOrdemServicoCommand, AprovarOrdemServicoCommandResponse>
 {
@@ -27,7 +27,11 @@ public class AprovarOrdemServicoCommandHandler(
 
         await ordemServicoGateway.UpdateAsync(ordemServico);
         logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
-        await mediator.Publish(new DomainEventNotification<OrdemServicoAprovadaEvent>(new OrdemServicoAprovadaEvent(ordemServico.Id)), cancellationToken);
+
+        if (ordemServico.Status is StatusOrdemServico.ChecandoEstoque)
+        {
+            await integrationPublisher.PublishOrdemServicoAprovadaAsync(ordemServico, cancellationToken);
+        }
 
         return new AprovarOrdemServicoCommandResponse()
         {

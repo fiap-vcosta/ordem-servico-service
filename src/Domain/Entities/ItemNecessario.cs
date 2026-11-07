@@ -30,30 +30,26 @@ public class ItemNecessario
         ItemEstoque = @params.ItemEstoque
     };
 
-    public void ChecarEstoque(decimal quantidadeDisponivel)
+    public void AplicarStatusEstoque(StatusItemEstoque status)
     {
-        if (Status is not (StatusItemEstoque.EstoqueNaoChecado or StatusItemEstoque.EstoqueEmFalta or StatusItemEstoque.EstoqueDisponivel))
+        if (Status is not (
+            StatusItemEstoque.EstoqueNaoChecado
+            or StatusItemEstoque.EstoqueEmFalta
+            or StatusItemEstoque.EstoqueDisponivel
+            or StatusItemEstoque.EstoqueTravado))
         {
-            throw new BusinessRuleException($"Item de estoque {Id} com status {Status} não pode ser checado no estoque.");
+            throw new BusinessRuleException($"Item de estoque {Id} com status {Status} não pode receber status de estoque.");
         }
 
-        if (Quantidade > quantidadeDisponivel)
+        if (status is not (
+            StatusItemEstoque.EstoqueEmFalta
+            or StatusItemEstoque.EstoqueDisponivel
+            or StatusItemEstoque.EstoqueTravado))
         {
-            Status = StatusItemEstoque.EstoqueEmFalta;
-            return;
+            throw new BusinessRuleException($"Status de estoque {status} inválido para item {Id}.");
         }
 
-        Status = StatusItemEstoque.EstoqueDisponivel;
-    }
-
-    public void TravarEstoque()
-    {
-        if (Status is not (StatusItemEstoque.EstoqueNaoChecado or StatusItemEstoque.EstoqueEmFalta or StatusItemEstoque.EstoqueDisponivel))
-        {
-            throw new BusinessRuleException($"Item de estoque {Id} com status {Status} não pode ter estoque travado.");
-        }
-
-        Status = StatusItemEstoque.EstoqueTravado;
+        Status = status;
     }
 
     public void ConfirmarUtilizacao()

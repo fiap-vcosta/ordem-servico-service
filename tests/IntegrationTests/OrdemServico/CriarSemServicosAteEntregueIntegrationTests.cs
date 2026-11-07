@@ -22,7 +22,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarInternamenteAsync(ordemId);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);
@@ -42,7 +42,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         await AdicionarServicoAsync(ordemId, idServico: 2, valorCobrado: 50m);
         await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AprovarInternamenteAsync(ordemId);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);

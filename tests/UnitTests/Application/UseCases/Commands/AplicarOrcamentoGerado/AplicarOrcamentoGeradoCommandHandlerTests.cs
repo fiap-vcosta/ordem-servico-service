@@ -1,11 +1,9 @@
-using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.AplicarOrcamentoGerado;
 using Domain.Exceptions;
 using Domain.Entities;
-using Domain.Events;
 using Domain.ValueObjects;
-using MediatR;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -18,14 +16,14 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act
@@ -35,8 +33,8 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Assert
         Assert.Equal(StatusOrdemServico.AguardandoAprovacao, result.Status);
-        mediator.Verify(
-            m => m.Publish(It.IsAny<DomainEventNotification<OrdemServicoAprovadaEvent>>(), It.IsAny<CancellationToken>()),
+        publisher.Verify(
+            p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -45,17 +43,17 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoSoComAprovados();
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
-        mediator
-            .Setup(m => m.Publish(It.IsAny<DomainEventNotification<OrdemServicoAprovadaEvent>>(), It.IsAny<CancellationToken>()))
+        publisher
+            .Setup(p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act
@@ -65,8 +63,8 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Assert
         Assert.Equal(StatusOrdemServico.ChecandoEstoque, result.Status);
-        mediator.Verify(
-            m => m.Publish(It.IsAny<DomainEventNotification<OrdemServicoAprovadaEvent>>(), It.IsAny<CancellationToken>()),
+        publisher.Verify(
+            p => p.PublishOrdemServicoAprovadaAsync(ordem, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -75,14 +73,14 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoSoComRejeitados();
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act
@@ -92,8 +90,8 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Assert
         Assert.Equal(StatusOrdemServico.Entregue, result.Status);
-        mediator.Verify(
-            m => m.Publish(It.IsAny<DomainEventNotification<OrdemServicoAprovadaEvent>>(), It.IsAny<CancellationToken>()),
+        publisher.Verify(
+            p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -102,14 +100,14 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
         ordem.AplicarOrcamentoGerado(1);
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act
@@ -127,13 +125,13 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act
@@ -151,12 +149,12 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        var mediator = new Mock<IMediator>();
+        var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
-            mediator.Object,
+            publisher.Object,
             NullLogger<AplicarOrcamentoGeradoCommandHandler>.Instance);
 
         // Act & Assert

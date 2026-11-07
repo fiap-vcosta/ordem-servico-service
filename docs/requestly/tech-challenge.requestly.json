@@ -634,21 +634,6 @@
       "rank": "a4"
     },
     {
-      "id": "503d9d45-ae4a-4b07-b570-e7134071e596",
-      "name": "03-estoque",
-      "type": "collection",
-      "parentId": "a8b10b91-f6ac-4582-829c-3c9ee45c44db",
-      "deleted": false,
-      "data": {
-        "auth": {
-          "type": "bearer_token",
-          "token": "{{token}}"
-        }
-      },
-      "rank": "a3",
-      "description": "Itens de estoque e entrada de saldo."
-    },
-    {
       "id": "3000e82b-5b50-4a7e-ae56-5aeed1fb9275",
       "name": "listar",
       "type": "api",

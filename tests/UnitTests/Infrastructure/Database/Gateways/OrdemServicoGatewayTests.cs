@@ -67,47 +67,6 @@ public class OrdemServicoGatewayTests : IDisposable
     }
 
     [Fact]
-    public async Task GetAguardandoPecaPorItemEstoqueAsync_ReturnsOrders_WhenOrderHasStockGap()
-    {
-        // Arrange
-        var cliente = new ClienteOrdemServico { Id = 1, Nome = "Cliente Teste", Email = "teste@teste.com" };
-        var veiculo = new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "Honda", Modelo = "Civic" };
-        var servicoCatalogo = new ServicoCatalogo() { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
-        var ordem = OrdemServicoAggregateRoot.Criar(cliente, veiculo);
-        ordem.EnviarParaDiagnostico();
-        ordem.AdicionarItemServico("Troca de óleo", 100m, servicoCatalogo,
-            new List<ItemNecessario.CriarItemNecessarioParams>
-        {
-            new(1, 10m, new ItemEstoqueOrdemServico { Id = 1, Codigo = "ITM-001", Nome = "Filtro", UnidadeMedida = "Unidade" })
-        });
-        ordem.FinalizarDiagnostico();
-        ordem.AplicarOrcamentoGerado(1);
-        ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [1] = 0m });
-        await _gateway.CriarAsync(ordem);
-
-        // Act
-        var result = (await _gateway.GetAguardandoPecaPorItemEstoqueAsync(1)).ToList();
-
-        // Assert
-        Assert.Single(result);
-        Assert.Equal(StatusOrdemServico.AguardandoPeca, result.Single().Status);
-    }
-
-    [Fact]
-    public async Task GetAguardandoPecaPorItemEstoqueAsync_ReturnsEmpty_WhenNoMatchExists()
-    {
-        // Arrange
-        var itemId = 1;
-
-        // Act
-        var result = (await _gateway.GetAguardandoPecaPorItemEstoqueAsync(itemId)).ToList();
-
-        // Assert
-        Assert.Empty(result);
-    }
-
-    [Fact]
     public async Task UpdateAsync_PersistsStatusChange()
     {
         // Arrange
@@ -203,7 +162,7 @@ public class OrdemServicoGatewayTests : IDisposable
         liberada.FinalizarDiagnostico();
         liberada.AplicarOrcamentoGerado(1);
         liberada.AprovarServicosSugeridos();
-        liberada.ChecarItensNecessarios(new Dictionary<int, decimal>());
+        liberada.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque>());
         await _gateway.CriarAsync(liberada);
 
         var descartada = OrdemServicoAggregateRoot.Criar(cliente, veiculo);

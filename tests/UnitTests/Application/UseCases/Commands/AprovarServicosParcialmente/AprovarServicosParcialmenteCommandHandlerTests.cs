@@ -1,3 +1,4 @@
+using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.AprovarServicosParcialmente;
 using Domain.Exceptions;
 using Application.Abstractions.Gateways;
@@ -15,6 +16,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
+        var mockPublisher = new Mock<IOrdemServicoIntegrationPublisher>();
 
         var ordem = CriarOrdemAguardandoAprovacaoComDoisServicos();
         var idPrimeiro = ordem.Servicos.First().Id;
@@ -22,7 +24,10 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
-        var handler = new AprovarServicosParcialmenteCommandHandler(mockOrdemServicoGateway.Object, NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
+        var handler = new AprovarServicosParcialmenteCommandHandler(
+            mockOrdemServicoGateway.Object,
+            mockPublisher.Object,
+            NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
         var command = new AprovarServicosParcialmenteCommand
         {
             IdOrdemServico = 1,
@@ -36,6 +41,9 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         Assert.Equal(StatusOrdemServico.EmDiagnostico, result.Status);
         Assert.Equal(StatusItemOrdemServico.Aprovado, ordem.Servicos.First(s => s.Id == idPrimeiro).Status);
         mockOrdemServicoGateway.Verify(r => r.UpdateAsync(ordem), Times.Once);
+        mockPublisher.Verify(
+            p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -47,7 +55,10 @@ public class AprovarServicosParcialmenteCommandHandlerTests
 
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
 
-        var handler = new AprovarServicosParcialmenteCommandHandler(mockOrdemServicoGateway.Object, NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
+        var handler = new AprovarServicosParcialmenteCommandHandler(
+            mockOrdemServicoGateway.Object,
+            new Mock<IOrdemServicoIntegrationPublisher>().Object,
+            NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
         var command = new AprovarServicosParcialmenteCommand
         {
             IdOrdemServico = 1,
@@ -65,7 +76,10 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
-        var handler = new AprovarServicosParcialmenteCommandHandler(mockOrdemServicoGateway.Object, NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
+        var handler = new AprovarServicosParcialmenteCommandHandler(
+            mockOrdemServicoGateway.Object,
+            new Mock<IOrdemServicoIntegrationPublisher>().Object,
+            NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>

@@ -80,8 +80,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
-        ordem.TravarItensNecessarios();
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
         var servicoId = ordem.Servicos.First().Id;
         ordem.ConfirmarExecucao(
         [
