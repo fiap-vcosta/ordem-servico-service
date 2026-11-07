@@ -31,7 +31,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
         await AssertStatusAsync(ordemId, "AguardandoAprovacao");
 
         await AprovarInternamenteAsync(ordemId);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);
@@ -62,7 +62,7 @@ public class CriarComServicosAteEntregueIntegrationTests(CustomWebApplicationFac
 
         var token = await GetTokenAprovacaoAsync(ordemId);
         await AprovarPublicamenteAsync(token);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);

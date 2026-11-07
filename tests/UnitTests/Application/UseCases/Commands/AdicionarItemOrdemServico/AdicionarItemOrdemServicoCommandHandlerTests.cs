@@ -1,7 +1,6 @@
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AdicionarItemOrdemServico;
 using Domain.Entities;
-using Domain.Estoque.Entities;
 using Domain.Exceptions;
 using Domain.ValueObjects;
 using Moq;
@@ -16,21 +15,21 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         var mockCatalog = new Mock<IAdministrativoCatalogGateway>();
-        var mockItemEstoqueGateway = new Mock<IItemEstoqueGateway>();
+        var mockEstoqueCatalog = new Mock<IEstoqueCatalogGateway>();
 
         var ordem = CriarOrdemEmDiagnostico();
         var servico = new AdministrativoServicoDto(5, "OLE-001", "Troca de Óleo", 150m);
-        var itemEstoque = new ItemEstoqueAggregateRoot { Id = 10, Codigo = "FLT-001", Nome = "Filtro", UnidadeMedida = UnidadeMedida.Unidade };
+        var itemEstoque = new EstoqueItemDto(10, "FLT-001", "Filtro", "Unidade");
 
         mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
         mockCatalog.Setup(r => r.GetServicoByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(servico);
-        mockItemEstoqueGateway.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(itemEstoque);
+        mockEstoqueCatalog.Setup(r => r.GetItemByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(itemEstoque);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AdicionarItemOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
             mockCatalog.Object,
-            mockItemEstoqueGateway.Object);
+            mockEstoqueCatalog.Object);
 
         var command = new AdicionarItemOrdemServicoCommand
         {
@@ -63,7 +62,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var handler = new AdicionarItemOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
             new Mock<IAdministrativoCatalogGateway>().Object,
-            new Mock<IItemEstoqueGateway>().Object);
+            new Mock<IEstoqueCatalogGateway>().Object);
 
         var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = 999, IdServico = 1, ValorCobrado = 100m };
 
@@ -84,9 +83,43 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var handler = new AdicionarItemOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
             mockCatalog.Object,
-            new Mock<IItemEstoqueGateway>().Object);
+            new Mock<IEstoqueCatalogGateway>().Object);
 
         var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = 1, IdServico = 999, ValorCobrado = 100m };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<DomainNotFoundException>(() => handler.Handle(command, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Handle_Throws_WhenItemEstoqueNotFound()
+    {
+        // Arrange
+        var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
+        var mockCatalog = new Mock<IAdministrativoCatalogGateway>();
+        var mockEstoqueCatalog = new Mock<IEstoqueCatalogGateway>();
+
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CriarOrdemEmDiagnostico());
+        mockCatalog.Setup(r => r.GetServicoByIdAsync(5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AdministrativoServicoDto(5, "OLE-001", "Troca de Óleo", 150m));
+        mockEstoqueCatalog.Setup(r => r.GetItemByIdAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EstoqueItemDto?)null);
+
+        var handler = new AdicionarItemOrdemServicoCommandHandler(
+            mockOrdemServicoGateway.Object,
+            mockCatalog.Object,
+            mockEstoqueCatalog.Object);
+
+        var command = new AdicionarItemOrdemServicoCommand
+        {
+            IdOrdemServico = 1,
+            IdServico = 5,
+            ValorCobrado = 100m,
+            ItensNecessarios =
+            [
+                new AdicionarItemOrdemServicoCommand.ItemNecessario { IdItemEstoque = 10, Quantidade = 1m }
+            ]
+        };
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() => handler.Handle(command, CancellationToken.None));

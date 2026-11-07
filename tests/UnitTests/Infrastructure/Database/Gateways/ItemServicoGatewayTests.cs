@@ -41,7 +41,7 @@ public class ItemServicoGatewayTests : IDisposable
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal>());
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque>());
         var servicoId = ordem.Servicos.First().Id;
         ordem.ConfirmarExecucao(
         [

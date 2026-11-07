@@ -2,7 +2,9 @@ using Api.Contracts.Validation;
 using Api.Controllers.Staff.OrdemServico.CriarOrdemServico;
 using Api.Extensions;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
 using Application.Abstractions.Services;
+using BuildingBlocks.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +44,10 @@ public class ServiceCollectionExtensionsTests
                 ["Jwt:Cliente:PublicKeyPem"] = TestPublicKeyPem,
                 ["Jwt:Cliente:RequireHttpsMetadata"] = "false",
                 ["Administrativo:BaseUrl"] = "http://localhost:8080",
-                ["ServiceAuth:Key"] = "integration-service-auth-key"
+                ["Estoque:BaseUrl"] = "http://localhost:8082",
+                ["ServiceAuth:Key"] = "integration-service-auth-key",
+                ["PubSub:UseInMemory"] = "true",
+                ["PubSub:EnableWorkers"] = "false"
             })
             .Build();
         services.AddSingleton<IConfiguration>(configuration);
@@ -58,8 +63,10 @@ public class ServiceCollectionExtensionsTests
         Assert.NotNull(provider.GetService<ISmtpService>());
         Assert.NotNull(provider.GetService<IValidator<CriarOrdemServicoRequest>>());
         Assert.NotNull(scoped.GetRequiredService<IAdministrativoCatalogGateway>());
-        Assert.NotNull(scoped.GetRequiredService<IItemEstoqueGateway>());
+        Assert.NotNull(scoped.GetRequiredService<IEstoqueCatalogGateway>());
         Assert.NotNull(scoped.GetRequiredService<IOrdemServicoGateway>());
         Assert.NotNull(scoped.GetRequiredService<IItemServicoGateway>());
+        Assert.NotNull(provider.GetRequiredService<IOrdemServicoIntegrationPublisher>());
+        Assert.NotNull(provider.GetRequiredService<IEventPublisher>());
     }
 }

@@ -1,16 +1,16 @@
-using System.Transactions;
 using Application.Abstractions.Gateways;
-using Application.UseCases.Estoque.ItemEstoque.Commands.ConfirmarUtilizacaoItensEstoque;
+using Application.Abstractions.Messaging;
+using Application.Logging;
+using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Application.Logging;
 
 namespace Application.UseCases.Commands.ConfirmarExecucaoOrdemServico;
 
 public class ConfirmarExecucaoOrdemServicoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IMediator mediator,
+    IOrdemServicoIntegrationPublisher integrationPublisher,
     ILogger<ConfirmarExecucaoOrdemServicoCommandHandler> logger
 ) : IRequestHandler<ConfirmarExecucaoOrdemServicoCommand, OrdemServicoResponse>
 {
@@ -27,17 +27,15 @@ public class ConfirmarExecucaoOrdemServicoCommandHandler(
             throw new DomainNotFoundException($"Serviço com id {servico.IdServico} não pertence à Ordem de Serviço {request.IdOrdemServico}");
         }
 
-        var opcoesTransacao = new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted };
-        using var scope = new TransactionScope(TransactionScopeOption.Required, opcoesTransacao, TransactionScopeAsyncFlowOption.Enabled);
-
-        var command = new ConfirmarUtilizacaoItensEstoqueCommand { IdOrdemServico = ordemServico.Id };
-        await mediator.Send(command, cancellationToken);
-
         ordemServico.ConfirmarExecucao(request.ServicosExecutados);
         await ordemServicoGateway.UpdateAsync(ordemServico);
         logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
 
-        scope.Complete();
+        if (ordemServico.Status is StatusOrdemServico.Finalizada)
+        {
+            await integrationPublisher.PublishOrdemServicoFinalizadaAsync(ordemServico, cancellationToken);
+        }
+
         return OrdemServicoResponse.From(ordemServico);
     }
 }

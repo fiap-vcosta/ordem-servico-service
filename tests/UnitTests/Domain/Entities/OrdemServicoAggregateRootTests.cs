@@ -96,7 +96,7 @@ public class OrdemServicoAggregateRootTests
     {
         // Arrange
         var ordem = CriarOrdemComServicoAprovado();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
 
         // Act
         ordem.Descartar();
@@ -128,7 +128,7 @@ public class OrdemServicoAggregateRootTests
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal>());
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque>());
         var primeiroId = ordem.Servicos.First().Id;
         ordem.ConfirmarExecucao(
         [
@@ -357,27 +357,30 @@ public class OrdemServicoAggregateRootTests
     }
 
     [Fact]
-    public void CheckRequiredItems_WhenStockIsSufficient_SetsLiberatedToExecute()
+    public void AplicarEstoqueReservado_WhenStockReserved_SetsLiberatedToExecute()
     {
         // Arrange
         var ordem = CriarOrdemComServicoAprovado();
-        var saldos = new Dictionary<int, decimal> { [100] = 5m };
+        var status = new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado };
 
         // Act
-        ordem.ChecarItensNecessarios(saldos);
+        ordem.AplicarEstoqueReservado(status);
 
         // Assert
         Assert.Equal(StatusOrdemServico.LiberadaParaExecucao, ordem.Status);
+        Assert.All(ordem.ItensNecessariosParaExecucao, item =>
+            Assert.Equal(StatusItemEstoque.EstoqueTravado, item.Status));
     }
 
     [Fact]
-    public void CheckRequiredItems_WhenStatusIsInvalid_ThrowsBusinessRuleException()
+    public void AplicarEstoqueReservado_WhenStatusIsInvalid_ThrowsBusinessRuleException()
     {
         // Arrange
         var ordem = CriarOrdem();
 
         // Act & Assert
-        Assert.Throws<BusinessRuleException>(() => ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m }));
+        Assert.Throws<BusinessRuleException>(() =>
+            ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado }));
     }
 
     [Fact]
@@ -485,7 +488,7 @@ public class OrdemServicoAggregateRootTests
     }
 
     [Fact]
-    public void ChecarItensNecessarios_WhenStockIsInsufficient_SetsAguardandoPeca()
+    public void AplicarEstoqueEmFalta_WhenStockMissing_SetsAguardandoPeca()
     {
         // Arrange
         var servicoCatalogo = new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
@@ -500,14 +503,15 @@ public class OrdemServicoAggregateRootTests
         ordem.AprovarServicosSugeridos();
 
         // Act
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
+        ordem.AplicarEstoqueEmFalta(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueEmFalta });
 
         // Assert
         Assert.Equal(StatusOrdemServico.AguardandoPeca, ordem.Status);
+        Assert.Equal(StatusItemEstoque.EstoqueEmFalta, ordem.ItensNecessariosParaExecucao.First().Status);
     }
 
     [Fact]
-    public void ChecarItensNecessarios_WhenStatusIsAguardandoPeca_ChecksAgain()
+    public void AplicarEstoqueReservado_WhenStatusIsAguardandoPeca_LiberatesOrder()
     {
         // Arrange
         var servicoCatalogo = new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
@@ -520,28 +524,27 @@ public class OrdemServicoAggregateRootTests
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
+        ordem.AplicarEstoqueEmFalta(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueEmFalta });
         Assert.Equal(StatusOrdemServico.AguardandoPeca, ordem.Status);
 
         // Act
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 15m });
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
 
         // Assert
         Assert.Equal(StatusOrdemServico.LiberadaParaExecucao, ordem.Status);
+        Assert.All(ordem.ItensNecessariosParaExecucao, item =>
+            Assert.Equal(StatusItemEstoque.EstoqueTravado, item.Status));
     }
 
     [Fact]
-    public void TravarItensNecessarios_LockAllRequiredItems()
+    public void AplicarEstoqueEmFalta_WhenStatusIsInvalid_ThrowsBusinessRuleException()
     {
         // Arrange
-        var ordem = CriarOrdemComServicoAprovado();
+        var ordem = CriarOrdem();
 
-        // Act
-        ordem.TravarItensNecessarios();
-
-        // Assert
-        Assert.All(ordem.ItensNecessariosParaExecucao, item =>
-            Assert.Equal(StatusItemEstoque.EstoqueTravado, item.Status));
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() =>
+            ordem.AplicarEstoqueEmFalta(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueEmFalta }));
     }
 
     [Fact]
@@ -549,8 +552,7 @@ public class OrdemServicoAggregateRootTests
     {
         // Arrange
         var ordem = CriarOrdemComServicoAprovado();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
-        ordem.TravarItensNecessarios();
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
         var servicoId = ordem.Servicos.First().Id;
 
         // Act
@@ -567,6 +569,7 @@ public class OrdemServicoAggregateRootTests
         // Assert
         Assert.Equal(StatusOrdemServico.Finalizada, ordem.Status);
         Assert.All(ordem.Servicos, s => Assert.Equal(StatusItemOrdemServico.Concluido, s.Status));
+        Assert.All(ordem.ItensNecessariosParaExecucao, item => Assert.Equal(StatusItemEstoque.Utilizado, item.Status));
     }
 
     [Fact]
@@ -584,8 +587,7 @@ public class OrdemServicoAggregateRootTests
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
-        ordem.TravarItensNecessarios();
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
         var firstServicoId = ordem.Servicos.First().Id;
 
         // Act
@@ -615,7 +617,7 @@ public class OrdemServicoAggregateRootTests
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal>());
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque>());
         var servicos = ordem.Servicos.ToList();
         servicos[0].GetType().GetProperty("Id")?.SetValue(servicos[0], 1);
         servicos[1].GetType().GetProperty("Id")?.SetValue(servicos[1], 2);
@@ -784,8 +786,7 @@ public class OrdemServicoAggregateRootTests
     private static OrdemServicoAggregateRoot CriarOrdemFinalizada()
     {
         var ordem = CriarOrdemComServicoAprovado();
-        ordem.ChecarItensNecessarios(new Dictionary<int, decimal> { [100] = 5m });
-        ordem.TravarItensNecessarios();
+        ordem.AplicarEstoqueReservado(new Dictionary<int, StatusItemEstoque> { [100] = StatusItemEstoque.EstoqueTravado });
         var servicoId = ordem.Servicos.First().Id;
         ordem.ConfirmarExecucao(
         [

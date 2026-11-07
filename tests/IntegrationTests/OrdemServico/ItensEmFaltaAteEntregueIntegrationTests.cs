@@ -7,11 +7,11 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
     : OrdemServicoIntegrationTestBase(factory)
 {
     [Fact]
-    public async Task Fluxo_AprovarInternamente_ItemEmFalta_Reabastecer_AteEntregue()
+    public async Task Fluxo_AprovarInternamente_ItemEmFalta_DepoisReservar_AteEntregue()
     {
         // Arrange
         AuthenticateAsStaff();
-        var idItemSemSaldo = await CriarItemEstoqueSemSaldoAsync("EMF-INT");
+        const int idItemEmFalta = 100;
 
         // Act
         var ordemId = await CriarOrdemAsync(
@@ -22,26 +22,26 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
                 {
                     IdServico = 1,
                     ValorCobrado = 150m,
-                    ItensNecessarios = new[] { new { IdItemEstoque = idItemSemSaldo, Quantidade = 1m } }
+                    ItensNecessarios = new[] { new { IdItemEstoque = idItemEmFalta, Quantidade = 1m } }
                 }
             ]);
         await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
         await AprovarInternamenteAsync(ordemId);
-        await AssertStatusAsync(ordemId, "AguardandoPeca");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
-        await RegistrarEntradaEstoqueAsync(idItemEstoque: idItemSemSaldo, quantidade: 5m);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AplicarEstoqueEmFaltaAsync(ordemId, idItemEmFalta);
+        await AssertStatusAsync(ordemId, "AguardandoPeca");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);
     }
 
     [Fact]
-    public async Task Fluxo_AprovarPublicamente_ItemEmFalta_Reabastecer_AteEntregue()
+    public async Task Fluxo_AprovarPublicamente_ItemEmFalta_DepoisReservar_AteEntregue()
     {
         // Arrange
         AuthenticateAsStaff();
-        var idItemSemSaldo = await CriarItemEstoqueSemSaldoAsync("EMF-PUB");
+        const int idItemEmFalta = 100;
 
         // Act
         var ordemId = await CriarOrdemAsync(
@@ -52,7 +52,7 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
                 {
                     IdServico = 1,
                     ValorCobrado = 150m,
-                    ItensNecessarios = new[] { new { IdItemEstoque = idItemSemSaldo, Quantidade = 1m } }
+                    ItensNecessarios = new[] { new { IdItemEstoque = idItemEmFalta, Quantidade = 1m } }
                 }
             ]);
         await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
@@ -60,10 +60,10 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
 
         var token = await GetTokenAprovacaoAsync(ordemId);
         await AprovarPublicamenteAsync(token, DocumentoMariaOliveira);
-        await AssertStatusAsync(ordemId, "AguardandoPeca");
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
 
-        await RegistrarEntradaEstoqueAsync(idItemEstoque: idItemSemSaldo, quantidade: 5m);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
+        await AplicarEstoqueEmFaltaAsync(ordemId, idItemEmFalta);
+        await AssertStatusAsync(ordemId, "AguardandoPeca");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);

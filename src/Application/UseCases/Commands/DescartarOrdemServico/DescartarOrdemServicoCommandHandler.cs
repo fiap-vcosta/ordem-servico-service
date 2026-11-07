@@ -1,17 +1,16 @@
-using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
+using Application.Logging;
 using Application.UseCases.Responses;
 using Domain.Exceptions;
-using Domain.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Application.Logging;
 
 namespace Application.UseCases.Commands.DescartarOrdemServico;
 
 public class DescartarOrdemServicoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IMediator mediator,
+    IOrdemServicoIntegrationPublisher integrationPublisher,
     ILogger<DescartarOrdemServicoCommandHandler> logger
 ) : IRequestHandler<DescartarOrdemServicoCommand, DescartarOrdemServicoResponse>
 {
@@ -27,7 +26,7 @@ public class DescartarOrdemServicoCommandHandler(
 
         await ordemServicoGateway.UpdateAsync(ordemServico);
         logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
-        await mediator.Publish(new DomainEventNotification<OrdemServicoDescartadaEvent>(new OrdemServicoDescartadaEvent(ordemServico.Id)), cancellationToken);
+        await integrationPublisher.PublishOrdemServicoDescartadaAsync(ordemServico, cancellationToken);
 
         return new DescartarOrdemServicoResponse
         {

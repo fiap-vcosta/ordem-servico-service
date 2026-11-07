@@ -76,11 +76,6 @@ public class Servico
             throw new BusinessRuleException($"Serviço {Id} com status {Status} não pode ser concluído.");
         }
 
-        foreach (var itemNecessario in _itensNecessarios)
-        {
-            itemNecessario.ConfirmarUtilizacao();
-        }
-
         Status = StatusItemOrdemServico.Concluido;
         ExecucaoIniciadaEm = iniciadoEm;
         ExecucaoFinalizadaEm = finalizadoEm;

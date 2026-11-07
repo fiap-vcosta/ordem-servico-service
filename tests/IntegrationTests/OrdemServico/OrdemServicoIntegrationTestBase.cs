@@ -2,8 +2,11 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Application.UseCases.Commands.AplicarCobrancaGerada;
+using Application.UseCases.Commands.AplicarEstoqueEmFalta;
+using Application.UseCases.Commands.AplicarEstoqueReservado;
 using Application.UseCases.Commands.AplicarOrcamentoGerado;
 using Application.UseCases.Commands.AplicarPagamentoConfirmado;
+using Domain.Entities;
 using IntegrationTests.Infrastructure;
 using Infrastructure.Database;
 using MediatR;
@@ -162,31 +165,64 @@ public abstract class OrdemServicoIntegrationTestBase
         await mediator.Send(new AplicarPagamentoConfirmadoCommand { IdOrdemServico = ordemId });
     }
 
-    protected async Task RegistrarEntradaEstoqueAsync(int idItemEstoque, decimal quantidade)
+    protected async Task AplicarEstoqueReservadoAsync(int ordemId, params int[] itemEstoqueIds)
     {
-        var response = await Client.PostAsJsonAsync($"/ordem-servico/itens-estoque/{idItemEstoque}/registrar-entrada", new
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var aprovadaEm = await db.OrdensServico
+            .AsNoTracking()
+            .Where(o => o.Id == ordemId)
+            .Select(o => o.AprovadaEm)
+            .FirstAsync();
+        Assert.NotNull(aprovadaEm);
+
+        var ids = itemEstoqueIds.Length > 0
+            ? itemEstoqueIds
+            : await db.ItensServicos
+                .AsNoTracking()
+                .Where(s => s.IdOrdemServico == ordemId)
+                .SelectMany(s => s.ItensNecessarios)
+                .Select(i => i.ItemEstoque.Id)
+                .Distinct()
+                .ToArrayAsync();
+
+        await mediator.Send(new AplicarEstoqueReservadoCommand
         {
-            Quantidade = quantidade
+            IdOrdemServico = ordemId,
+            AprovadaEm = new DateTimeOffset(DateTime.SpecifyKind(aprovadaEm.Value, DateTimeKind.Utc)),
+            Itens = ids.Select(id => new AplicarEstoqueItemStatus(id, StatusItemEstoque.EstoqueTravado)).ToList()
         });
-        response.EnsureSuccessStatusCode();
     }
 
-    protected async Task<int> CriarItemEstoqueSemSaldoAsync(string codigoPrefixo)
+    protected async Task AplicarEstoqueEmFaltaAsync(int ordemId, params int[] itemEstoqueIds)
     {
-        var codigo = $"{codigoPrefixo}-{Guid.NewGuid():N}"[..20];
-        var response = await Client.PostAsJsonAsync("/ordem-servico/itens-estoque", new
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var aprovadaEm = await db.OrdensServico
+            .AsNoTracking()
+            .Where(o => o.Id == ordemId)
+            .Select(o => o.AprovadaEm)
+            .FirstAsync();
+        Assert.NotNull(aprovadaEm);
+
+        var ids = itemEstoqueIds.Length > 0
+            ? itemEstoqueIds
+            : await db.ItensServicos
+                .AsNoTracking()
+                .Where(s => s.IdOrdemServico == ordemId)
+                .SelectMany(s => s.ItensNecessarios)
+                .Select(i => i.ItemEstoque.Id)
+                .Distinct()
+                .ToArrayAsync();
+
+        await mediator.Send(new AplicarEstoqueEmFaltaCommand
         {
-            Codigo = codigo,
-            Tipo = "Peca",
-            Nome = $"Peça sem saldo {codigoPrefixo}",
-            UnidadeMedida = "Unidade",
-            PrecoVenda = 10m,
-            Saldo = 0m
+            IdOrdemServico = ordemId,
+            AprovadaEm = new DateTimeOffset(DateTime.SpecifyKind(aprovadaEm.Value, DateTimeKind.Utc)),
+            Itens = ids.Select(id => new AplicarEstoqueItemStatus(id, StatusItemEstoque.EstoqueEmFalta)).ToList()
         });
-        response.EnsureSuccessStatusCode();
-        var body = await response.Content.ReadFromJsonAsync<IdResponse>(JsonOptions);
-        Assert.NotNull(body);
-        return body.Id;
     }
 
     protected async Task AssertStatusAsync(int ordemId, string expectedStatus)
@@ -280,6 +316,21 @@ public abstract class OrdemServicoIntegrationTestBase
 
     protected async Task ExecutarAteEntregueAsync(int ordemId)
     {
+        await using (var scope = Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var status = await db.OrdensServico
+                .AsNoTracking()
+                .Where(o => o.Id == ordemId)
+                .Select(o => o.Status)
+                .FirstAsync();
+            if (status is StatusOrdemServico.ChecandoEstoque or StatusOrdemServico.AguardandoPeca)
+            {
+                await AplicarEstoqueReservadoAsync(ordemId);
+            }
+        }
+
+        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
         var aprovados = await GetServicoIdsPorStatusAsync(ordemId, "Aprovado");
         Assert.NotEmpty(aprovados);
         await ConfirmarExecucaoAsync(ordemId, aprovados);

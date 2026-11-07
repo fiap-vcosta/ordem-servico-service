@@ -47,6 +47,13 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: >
+      gcloud beta emulators pubsub start --host-port=0.0.0.0:8085 --project=local-ordem-servico
+    ports:
+      - "8086:8085"
+
   api:
     profiles:
       - app
@@ -69,7 +76,12 @@ services:
       Jwt__Cliente__PublicKeyPem: ${JWT_PUBLIC_KEY_PEM:?JWT_PUBLIC_KEY_PEM is required}
       Jwt__Cliente__RequireHttpsMetadata: "false"
       Administrativo__BaseUrl: ${ADMINISTRATIVO_BASE_URL:-http://host.docker.internal:8080}
+      Estoque__BaseUrl: ${ESTOQUE_BASE_URL:-http://host.docker.internal:8082}
       ServiceAuth__Key: ${SERVICE_AUTH_KEY:?SERVICE_AUTH_KEY is required}
+      PubSub__ProjectId: local-ordem-servico
+      PubSub__UseInMemory: "true"
+      PubSub__EnableWorkers: "false"
+      PUBSUB_EMULATOR_HOST: pubsub:8085
       DD_SERVICE: ordem-servico-service
       DD_ENV: local
       DD_LOGS_INJECTION: "true"
@@ -81,6 +93,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      pubsub:
+        condition: service_started
 
 secrets:
   nuget_token:

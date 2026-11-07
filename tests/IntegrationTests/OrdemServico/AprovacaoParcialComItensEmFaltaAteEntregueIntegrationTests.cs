@@ -7,10 +7,12 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
     : OrdemServicoIntegrationTestBase(factory)
 {
     [Fact]
-    public async Task Fluxo_Parcial_DepoisMaisServicosComItensEmFalta_Reabastecer_AteEntregue()
+    public async Task Fluxo_Parcial_DepoisMaisServicosComItensEmFalta_Reservar_AteEntregue()
     {
         // Arrange
         AuthenticateAsStaff();
+        const int idItemEmFalta1 = 100;
+        const int idItemEmFalta2 = 101;
 
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 1);
@@ -23,9 +25,6 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
 
         await AprovarParcialmenteAsync(ordemId, idServicoInicialAprovado);
         await AssertStatusAsync(ordemId, "EmDiagnostico");
-
-        var idItemEmFalta1 = await CriarItemEstoqueSemSaldoAsync("PARC-1");
-        var idItemEmFalta2 = await CriarItemEstoqueSemSaldoAsync("PARC-2");
 
         var idServicoComFalta1 = await AdicionarServicoERetornarIdAsync(
             ordemId, idServico: 1, valorCobrado: 120m, idItemEstoque: idItemEmFalta1, quantidade: 1m);
@@ -43,12 +42,11 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
         Assert.Contains(idServicoParaRejeitar, await GetServicoIdsPorStatusAsync(ordemId, "Rejeitado"));
 
         await FinalizarDiagnosticoEAplicarOrcamentoAsync(ordemId);
+        await AssertStatusAsync(ordemId, "ChecandoEstoque");
+
+        await AplicarEstoqueEmFaltaAsync(ordemId, idItemEmFalta1, idItemEmFalta2);
         await AssertStatusAsync(ordemId, "AguardandoPeca");
         await AssertListagemContemOrdemComStatusAsync(ordemId, "AguardandoPeca");
-
-        await RegistrarEntradaEstoqueAsync(idItemEmFalta1, quantidade: 5m);
-        await RegistrarEntradaEstoqueAsync(idItemEmFalta2, quantidade: 5m);
-        await AssertStatusAsync(ordemId, "LiberadaParaExecucao");
 
         // Assert
         await ExecutarAteEntregueAsync(ordemId);

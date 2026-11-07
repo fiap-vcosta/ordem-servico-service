@@ -1,9 +1,8 @@
-using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
+using Application.Abstractions.Messaging;
 using Application.Logging;
-using Domain.Exceptions;
 using Domain.Entities;
-using Domain.Events;
+using Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +10,7 @@ namespace Application.UseCases.Commands.AplicarOrcamentoGerado;
 
 public class AplicarOrcamentoGeradoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IMediator mediator,
+    IOrdemServicoIntegrationPublisher integrationPublisher,
     ILogger<AplicarOrcamentoGeradoCommandHandler> logger
 ) : IRequestHandler<AplicarOrcamentoGeradoCommand, OrdemServicoResponse>
 {
@@ -35,9 +34,7 @@ public class AplicarOrcamentoGeradoCommandHandler(
 
         if (ordemServico.Status is StatusOrdemServico.ChecandoEstoque)
         {
-            await mediator.Publish(
-                new DomainEventNotification<OrdemServicoAprovadaEvent>(new OrdemServicoAprovadaEvent(ordemServico.Id)),
-                cancellationToken);
+            await integrationPublisher.PublishOrdemServicoAprovadaAsync(ordemServico, cancellationToken);
         }
 
         return OrdemServicoResponse.From(ordemServico);

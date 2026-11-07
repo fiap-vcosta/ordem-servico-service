@@ -24,70 +24,66 @@ public class ItemNecessarioTests
     }
 
     [Fact]
-    public void CheckStock_WhenQuantityIsSufficient_SetsAvailableStatus()
+    public void AplicarStatusEstoque_WhenAvailable_SetsAvailableStatus()
     {
         // Arrange
         var itemEstoque = new ItemEstoqueOrdemServico { Id = 11, Nome = "Óleo" };
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 3m, itemEstoque));
 
         // Act
-        item.ChecarEstoque(5m);
+        item.AplicarStatusEstoque(StatusItemEstoque.EstoqueDisponivel);
 
         // Assert
         Assert.Equal(StatusItemEstoque.EstoqueDisponivel, item.Status);
     }
 
     [Fact]
-    public void CheckStock_WhenQuantityIsInsufficient_SetsOutOfStockStatus()
+    public void AplicarStatusEstoque_WhenMissing_SetsOutOfStockStatus()
     {
         // Arrange
         var itemEstoque = new ItemEstoqueOrdemServico { Id = 11, Nome = "Óleo" };
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 10m, itemEstoque));
 
         // Act
-        item.ChecarEstoque(5m);
+        item.AplicarStatusEstoque(StatusItemEstoque.EstoqueEmFalta);
 
         // Assert
         Assert.Equal(StatusItemEstoque.EstoqueEmFalta, item.Status);
     }
 
     [Fact]
-    public void CheckStock_WhenStatusIsLocked_ThrowsBusinessRuleException()
+    public void AplicarStatusEstoque_WhenStatusIsUtilizado_ThrowsBusinessRuleException()
     {
         // Arrange
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 2m, new ItemEstoqueOrdemServico { Id = 12, Nome = "Parafuso" }));
-        item.ChecarEstoque(3m);
-        item.TravarEstoque();
+        item.AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
+        item.ConfirmarUtilizacao();
 
         // Act & Assert
-        Assert.Throws<BusinessRuleException>(() => item.ChecarEstoque(1m));
+        Assert.Throws<BusinessRuleException>(() => item.AplicarStatusEstoque(StatusItemEstoque.EstoqueDisponivel));
     }
 
     [Fact]
-    public void LockStock_WhenStatusIsAvailable_SetsLockedStatus()
+    public void AplicarStatusEstoque_WhenLocked_SetsLockedStatus()
     {
         // Arrange
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 2m, new ItemEstoqueOrdemServico { Id = 12, Nome = "Parafuso" }));
-        item.ChecarEstoque(3m);
 
         // Act
-        item.TravarEstoque();
+        item.AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
 
         // Assert
         Assert.Equal(StatusItemEstoque.EstoqueTravado, item.Status);
     }
 
     [Fact]
-    public void LockStock_WhenStatusIsUtilized_ThrowsBusinessRuleException()
+    public void AplicarStatusEstoque_WhenStatusIsInvalid_ThrowsBusinessRuleException()
     {
         // Arrange
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 2m, new ItemEstoqueOrdemServico { Id = 13, Nome = "Correia" }));
-        item.ChecarEstoque(3m);
-        item.TravarEstoque();
-        item.ConfirmarUtilizacao();
 
         // Act & Assert
-        Assert.Throws<BusinessRuleException>(() => item.TravarEstoque());
+        Assert.Throws<BusinessRuleException>(() => item.AplicarStatusEstoque(StatusItemEstoque.Utilizado));
     }
 
     [Fact]
@@ -95,8 +91,7 @@ public class ItemNecessarioTests
     {
         // Arrange
         var item = ItemNecessario.Criar(new ItemNecessario.CriarItemNecessarioParams(1, 2m, new ItemEstoqueOrdemServico { Id = 13, Nome = "Correia" }));
-        item.ChecarEstoque(3m);
-        item.TravarEstoque();
+        item.AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
 
         // Act
         item.ConfirmarUtilizacao();

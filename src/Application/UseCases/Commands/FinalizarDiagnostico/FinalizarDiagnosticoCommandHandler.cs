@@ -10,7 +10,7 @@ namespace Application.UseCases.Commands.FinalizarDiagnostico;
 
 public class FinalizarDiagnosticoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
-    IDiagnosticoFinalizadoPublisher diagnosticoFinalizadoPublisher,
+    IOrdemServicoIntegrationPublisher integrationPublisher,
     ILogger<FinalizarDiagnosticoCommandHandler> logger
 ) : IRequestHandler<FinalizarDiagnosticoCommand, FinalizarDiagnosticoCommandResponse>
 {
@@ -26,7 +26,7 @@ public class FinalizarDiagnosticoCommandHandler(
         await ordemServicoGateway.UpdateAsync(ordemServico);
         logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
 
-        await diagnosticoFinalizadoPublisher.PublishAsync(ordemServico, cancellationToken);
+        await integrationPublisher.PublishDiagnosticoFinalizadoAsync(ordemServico, cancellationToken);
 
         return new FinalizarDiagnosticoCommandResponse()
         {

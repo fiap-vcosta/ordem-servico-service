@@ -73,15 +73,14 @@ public class ServicoTests
     }
 
     [Fact]
-    public void ConfirmConclusion_WhenApproved_SetsConcludedStatusAndUpdatesItems()
+    public void ConfirmConclusion_WhenApproved_SetsConcludedStatusWithoutConsumingStock()
     {
         // Arrange
         var servico = Servico.Criar("Troca de óleo", 150m, _servicoCatalogo);
         var itemEstoque = new ItemEstoqueOrdemServico { Id = 21, Nome = "Óleo" };
         servico.AdicionarItemNecessario(new ItemNecessario.CriarItemNecessarioParams(1, 2m, itemEstoque));
         servico.Aprovar();
-        servico.ItensNecessarios.First().ChecarEstoque(3m);
-        servico.ItensNecessarios.First().TravarEstoque();
+        servico.ItensNecessarios.First().AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
 
         // Act
         var iniciado = DateTime.UtcNow.AddMinutes(-30);
@@ -92,7 +91,7 @@ public class ServicoTests
         Assert.Equal(StatusItemOrdemServico.Concluido, servico.Status);
         Assert.Equal(iniciado, servico.ExecucaoIniciadaEm);
         Assert.Equal(finalizado, servico.ExecucaoFinalizadaEm);
-        Assert.All(servico.ItensNecessarios, item => Assert.Equal(StatusItemEstoque.Utilizado, item.Status));
+        Assert.All(servico.ItensNecessarios, item => Assert.Equal(StatusItemEstoque.EstoqueTravado, item.Status));
     }
 
     [Fact]

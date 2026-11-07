@@ -42,6 +42,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         Environment.SetEnvironmentVariable("Jwt__Cliente__RequireHttpsMetadata", "false");
         Environment.SetEnvironmentVariable("ServiceAuth__Key", "integration-service-auth-key");
         Environment.SetEnvironmentVariable("Administrativo__BaseUrl", "http://localhost:9");
+        Environment.SetEnvironmentVariable("Estoque__BaseUrl", "http://localhost:9");
+        Environment.SetEnvironmentVariable("PubSub__UseInMemory", "true");
+        Environment.SetEnvironmentVariable("PubSub__EnableWorkers", "false");
     }
 
     public new async Task DisposeAsync()
@@ -68,6 +71,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         builder.UseSetting("Jwt:Cliente:RequireHttpsMetadata", "false");
         builder.UseSetting("ServiceAuth:Key", "integration-service-auth-key");
         builder.UseSetting("Administrativo:BaseUrl", "http://localhost:9");
+        builder.UseSetting("Estoque:BaseUrl", "http://localhost:9");
+        builder.UseSetting("PubSub:UseInMemory", "true");
+        builder.UseSetting("PubSub:EnableWorkers", "false");
 
         builder.ConfigureAppConfiguration((_, config) =>
         {
@@ -83,7 +89,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 ["Jwt:Cliente:PublicKeyPem"] = publicPem,
                 ["Jwt:Cliente:RequireHttpsMetadata"] = "false",
                 ["ServiceAuth:Key"] = "integration-service-auth-key",
-                ["Administrativo:BaseUrl"] = "http://localhost:9"
+                ["Administrativo:BaseUrl"] = "http://localhost:9",
+                ["Estoque:BaseUrl"] = "http://localhost:9",
+                ["PubSub:UseInMemory"] = "true",
+                ["PubSub:EnableWorkers"] = "false"
             });
         });
 
@@ -91,6 +100,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         {
             services.RemoveAll<IAdministrativoCatalogGateway>();
             services.AddSingleton<IAdministrativoCatalogGateway, StubAdministrativoCatalogGateway>();
+            services.RemoveAll<IEstoqueCatalogGateway>();
+            services.AddSingleton<IEstoqueCatalogGateway, StubEstoqueCatalogGateway>();
         });
     }
 

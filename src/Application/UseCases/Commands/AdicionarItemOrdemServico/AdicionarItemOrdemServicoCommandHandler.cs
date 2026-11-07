@@ -10,7 +10,7 @@ namespace Application.UseCases.Commands.AdicionarItemOrdemServico;
 public class AdicionarItemOrdemServicoCommandHandler(
     IOrdemServicoGateway ordemServicoGateway,
     IAdministrativoCatalogGateway administrativoCatalogGateway,
-    IItemEstoqueGateway itemEstoqueGateway
+    IEstoqueCatalogGateway estoqueCatalogGateway
 ) : IRequestHandler<AdicionarItemOrdemServicoCommand, AdicionarItemOrdemServicoCommandResponse>
 {
     public async Task<AdicionarItemOrdemServicoCommandResponse> Handle(AdicionarItemOrdemServicoCommand request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public class AdicionarItemOrdemServicoCommandHandler(
         var itensNecessarios = new List<ItemNecessario.CriarItemNecessarioParams>();
         foreach (var itemNecessario in request.ItensNecessarios)
         {
-            var itemEstoque = await itemEstoqueGateway.GetByIdAsync(itemNecessario.IdItemEstoque);
+            var itemEstoque = await estoqueCatalogGateway.GetItemByIdAsync(itemNecessario.IdItemEstoque, cancellationToken);
             if (itemEstoque == null)
             {
                 throw new DomainNotFoundException($"Item de estoque com id {itemNecessario.IdItemEstoque} não encontrado");
@@ -41,7 +41,7 @@ public class AdicionarItemOrdemServicoCommandHandler(
                 Id = itemEstoque.Id,
                 Codigo = itemEstoque.Codigo,
                 Nome = itemEstoque.Nome,
-                UnidadeMedida = itemEstoque.UnidadeMedida.ToString()
+                UnidadeMedida = itemEstoque.UnidadeMedida
             };
 
             itensNecessarios.Add(new ItemNecessario.CriarItemNecessarioParams(ordemServico.Id, itemNecessario.Quantidade, itemEstoqueOrdemServico));
