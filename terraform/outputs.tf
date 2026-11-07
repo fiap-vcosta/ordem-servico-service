@@ -18,7 +18,3 @@ output "connection_string_secret_id" {
   value       = google_secret_manager_secret.connection_string.secret_id
 }
 
-output "service_auth_secret_id" {
-  description = "Secret Manager id da chave X-Service-Key."
-  value       = google_secret_manager_secret.service_auth.secret_id
-}

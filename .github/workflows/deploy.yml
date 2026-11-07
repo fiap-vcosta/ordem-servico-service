@@ -15,6 +15,6 @@ jobs:
       deployment_name: ordem-servico-service
       smoke_url: https://vcosta-fiap.online/ordem-servico/health
       connection_string_sm_secret: ordem-servico-service-connection-string
-      service_auth_sm_secret: ordem-servico-service-service-auth-key
     secrets:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      SERVICE_AUTH_KEY: ${{ secrets.SERVICE_AUTH_KEY }}
