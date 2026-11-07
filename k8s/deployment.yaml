@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api
+  name: ordem-servico-service
   namespace: tech-challenge
   labels:
-    app: api
-    tags.datadoghq.com/service: api
+    app: ordem-servico-service
+    tags.datadoghq.com/service: ordem-servico-service
     tags.datadoghq.com/env: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api
+      app: ordem-servico-service
   template:
     metadata:
       labels:
-        app: api
-        tags.datadoghq.com/service: api
+        app: ordem-servico-service
+        tags.datadoghq.com/service: ordem-servico-service
         tags.datadoghq.com/env: prod
     spec:
-      serviceAccountName: api
+      serviceAccountName: ordem-servico-service
       initContainers:
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.25.4
@@ -35,7 +35,7 @@ spec:
             - name: CLOUD_SQL_CONNECTION_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: api
+                  name: ordem-servico-service
                   key: CLOUD_SQL_CONNECTION_NAME
           startupProbe:
             httpGet:
@@ -54,52 +54,60 @@ spec:
             requests:
               cpu: "50m"
               memory: "128Mi"
+              ephemeral-storage: "64Mi"
+            limits:
+              memory: "256Mi"
+              ephemeral-storage: "128Mi"
       containers:
-        - name: api
+        - name: ordem-servico-service
           image: ${IMAGE}
           ports:
             - name: http
               containerPort: 8080
           envFrom:
             - configMapRef:
-                name: api
+                name: ordem-servico-service
             - secretRef:
-                name: api
+                name: ordem-servico-service
           env:
             - name: DD_VERSION
               value: "${DD_VERSION}"
           startupProbe:
             httpGet:
-              path: /health
+              path: /ordem-servico/health
               port: http
             periodSeconds: 5
             failureThreshold: 30
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ordem-servico/health
               port: http
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /ordem-servico/health
               port: http
             periodSeconds: 10
           resources:
             requests:
               cpu: "250m"
               memory: "512Mi"
+              ephemeral-storage: "128Mi"
+            limits:
+              memory: "768Mi"
+              ephemeral-storage: "256Mi"
         - name: datadog-agent
           image: gcr.io/datadoghq/agent:7.68.3
           env:
             - name: DD_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: api
+                  name: ordem-servico-service
                   key: DD_API_KEY
             - name: DD_SITE
               valueFrom:
                 configMapKeyRef:
-                  name: api
+                  name: ordem-servico-service
                   key: DD_SITE
             - name: DD_APM_ENABLED
               value: "true"
@@ -123,5 +131,7 @@ spec:
             requests:
               cpu: "100m"
               memory: "256Mi"
+              ephemeral-storage: "128Mi"
             limits:
               memory: "512Mi"
+              ephemeral-storage: "256Mi"

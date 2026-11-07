@@ -1,17 +1,34 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: api
+  name: ordem-servico-service
   namespace: tech-challenge
 data:
   ASPNETCORE_ENVIRONMENT: "Production"
-  ASPNETCORE_URLS: "http://+:8080"
-  JwtFuncionario__Issuer: "tech-challenge-api"
-  JwtFuncionario__Audience: "tech-challenge-api"
-  JwtCliente__Issuer: "tech-challenge-cliente"
-  JwtCliente__Audience: "tech-challenge-cliente"
+  # TLS termina no Gateway; Kestrel escuta HTTP só dentro do cluster.
+  ASPNETCORE_URLS: "http://+:8080" # NOSONAR
+  Jwt__Funcionario__Issuer: "autenticacao-service"
+  Jwt__Funcionario__Audience: "funcionario"
+  Jwt__Funcionario__JwksUrl: "https://vcosta-fiap.online/autenticacao/.well-known/jwks.json"
+  Jwt__Funcionario__RequireHttpsMetadata: "true"
+  Jwt__Cliente__Issuer: "autenticacao-service"
+  Jwt__Cliente__Audience: "cliente"
+  Jwt__Cliente__JwksUrl: "https://vcosta-fiap.online/autenticacao/.well-known/jwks.json"
+  Jwt__Cliente__RequireHttpsMetadata: "true"
   CLOUD_SQL_CONNECTION_NAME: "vcosta-fiap-tech-challenge:us-central1:tech-challenge-pg"
-  DD_SERVICE: "api"
+  Administrativo__BaseUrl: "http://administrativo-service"
+  Estoque__BaseUrl: "http://estoque-service"
+  PubSub__ProjectId: "vcosta-fiap-tech-challenge"
+  PubSub__UseInMemory: "false"
+  PubSub__EnableWorkers: "true"
+  PubSub__Subscriptions__OrcamentoGerado: "ordem-servico-orcamento-gerado"
+  PubSub__Subscriptions__OrcamentoFalhou: "ordem-servico-orcamento-falhou"
+  PubSub__Subscriptions__EstoqueReservado: "ordem-servico-estoque-reservado"
+  PubSub__Subscriptions__EstoqueEmFalta: "ordem-servico-estoque-em-falta"
+  PubSub__Subscriptions__CobrancaGerada: "ordem-servico-cobranca-gerada"
+  PubSub__Subscriptions__PagamentoConfirmado: "ordem-servico-pagamento-confirmado"
+  PubSub__Subscriptions__PagamentoRecusado: "ordem-servico-pagamento-recusado"
+  DD_SERVICE: "ordem-servico-service"
   DD_ENV: "prod"
   DD_AGENT_HOST: "127.0.0.1"
   DD_TRACE_AGENT_PORT: "8126"

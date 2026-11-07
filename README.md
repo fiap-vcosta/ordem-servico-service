@@ -127,27 +127,34 @@ API local: http://localhost:5225
 
 ---
 
-## Deploy na GCP
+## Terraform (GCP)
 
-Manifests em [`k8s/`](k8s/): namespace, service account, ConfigMap, Deployment, Service `ClusterIP`, Ingress GCE, ManagedCertificate e HPA. O Deployment roda o **Cloud SQL Auth Proxy como sidecar nativo**, que autentica na instância por IAM (Workload Identity) e escuta em `127.0.0.1:5432` — a API só conhece `localhost`.
+Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service`. Lê a instância Cloud SQL do [`infra-db`](https://github.com/fiap-vcosta/infra-db) e a SA de runtime do [`infra-bootstrap`](https://github.com/fiap-vcosta/infra-bootstrap). Tópicos vêm do [`infra-events`](https://github.com/fiap-vcosta/infra-events).
 
-Entrada pública: **HTTPS** em `https://api.vcosta-fiap.online` (Ingress GCE + certificado gerenciado). O IP global `tech-challenge-api` e o record DNS `api` (Cloud DNS) vêm do [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s); os nameservers do domínio já apontam para o Google, então o A sobe/desce com o `tf-apply` / `tf-destroy`. Entrada oficial do cliente: `https://vcosta-fiap.online/api/...` (API Gateway no apex).
+| Recurso | Papel |
+|---------|--------|
+| Database `ordem_servico` | Banco do serviço |
+| Role `ordem_servico_app` + `REVOKE CONNECT … FROM PUBLIC` | Isolamento cross-database |
+| Usuário `ordem_servico` | Login da app com `database_roles = [ordem_servico_app]` |
+| Secrets SM | `ordem-servico-service-connection-string`, `ordem-servico-service-service-auth-key` |
+| Pub/Sub subscriptions + DLQ | Consome orçamento/estoque/pagamento (7 pull subs) |
+| Pub/Sub publisher IAM | `diagnostico-finalizado`, `ordem-servico-aprovada\|finalizada\|descartada` |
 
-Não há Job de migration: a aplicação roda `db.Database.Migrate()` no start, e o sidecar nativo garante que o túnel esteja pronto antes disso.
+`tf-apply` / `tf-destroy` são manuais.
 
-Os workflows `build-push` e `deploy` deste monólito foram **removidos**. Não há CD automático nem `workflow_dispatch` de deploy neste repositório enquanto a API legada não for recortada em microsserviço. Quando o CD voltar, os callers usarão [`fiap-vcosta/actions`](https://github.com/fiap-vcosta/actions) (`build-push` / `deploy`).
+## CD (GCP)
 
-Os manifests em [`k8s/`](k8s/) e a documentação de Ingress/HPA abaixo descrevem o shape ainda presente no repo; não dispare apply manual desses manifests na janela atual (a entrada pública já é Gateway API + API Gateway no `infra-k8s`).
+| Workflow | Gatilho | Papel |
+|----------|---------|--------|
+| `build-push` | push em `main` | Imagem `ordem-servico-service` no Artifact Registry |
+| `tf-apply` / `tf-destroy` | `workflow_dispatch` | Database, usuário, role, secrets SM e subscriptions |
+| `deploy` | `workflow_dispatch` | Secret k8s + manifests `k8s/` + rollout + smoke em `https://vcosta-fiap.online/ordem-servico/health` |
 
-Issuer/Audience de funcionário e de cliente ficam no ConfigMap (`tech-challenge-api` × `tech-challenge-cliente`) — dois emissores, dois materiais (RNF21). Localmente (Compose), use `JWT_FUNCIONARIO_*` e `JWT_CLIENTE_*` no `.env` — ver `.env.example`.
+Pré-requisitos do `deploy`: cluster/Gateway do [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s), `tf-apply` deste repo e imagem do `build-push`.
 
-Evidência de HPA (quando houver deploy ativo):
+Manifests em [`k8s/`](k8s/): Deployment (Cloud SQL Proxy + Datadog), Service, HPA, KSA, HTTPRoute `/ordem-servico` e HealthCheckPolicy. O `HTTPRoute` expõe só o prefixo público; `/system/…` fica no cluster. JWT staff/cliente no ConfigMap valida JWKS em `https://vcosta-fiap.online/autenticacao/.well-known/jwks.json`. `Administrativo__BaseUrl` / `Estoque__BaseUrl` apontam para os Services do cluster.
 
-```bash
-./scripts/stress-hpa.sh https://api.vcosta-fiap.online
-kubectl get hpa,pods -n tech-challenge
-```
-
+Não há Job de migration: a app roda `db.Database.Migrate()` no start com o proxy já pronto.
 ---
 
 ## Observabilidade (Datadog)
@@ -203,8 +210,8 @@ dotnet test tests/IntegrationTests/IntegrationTests.csproj   # requer Docker
 
 - Estratégia: [`docs/06_testes.md`](docs/06_testes.md)
 - Collections HTTP: [`docs/07_api.md`](docs/07_api.md) (Swagger + Requestly; e2e Gateway em `12-gateway-cliente-aprovar`)
-- CI: lint + unit + integration + Sonar via caller de [`fiap-vcosta/actions`](https://github.com/fiap-vcosta/actions) ([`ci.yml`](.github/workflows/ci.yml))
-- CD: desativado neste monólito; volta com callers de `build-push` / `deploy` do mesmo repo `actions` no recorte em microsserviço
+- CI: `ci-dotnet` + `ci-terraform` via [`fiap-vcosta/actions`](https://github.com/fiap-vcosta/actions) ([`ci.yml`](.github/workflows/ci.yml))
+- CD: `build-push` (merge `main`), `tf-apply` / `tf-destroy` / `deploy` manuais
 
 ---
 
