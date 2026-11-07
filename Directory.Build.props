@@ -5,4 +5,13 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
   </PropertyGroup>
+
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.coverage.exclusions">
+      <Value>**/AppDbContextFactory.cs,**/Migrations/**/*,**/Program.cs,**/ServiceCollectionExtensions.cs,**/WebApplicationExtensions.cs</Value>
+    </SonarQubeSetting>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>**/Migrations/**/*</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>
