@@ -10,7 +10,7 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
     public async Task Fluxo_RejeicaoInterna_DepoisDescartar_AteDescartada()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(
@@ -42,7 +42,7 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
     public async Task Fluxo_RejeicaoPublica_DepoisDescartar_AteDescartada()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(
@@ -73,7 +73,7 @@ public class RejeicaoAteDescartadaIntegrationTests(CustomWebApplicationFactory f
     public async Task Fluxo_RejeicaoInterna_FinalizarSemServicosPendentes_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 4);

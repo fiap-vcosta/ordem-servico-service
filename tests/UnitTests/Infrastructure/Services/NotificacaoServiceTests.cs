@@ -1,4 +1,3 @@
-using Domain.Administrativo.Entities;
 using Infrastructure.Services;
 
 namespace UnitTests.Infrastructure.Services;
@@ -10,10 +9,8 @@ public class NotificacaoServiceTests
     {
         // Arrange
         var service = new NotificacaoService();
-        var tipoUsuario = TipoUsuario.Mecanico;
-        var conteudo = "Teste de notificação";
 
         // Act && Assert method completes without exception
-        await service.NotificarUsuariosPorTipo(tipoUsuario, conteudo);
+        await service.NotificarUsuariosPorTipo("Mecanico", "Teste de notificação");
     }
 }

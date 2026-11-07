@@ -50,29 +50,41 @@ services:
   api:
     profiles:
       - app
-    build: .
+    build:
+      context: .
+      secrets:
+        - nuget_token
     ports:
-      - "8080:8080"
+      - "8083:8080"
     environment:
       ASPNETCORE_URLS: http://+:8080
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?ASPNETCORE_ENVIRONMENT is required}
-      ConnectionStrings__DefaultConnection: Host=db;Database=${POSTGRES_DB:?POSTGRES_DB is required};Username=${POSTGRES_USER:?POSTGRES_USER is required};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      JwtFuncionario__Key: ${JWT_FUNCIONARIO_KEY:?JWT_FUNCIONARIO_KEY is required}
-      JwtFuncionario__Issuer: ${JWT_FUNCIONARIO_ISSUER:?JWT_FUNCIONARIO_ISSUER is required}
-      JwtFuncionario__Audience: ${JWT_FUNCIONARIO_AUDIENCE:?JWT_FUNCIONARIO_AUDIENCE is required}
-      JwtCliente__Key: ${JWT_CLIENTE_KEY:?JWT_CLIENTE_KEY is required}
-      JwtCliente__Issuer: ${JWT_CLIENTE_ISSUER:?JWT_CLIENTE_ISSUER is required}
-      JwtCliente__Audience: ${JWT_CLIENTE_AUDIENCE:?JWT_CLIENTE_AUDIENCE is required}
+      ConnectionStrings__DefaultConnection: Host=db;Database=${POSTGRES_DB:?POSTGRES_DB is required};Username=${POSTGRES_USER:?POSTGRES_USER is required};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required};Maximum Pool Size=15
+      Jwt__Funcionario__Issuer: ${JWT_FUNCIONARIO_ISSUER:?JWT_FUNCIONARIO_ISSUER is required}
+      Jwt__Funcionario__Audience: ${JWT_FUNCIONARIO_AUDIENCE:?JWT_FUNCIONARIO_AUDIENCE is required}
+      Jwt__Funcionario__PublicKeyPem: ${JWT_PUBLIC_KEY_PEM:?JWT_PUBLIC_KEY_PEM is required}
+      Jwt__Funcionario__RequireHttpsMetadata: "false"
+      Jwt__Cliente__Issuer: ${JWT_CLIENTE_ISSUER:?JWT_CLIENTE_ISSUER is required}
+      Jwt__Cliente__Audience: ${JWT_CLIENTE_AUDIENCE:?JWT_CLIENTE_AUDIENCE is required}
+      Jwt__Cliente__PublicKeyPem: ${JWT_PUBLIC_KEY_PEM:?JWT_PUBLIC_KEY_PEM is required}
+      Jwt__Cliente__RequireHttpsMetadata: "false"
+      Administrativo__BaseUrl: ${ADMINISTRATIVO_BASE_URL:-http://host.docker.internal:8080}
       ServiceAuth__Key: ${SERVICE_AUTH_KEY:?SERVICE_AUTH_KEY is required}
-      DD_SERVICE: api
+      DD_SERVICE: ordem-servico-service
       DD_ENV: local
       DD_LOGS_INJECTION: "true"
       DD_API_KEY: ${DD_API_KEY:-}
       DD_SITE: ${DD_SITE:-datadoghq.com}
       DD_AGENT_HOST: ${DD_AGENT_HOST:-127.0.0.1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
+
+secrets:
+  nuget_token:
+    environment: NUGET_AUTH_TOKEN
 
 volumes:
   postgres_data:

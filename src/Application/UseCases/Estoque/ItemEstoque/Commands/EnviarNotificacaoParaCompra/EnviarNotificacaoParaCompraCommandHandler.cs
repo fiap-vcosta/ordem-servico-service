@@ -1,5 +1,4 @@
 using Application.Abstractions.Services;
-using Domain.Administrativo.Entities;
 using MediatR;
 
 namespace Application.UseCases.Estoque.ItemEstoque.Commands.EnviarNotificacaoParaCompra;
@@ -11,7 +10,7 @@ public class EnviarNotificacaoParaCompraCommandHandle(INotificacaoService notifi
     {
         var notificacao = $"Comprar {request.QuantidadeFaltando} de {request.NomeItem} para OS {request.IdOrdemServico}";
 
-        await notificacaoService.NotificarUsuariosPorTipo(TipoUsuario.Atendente, notificacao);
+        await notificacaoService.NotificarUsuariosPorTipo("Atendente", notificacao);
 
         return Unit.Value;
     }

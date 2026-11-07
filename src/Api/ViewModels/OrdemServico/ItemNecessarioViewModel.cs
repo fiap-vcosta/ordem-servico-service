@@ -1,5 +1,5 @@
-using Application.UseCases.OrdemServico.Responses;
-using Domain.OrdemServico.Entities;
+using Application.UseCases.Responses;
+using Domain.Entities;
 
 namespace Api.ViewModels.OrdemServico;
 

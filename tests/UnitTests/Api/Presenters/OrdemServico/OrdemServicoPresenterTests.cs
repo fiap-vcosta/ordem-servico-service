@@ -1,9 +1,9 @@
 using Api.Presenters.OrdemServico;
 using Api.ViewModels.OrdemServico;
-using Application.UseCases.OrdemServico;
-using Application.UseCases.OrdemServico.Commands.CriarOrdemServico;
-using Application.UseCases.OrdemServico.Responses;
-using Domain.OrdemServico.Entities;
+using Application.UseCases;
+using Application.UseCases.Commands.CriarOrdemServico;
+using Application.UseCases.Responses;
+using Domain.Entities;
 
 namespace UnitTests.Api.Presenters.OrdemServico;
 

@@ -1,8 +1,8 @@
 using Application.UseCases.Estoque.ItemEstoque.Commands.ConfirmarUtilizacaoItensEstoque;
 using Domain.Exceptions;
 using Application.Abstractions.Gateways;
-using Domain.OrdemServico.Entities;
-using Domain.OrdemServico.ValueObjects;
+using Domain.Entities;
+using Domain.ValueObjects;
 using Domain.Estoque.Entities;
 using Moq;
 

@@ -10,7 +10,7 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
     public async Task Fluxo_AprovarInternamente_ItemEmFalta_Reabastecer_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
         var idItemSemSaldo = await CriarItemEstoqueSemSaldoAsync("EMF-INT");
 
         // Act
@@ -40,7 +40,7 @@ public class ItensEmFaltaAteEntregueIntegrationTests(CustomWebApplicationFactory
     public async Task Fluxo_AprovarPublicamente_ItemEmFalta_Reabastecer_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
         var idItemSemSaldo = await CriarItemEstoqueSemSaldoAsync("EMF-PUB");
 
         // Act

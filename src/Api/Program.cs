@@ -1,5 +1,5 @@
 using Api.Extensions;
-using Api.Logging;
+using BuildingBlocks.Http.Logging;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -12,6 +12,11 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    if (builder.Environment.IsDevelopment())
+    {
+        TryLoadLocalJwtPublicKey(builder);
+    }
 
     builder.Host.UseSerilog(DatadogLogging.Configure);
 
@@ -32,13 +37,30 @@ try
         db.Database.Migrate();
     }
 
-    app.MapGet("/health", async (AppDbContext appDbContext) =>
+    app.MapGet("/ordem-servico/health", async (AppDbContext appDbContext) =>
     {
         var isDbOk = await appDbContext.Database.CanConnectAsync();
-        return isDbOk ? Results.Ok("OK") : Results.StatusCode(503);
+        return isDbOk ? Results.Ok("OK") : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
     });
 
     app.Run();
+
+    static void TryLoadLocalJwtPublicKey(WebApplicationBuilder webApplicationBuilder)
+    {
+        var publicKeyPath = Path.GetFullPath(
+            Path.Combine(webApplicationBuilder.Environment.ContentRootPath, "..", "..", ".local", "jwt", "public.pem"));
+        if (!File.Exists(publicKeyPath))
+        {
+            return;
+        }
+
+        var publicPem = File.ReadAllText(publicKeyPath);
+        webApplicationBuilder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Jwt:Funcionario:PublicKeyPem"] = publicPem,
+            ["Jwt:Cliente:PublicKeyPem"] = publicPem
+        });
+    }
 }
 catch (Exception ex)
 {

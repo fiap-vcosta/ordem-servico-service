@@ -110,8 +110,8 @@ cp .env.example .env
 docker compose --profile app up -d --build
 ```
 
-- API / Swagger / Health: http://localhost:8080 · `/swagger` · `/health`
-- Login seed: `admin` / `admin`
+- API / Swagger / Health: http://localhost:8083 · `/swagger` · `/ordem-servico/health`
+- JWT via JWKS/PEM do `autenticacao-service` (sem login local). Catálogo via `administrativo-service` (`Administrativo:BaseUrl` + `ServiceAuth:Key`).
 - Variáveis: [`.env.example`](.env.example)
 
 ### SDK .NET

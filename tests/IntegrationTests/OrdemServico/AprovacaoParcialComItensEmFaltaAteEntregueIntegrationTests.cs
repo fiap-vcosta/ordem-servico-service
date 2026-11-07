@@ -10,7 +10,7 @@ public class AprovacaoParcialComItensEmFaltaAteEntregueIntegrationTests(CustomWe
     public async Task Fluxo_Parcial_DepoisMaisServicosComItensEmFalta_Reabastecer_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 1);

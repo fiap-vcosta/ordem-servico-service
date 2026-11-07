@@ -10,7 +10,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
     public async Task Fluxo_CriarSemServicos_AdicionarDepois_AprovarInternamente_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 1);
@@ -32,7 +32,7 @@ public class CriarSemServicosAteEntregueIntegrationTests(CustomWebApplicationFac
     public async Task Fluxo_CriarComListaServicosVazia_AdicionarDepois_AteEntregue()
     {
         // Arrange
-        await AuthenticateAsAdminAsync();
+        AuthenticateAsStaff();
 
         // Act
         var ordemId = await CriarOrdemAsync(idVeiculo: 1, servicos: Array.Empty<object>());
