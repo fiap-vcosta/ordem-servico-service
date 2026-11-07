@@ -3,7 +3,7 @@ using Api.Controllers.Staff.ItemEstoque.RegistrarEntradaEstoque;
 using Api.Controllers.Staff.ItemEstoque.UpdateItemEstoque;
 using Domain.Estoque.Entities;
 
-namespace UnitTests.Api.Controllers.ItemEstoque;
+namespace UnitTests.Api.Controllers.Staff.ItemEstoque;
 
 public class ItemEstoqueRequestValidatorTests
 {

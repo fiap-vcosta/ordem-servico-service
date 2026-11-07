@@ -31,7 +31,6 @@ public sealed class AdministrativoCatalogGateway(HttpClient httpClient) : IAdmin
             body.Id,
             body.Nome,
             body.Email,
-            body.TipoDocumento,
             body.Documento);
     }
 
@@ -94,7 +93,6 @@ public sealed class AdministrativoCatalogGateway(HttpClient httpClient) : IAdmin
         [property: JsonPropertyName("id")] int Id,
         [property: JsonPropertyName("nome")] string Nome,
         [property: JsonPropertyName("email")] string Email,
-        [property: JsonPropertyName("tipoDocumento")] string TipoDocumento,
         [property: JsonPropertyName("documento")] string Documento);
 
     private sealed record VeiculoPayload(

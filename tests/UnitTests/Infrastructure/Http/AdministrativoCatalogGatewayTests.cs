@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using Application.Abstractions.Gateways;
 using Infrastructure.Http;
 
 namespace UnitTests.Infrastructure.Http;

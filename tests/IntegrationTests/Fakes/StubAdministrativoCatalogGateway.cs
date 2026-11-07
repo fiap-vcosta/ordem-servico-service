@@ -6,16 +6,16 @@ public sealed class StubAdministrativoCatalogGateway : IAdministrativoCatalogGat
 {
     private static readonly Dictionary<int, AdministrativoClienteDto> Clientes = new()
     {
-        [1] = new(1, "João Silva", "joao.silva@email.com", "Cpf", "86421537090"),
-        [2] = new(2, "Maria Oliveira", "maria.oliveira@email.com", "Cpf", "71284693031"),
-        [3] = new(3, "Carlos Santos", "carlos.santos@email.com", "Cpf", "15350946056"),
-        [4] = new(4, "Ana Costa", "ana.costa@email.com", "Cpf", "23100296028"),
-        [5] = new(5, "Lucas Ferreira", "lucas.ferreira@email.com", "Cpf", "04531783085"),
-        [6] = new(6, "Auto Peças Central Ltda", "contato@autopecascentral.com.br", "Cnpj", "11222333000181"),
-        [7] = new(7, "Oficina do Toninho ME", "oficinatoninho@email.com", "Cnpj", "11444777000161"),
-        [8] = new(8, "Transportadora Rápido Sul", "logistica@rapidosul.com.br", "Cnpj", "12345678000195"),
-        [9] = new(9, "Locadora de Veículos XYZ", "frota@xyzlocadora.com.br", "Cnpj", "27865757000102"),
-        [10] = new(10, "Comercial de Baterias Potência", "vendas@bateriaspotencia.com.br", "Cnpj", "60746948000112"),
+        [1] = new(1, "João Silva", "joao.silva@email.com", "86421537090"),
+        [2] = new(2, "Maria Oliveira", "maria.oliveira@email.com", "71284693031"),
+        [3] = new(3, "Carlos Santos", "carlos.santos@email.com", "15350946056"),
+        [4] = new(4, "Ana Costa", "ana.costa@email.com", "23100296028"),
+        [5] = new(5, "Lucas Ferreira", "lucas.ferreira@email.com", "04531783085"),
+        [6] = new(6, "Auto Peças Central Ltda", "contato@autopecascentral.com.br", "11222333000181"),
+        [7] = new(7, "Oficina do Toninho ME", "oficinatoninho@email.com", "11444777000161"),
+        [8] = new(8, "Transportadora Rápido Sul", "logistica@rapidosul.com.br", "12345678000195"),
+        [9] = new(9, "Locadora de Veículos XYZ", "frota@xyzlocadora.com.br", "27865757000102"),
+        [10] = new(10, "Comercial de Baterias Potência", "vendas@bateriaspotencia.com.br", "60746948000112"),
     };
 
     private static readonly Dictionary<int, AdministrativoVeiculoDto> Veiculos = new()

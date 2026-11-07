@@ -22,7 +22,7 @@ public class CriarOrdemServicoCommandHandlerTests
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         var mockMediator = new Mock<IMediator>();
 
-        var cliente = new AdministrativoClienteDto(1, "João", "joao@test.com", "Cpf", "12345678901");
+        var cliente = new AdministrativoClienteDto(1, "João", "joao@test.com", "12345678901");
         var veiculo = new AdministrativoVeiculoDto(1, 1, "ABC-1234", "Toyota", "Corolla");
         var command = new CriarOrdemServicoCommand { IdVeiculo = 1 };
 
@@ -77,7 +77,7 @@ public class CriarOrdemServicoCommandHandlerTests
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         var mockMediator = new Mock<IMediator>();
 
-        var cliente = new AdministrativoClienteDto(1, "João", "joao@test.com", "Cpf", "12345678901");
+        var cliente = new AdministrativoClienteDto(1, "João", "joao@test.com", "12345678901");
         var veiculo = new AdministrativoVeiculoDto(1, 1, "ABC-1234", "Toyota", "Corolla");
 
         mockCatalog.Setup(r => r.GetVeiculoByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(veiculo);

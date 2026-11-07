@@ -13,7 +13,6 @@ public sealed record AdministrativoClienteDto(
     int Id,
     string Nome,
     string Email,
-    string TipoDocumento,
     string Documento);
 
 public sealed record AdministrativoVeiculoDto(
