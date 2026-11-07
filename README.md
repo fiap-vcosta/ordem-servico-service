@@ -136,7 +136,8 @@ Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service
 | Database `ordem_servico` | Banco do serviço |
 | Role `ordem_servico_app` + `REVOKE CONNECT … FROM PUBLIC` | Isolamento cross-database |
 | Usuário `ordem_servico` | Login da app com `database_roles = [ordem_servico_app]` |
-| Secrets SM | `ordem-servico-service-connection-string`, `ordem-servico-service-service-auth-key` |
+| Secrets SM | `ordem-servico-service-connection-string` |
+| Org secret | `SERVICE_AUTH_KEY` — shared secret da malha (`X-Service-Key` / `ServiceAuth__Key`) |
 | Pub/Sub subscriptions + DLQ | Consome orçamento/estoque/pagamento (7 pull subs) |
 | Pub/Sub publisher IAM | `diagnostico-finalizado`, `ordem-servico-aprovada\|finalizada\|descartada` |
 
@@ -148,7 +149,7 @@ Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service
 |----------|---------|--------|
 | `build-push` | push em `main` | Imagem `ordem-servico-service` no Artifact Registry |
 | `tf-apply` / `tf-destroy` | `workflow_dispatch` | Database, usuário, role, secrets SM e subscriptions |
-| `deploy` | `workflow_dispatch` | Secret k8s + manifests `k8s/` + rollout + smoke em `https://vcosta-fiap.online/ordem-servico/health` |
+| `deploy` | `workflow_dispatch` | Secret k8s (connection string SM + org `SERVICE_AUTH_KEY`/`DD_API_KEY`) + manifests + smoke `/ordem-servico/health` |
 
 Pré-requisitos do `deploy`: cluster/Gateway do [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s), `tf-apply` deste repo e imagem do `build-push`.
 
