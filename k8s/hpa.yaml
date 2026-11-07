@@ -1,27 +1,27 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: api
+  name: ordem-servico-service
   namespace: tech-challenge
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: api
+    name: ordem-servico-service
   minReplicas: 1
   maxReplicas: 10
   metrics:
     - type: ContainerResource
       containerResource:
         name: cpu
-        container: api
+        container: ordem-servico-service
         target:
           type: Utilization
           averageUtilization: 50
     - type: ContainerResource
       containerResource:
         name: memory
-        container: api
+        container: ordem-servico-service
         target:
           type: Utilization
           averageUtilization: 80
