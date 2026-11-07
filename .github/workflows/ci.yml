@@ -4,13 +4,14 @@ on:
   push:
   pull_request:
 
-permissions:
-  contents: read
-
 jobs:
   ci:
     uses: fiap-vcosta/actions/.github/workflows/ci-dotnet.yml@main
+    permissions:
+      contents: read
+      packages: read
     with:
       sonar_project_key: fiap-vcosta_ordem-servico-service
+      enable_github_packages: true
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
