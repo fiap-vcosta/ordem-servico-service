@@ -1,6 +1,5 @@
 using Application.Abstractions.Gateways;
 using Application.Logging;
-using Application.UseCases;
 using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;

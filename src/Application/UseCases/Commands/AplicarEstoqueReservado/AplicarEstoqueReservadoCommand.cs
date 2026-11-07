@@ -1,4 +1,3 @@
-using Application.UseCases;
 using MediatR;
 
 namespace Application.UseCases.Commands.AplicarEstoqueReservado;
