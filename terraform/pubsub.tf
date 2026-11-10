@@ -13,6 +13,7 @@ data "google_project" "current" {
 
 locals {
   runtime_sa_email = data.terraform_remote_state.infra_bootstrap.outputs.runtime_service_account_emails["ordem-servico-service"]
+  ci_sa_email      = "github-actions@${var.project_id}.iam.gserviceaccount.com"
   pubsub_agent     = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 
   consume = {
@@ -61,7 +62,10 @@ resource "google_pubsub_subscription" "pull" {
     max_delivery_attempts = 5
   }
 
-  depends_on = [google_pubsub_topic_iam_member.dlq_pubsub_agent_publisher]
+  depends_on = [
+    google_pubsub_topic_iam_member.dlq_pubsub_agent_publisher,
+    google_pubsub_topic_iam_member.dlq_ci_publisher,
+  ]
 }
 
 resource "google_pubsub_topic_iam_member" "publisher" {
@@ -86,6 +90,14 @@ resource "google_pubsub_topic_iam_member" "dlq_pubsub_agent_publisher" {
   topic    = google_pubsub_topic.dlq[each.key].name
   role     = "roles/pubsub.publisher"
   member   = local.pubsub_agent
+}
+
+resource "google_pubsub_topic_iam_member" "dlq_ci_publisher" {
+  for_each = local.consume
+  project  = var.project_id
+  topic    = google_pubsub_topic.dlq[each.key].name
+  role     = "roles/pubsub.publisher"
+  member   = "serviceAccount:${local.ci_sa_email}"
 }
 
 resource "google_pubsub_subscription_iam_member" "dlq_pubsub_agent_subscriber" {
