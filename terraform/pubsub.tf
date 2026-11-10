@@ -60,6 +60,8 @@ resource "google_pubsub_subscription" "pull" {
     dead_letter_topic     = google_pubsub_topic.dlq[each.key].id
     max_delivery_attempts = 5
   }
+
+  depends_on = [google_pubsub_topic_iam_member.dlq_pubsub_agent_publisher]
 }
 
 resource "google_pubsub_topic_iam_member" "publisher" {
