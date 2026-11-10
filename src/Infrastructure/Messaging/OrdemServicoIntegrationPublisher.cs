@@ -16,6 +16,12 @@ public sealed class OrdemServicoIntegrationPublisher(IEventPublisher eventPublis
         {
             OrdemServicoId = ordemServico.Id,
             VersaoDiagnostico = ordemServico.VersaoDiagnostico,
+            Cliente = new DiagnosticoFinalizadoCliente
+            {
+                Nome = ordemServico.Cliente.Nome,
+                Email = ordemServico.Cliente.Email,
+                Documento = ordemServico.Cliente.Documento
+            },
             Servicos = ordemServico.Servicos
                 .Select(s => new DiagnosticoFinalizadoServico
                 {
@@ -31,6 +37,7 @@ public sealed class OrdemServicoIntegrationPublisher(IEventPublisher eventPublis
             TopicIds.DiagnosticoFinalizado,
             EventTypes.DiagnosticoFinalizado,
             data,
+            version: 2,
             cancellationToken);
     }
 

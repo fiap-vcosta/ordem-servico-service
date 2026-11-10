@@ -29,7 +29,11 @@ public class OrdemServicoIntegrationPublisherTests
                 It.Is<DiagnosticoFinalizadoData>(d =>
                     d.OrdemServicoId == ordem.Id
                     && d.VersaoDiagnostico == ordem.VersaoDiagnostico
+                    && d.Cliente.Nome == ordem.Cliente.Nome
+                    && d.Cliente.Email == ordem.Cliente.Email
+                    && d.Cliente.Documento == ordem.Cliente.Documento
                     && d.Servicos.Count == 1),
+                2,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -106,6 +110,7 @@ public class OrdemServicoIntegrationPublisherTests
                 It.Is<DiagnosticoFinalizadoData>(d =>
                     d.Servicos.Count == 1
                     && d.Servicos[0].Status == ServicoDiagnosticoStatus.Sugerido),
+                2,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -138,6 +143,7 @@ public class OrdemServicoIntegrationPublisherTests
                 It.Is<DiagnosticoFinalizadoData>(d =>
                     d.Servicos.Count == 1
                     && d.Servicos[0].Status == ServicoDiagnosticoStatus.Rejeitado),
+                2,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -169,6 +175,7 @@ public class OrdemServicoIntegrationPublisherTests
                 It.Is<DiagnosticoFinalizadoData>(d =>
                     d.Servicos.Count == 1
                     && d.Servicos[0].Status == ServicoDiagnosticoStatus.Concluido),
+                2,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
