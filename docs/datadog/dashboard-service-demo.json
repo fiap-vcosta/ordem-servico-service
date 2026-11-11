@@ -1,12 +1,12 @@
 {
-  "title": "Tech Challenge \u2014 ordem-servico-service (demo)",
-  "description": "Dashboard do servi\u00e7o `ordem-servico-service` na janela de demo (APM + logs). Dashboard geral da Saga: e2e/docs/datadog/.",
+  "title": "[ordem-servico] dashboard",
+  "description": "Dashboard do serviço `ordem-servico-service` na janela GCP (APM + logs). Dashboard geral da Saga: e2e/docs/datadog/.",
   "layout_type": "ordered",
   "reflow_type": "auto",
   "widgets": [
     {
       "definition": {
-        "title": "Lat\u00eancia p95 (APM)",
+        "title": "Latência p95 (APM)",
         "type": "timeseries",
         "requests": [
           {
@@ -42,7 +42,7 @@
     },
     {
       "definition": {
-        "title": "Runtime .NET \u2014 CPU %",
+        "title": "Runtime .NET — CPU %",
         "type": "timeseries",
         "requests": [
           {
@@ -54,7 +54,7 @@
     },
     {
       "definition": {
-        "title": "Runtime .NET \u2014 mem\u00f3ria committed",
+        "title": "Runtime .NET — memória committed",
         "type": "timeseries",
         "requests": [
           {
@@ -66,7 +66,7 @@
     },
     {
       "definition": {
-        "title": "Transi\u00e7\u00f5es OS (todas)",
+        "title": "Transições OS (todas)",
         "type": "timeseries",
         "requests": [
           {
@@ -99,7 +99,7 @@
     },
     {
       "definition": {
-        "title": "Transi\u00e7\u00f5es \u2014 AguardandoOrcamento",
+        "title": "Transições — AguardandoOrcamento",
         "type": "timeseries",
         "requests": [
           {
@@ -132,7 +132,7 @@
     },
     {
       "definition": {
-        "title": "Transi\u00e7\u00f5es \u2014 AguardandoPagamento",
+        "title": "Transições — AguardandoPagamento",
         "type": "timeseries",
         "requests": [
           {
@@ -165,7 +165,7 @@
     },
     {
       "definition": {
-        "title": "Transi\u00e7\u00f5es \u2014 Entregue",
+        "title": "Transições — Entregue",
         "type": "timeseries",
         "requests": [
           {
@@ -198,7 +198,7 @@
     },
     {
       "definition": {
-        "title": "Transi\u00e7\u00f5es \u2014 Descartada",
+        "title": "Transições — Descartada",
         "type": "timeseries",
         "requests": [
           {
