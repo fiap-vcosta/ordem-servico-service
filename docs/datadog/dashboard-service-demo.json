@@ -1,6 +1,6 @@
 {
   "title": "[ordem-servico] dashboard",
-  "description": "Dashboard de `ordem-servico-service` com grupos coloridos: monitores, aplicação, eventos entrada/saída, DLQ, banco e negócio. Pub/Sub e Cloud SQL exigem integração GCP no Datadog.",
+  "description": "Dashboard de `ordem-servico-service`: monitores, APIs (golden metrics), runtime, Pub/Sub/DLQ quando houver, Cloud SQL ou Firestore, e insights de negócio.",
   "layout_type": "ordered",
   "reflow_type": "auto",
   "widgets": [
@@ -30,25 +30,13 @@
               "title_size": "16",
               "title_align": "left"
             }
-          },
-          {
-            "definition": {
-              "type": "note",
-              "content": "Importe os JSON `monitor-*.json` deste repo antes. Query do widget: `name:[ordem-servico]*` (tags `service:ordem-servico-service` / `env:prod`).",
-              "background_color": "white",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "has_padding": true
-            }
           }
         ]
       }
     },
     {
       "definition": {
-        "title": "Aplicação",
+        "title": "APIs (golden metrics)",
         "background_color": "vivid_blue",
         "show_title": true,
         "type": "group",
@@ -56,7 +44,7 @@
         "widgets": [
           {
             "definition": {
-              "title": "Latência p95 (APM)",
+              "title": "Latência p95 (traffic latency)",
               "type": "timeseries",
               "requests": [
                 {
@@ -68,7 +56,19 @@
           },
           {
             "definition": {
-              "title": "Erros HTTP (APM)",
+              "title": "Tráfego — hits",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Erros",
               "type": "timeseries",
               "requests": [
                 {
@@ -80,12 +80,12 @@
           },
           {
             "definition": {
-              "title": "Hits HTTP (APM)",
+              "title": "Taxa de erro (errors / hits)",
               "type": "timeseries",
               "requests": [
                 {
-                  "q": "sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod}.as_count()",
-                  "display_type": "bars"
+                  "q": "(sum:trace.aspnet_core.request.errors{service:ordem-servico-service,env:prod}.as_count() / sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod}.as_count())",
+                  "display_type": "line"
                 }
               ]
             }
@@ -102,6 +102,113 @@
               ]
             }
           },
+          {
+            "definition": {
+              "title": "Top resources — latência p95",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "latency_p95",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Top resources — hits",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "hits",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Top resources — erros",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "errors",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Aplicação",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
             "definition": {
               "title": "Runtime .NET — CPU %",
