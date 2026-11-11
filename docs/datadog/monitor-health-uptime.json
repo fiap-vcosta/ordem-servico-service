@@ -1,10 +1,10 @@
 {
-  "name": "demo — health API (uptime)",
+  "name": "demo \u2014 health ordem-servico-service",
   "type": "query alert",
-  "query": "sum(last_5m):sum:trace.aspnet_core.request.hits{service:api,env:prod,resource_name:get_/health}.as_count() < 1",
-  "message": "{{#is_alert}}Sem hits em `GET /health` nos últimos 5 minutos — API pode estar fora do ar na demo. Smoke: https://api.vcosta-fiap.online/health{{/is_alert}}\n{{#is_recovery}}Health da API voltou a receber hits.{{/is_recovery}}",
+  "query": "sum(last_5m):sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod,resource_name:get_/ordem-servico/health}.as_count() < 1",
+  "message": "{{#is_alert}}Sem hits em `GET /ordem-servico/health` nos \u00faltimos 5 minutos \u2014 `ordem-servico-service` pode estar fora do ar.{{/is_alert}}\n{{#is_recovery}}Health voltou a receber hits.{{/is_recovery}}",
   "tags": [
-    "service:api",
+    "service:ordem-servico-service",
     "env:prod",
     "demo:tech-challenge"
   ],
@@ -12,8 +12,7 @@
     "thresholds": {
       "critical": 1
     },
-    "notify_no_data": true,
-    "no_data_timeframe": 10,
+    "notify_no_data": false,
     "require_full_window": false,
     "include_tags": true,
     "new_host_delay": 300,

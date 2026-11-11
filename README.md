@@ -180,8 +180,8 @@ Na demo, com o stack no ar e tráfego (Requestly):
 
 1. Datadog → **APM** → serviço `api` (`env:prod`) — traces e latência.
 2. **Logs** — JSON com `RequestId`; abra um log e siga para o trace (`dd.trace_id`).
-3. Dashboard: importe [`docs/datadog/dashboard-api-demo.json`](docs/datadog/dashboard-api-demo.json) — passos em [`docs/datadog/README.md`](docs/datadog/README.md).
-4. Monitor de erros / Synthetics em `/health` — mesmo doc.
+3. Dashboard deste serviço: importe [`docs/datadog/dashboard-service-demo.json`](docs/datadog/dashboard-service-demo.json) — passos em [`docs/datadog/README.md`](docs/datadog/README.md). Dashboard geral da Saga: repo `e2e` → `docs/datadog/`.
+4. Monitores HTTP/health — mesmo doc (`notify_no_data: false`; mute após `demo-down`).
 
 Compose local: JSON no console sempre; envio ao Datadog só se `DD_API_KEY` estiver no `.env` (sem sidecar local por padrão).
 

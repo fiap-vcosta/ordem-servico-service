@@ -13,7 +13,7 @@ Comece pelo [`README.md`](../README.md) na raiz.
 | [07_api.md](07_api.md) | Swagger + Requestly |
 | [08_modelo-de-dados.md](08_modelo-de-dados.md) | ER PostgreSQL + snapshots da OS |
 | [adrs/001-datadog-apm.md](adrs/001-datadog-apm.md) | Observabilidade Datadog (APM) |
-| [`datadog/`](datadog/) | Dashboard JSON + monitores da demo |
+| [`datadog/`](datadog/) | Dashboard JSON + monitores do serviço |
 | [`requestly/`](requestly/) | Collections e environments HTTP |
 
 Escolha do PostgreSQL e Cloud SQL: ADRs no repo [`infra-db`](https://github.com/fiap-vcosta/infra-db/tree/main/docs/adrs) (a ADR de engine foi migrada para lá).
