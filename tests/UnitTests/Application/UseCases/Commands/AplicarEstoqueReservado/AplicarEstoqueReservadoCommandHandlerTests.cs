@@ -67,6 +67,39 @@ public class AplicarEstoqueReservadoCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenAprovadaEmDiffersOnlyBySubMicrosecond_AppliesReservation()
+    {
+        // Arrange
+        var gateway = new Mock<IOrdemServicoGateway>();
+        var ordem = CriarOrdemChecandoEstoqueComItem(100);
+        var persistida = new DateTime(
+            ordem.AprovadaEm!.Value.Ticks - (ordem.AprovadaEm.Value.Ticks % TimeSpan.TicksPerMicrosecond),
+            DateTimeKind.Utc);
+        typeof(OrdemServicoAggregateRoot).GetProperty("AprovadaEm")!.SetValue(ordem, persistida);
+        var evento = new DateTimeOffset(persistida.AddTicks(7), TimeSpan.Zero);
+        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
+
+        var handler = new AplicarEstoqueReservadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarEstoqueReservadoCommandHandler>.Instance);
+
+        // Act
+        var result = await handler.Handle(
+            new AplicarEstoqueReservadoCommand
+            {
+                IdOrdemServico = 1,
+                AprovadaEm = evento,
+                Itens = [new AplicarEstoqueItemStatus(100, StatusItemEstoque.EstoqueTravado)]
+            },
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.LiberadaParaExecucao, result.Status);
+        gateway.Verify(g => g.UpdateAsync(ordem), Times.Once);
+    }
+
+    [Fact]
     public async Task Handle_WhenNotFound_ThrowsDomainNotFoundException()
     {
         // Arrange
