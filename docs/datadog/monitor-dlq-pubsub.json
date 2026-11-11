@@ -1,0 +1,21 @@
+{
+  "name": "[ordem-servico] pubsub dead-letter",
+  "type": "query alert",
+  "query": "sum(last_15m):sum:gcp.pubsub.subscription.dead_letter_message_count{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)}.as_count() > 0",
+  "message": "{{#is_alert}}Mensagens em dead-letter nas subscriptions de consumo do `ordem-servico-service` nos últimos 15 minutos. Conferir tópicos `ordem-servico-*-dlq`, logs `Failed to process Pub/Sub message` e APM.{{/is_alert}}\n{{#is_recovery}}Sem novas mensagens em dead-letter nas subscriptions deste serviço.{{/is_recovery}}",
+  "tags": [
+    "service:ordem-servico-service",
+    "env:prod"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 0
+    },
+    "notify_no_data": false,
+    "require_full_window": false,
+    "include_tags": true,
+    "new_host_delay": 300,
+    "notify_audit": false
+  },
+  "priority": 3
+}
