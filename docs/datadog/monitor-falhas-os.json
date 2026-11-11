@@ -1,12 +1,11 @@
 {
-  "name": "demo — falhas no fluxo de OS (logs error)",
+  "name": "[ordem-servico] falhas OS",
   "type": "log alert",
-  "query": "logs(\"service:api env:prod status:error (ordem OR OS OR OrdemServico)\").index(\"*\").rollup(\"count\").last(\"10m\") > 3",
-  "message": "{{#is_alert}}Logs de erro relacionados a OS na API nos últimos 10 minutos. Conferir APM e Logs Explorer.{{/is_alert}}\n{{#is_recovery}}Erros de OS nos logs voltaram ao normal.{{/is_recovery}}",
+  "query": "logs(\"service:ordem-servico-service env:prod status:error (ordem OR OS OR OrdemServico)\").index(\"*\").rollup(\"count\").last(\"10m\") > 3",
+  "message": "{{#is_alert}}Logs de erro relacionados a OS nos últimos 10 minutos. Conferir APM e Logs Explorer.{{/is_alert}}\n{{#is_recovery}}Erros de OS nos logs voltaram ao normal.{{/is_recovery}}",
   "tags": [
-    "service:api",
-    "env:prod",
-    "demo:tech-challenge"
+    "service:ordem-servico-service",
+    "env:prod"
   ],
   "options": {
     "thresholds": {

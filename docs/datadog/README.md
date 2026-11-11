@@ -1,50 +1,34 @@
-# Datadog — demo da API
+# Datadog — `ordem-servico-service`
 
-## Links (site `us5`)
+Site: `us5.datadoghq.com`. Dashboard geral da Saga: repo `e2e` → `docs/datadog/`.
+
+## Arquivos
+
+| Arquivo | Uso |
+|---------|-----|
+| [`dashboard-service-demo.json`](dashboard-service-demo.json) | APM/logs deste serviço (`DD_SERVICE=ordem-servico-service`) |
+| [`monitor-erros-http.json`](monitor-erros-http.json) | Erros APM HTTP |
+| [`monitor-health-uptime.json`](monitor-health-uptime.json) | Hits em `GET /ordem-servico/health` (`notify_no_data: false`) |
+| [`monitor-falhas-os.json`](monitor-falhas-os.json) | Logs `status:error` ligados a OS |
+
+## Importar
+
+1. Abra [https://us5.datadoghq.com](https://us5.datadoghq.com).
+2. **Dashboards** → **Import dashboard JSON** → [`dashboard-service-demo.json`](dashboard-service-demo.json).
+3. **Monitors** → importe cada `monitor-*.json`. Destino de alerta só na UI (não versionar e-mail).
+4. Após `demo-down`, mute os monitores.
+
+## Links úteis
 
 | Recurso | URL |
 |---------|-----|
-| Dashboard | https://us5.datadoghq.com/dashboard/zdc-k5i-6uc/tech-challenge--api-demo |
-| APM — serviço `api` | https://us5.datadoghq.com/apm/entity/service%3Aapi |
-| Logs — transições OS | https://us5.datadoghq.com/logs?query=service%3Aapi%20env%3Aprod%20%22movida%20para%20o%20status%22 |
-| Logs ↔ traces | abra um log com `trace_id` → **View Trace** |
-| Health (smoke) | https://api.vcosta-fiap.online/health |
+| APM — `ordem-servico-service` | https://us5.datadoghq.com/apm/entity/service%3Aordem-servico-service |
+| Health (GCP) | https://vcosta-fiap.online/ordem-servico/health |
 
-Monitores da demo (criar a partir dos JSON em [`monitor-*.json`](.) se ainda não existirem): erros HTTP, falhas OS, health/uptime.
+Logs JSON com `DD_LOGS_INJECTION=true` levam `dd.trace_id` → **View Trace**.
 
-## Importar / atualizar o dashboard
+## Grupos do dashboard
 
-1. Abra o site Datadog da org (`DD_SITE` = `us5.datadoghq.com`).
-2. **Dashboards** → abra o dashboard existente **ou** **New Dashboard** → **Import dashboard JSON**.
-3. Cole o conteúdo de [`dashboard-api-demo.json`](dashboard-api-demo.json) (ou faça upload / replace).
-4. Widgets APM: `trace.aspnet_core.request.*`. Widgets de OS: logs `"movida para o status…"`. Volume diário: query value 24h em OS **Recebida**.
+Cores por tipo (só grupos com conteúdo): **Monitores** (purple), **APIs / golden metrics** (vivid_blue), **Aplicação** (blue), **Eventos de entrada** (orange), **Eventos de saída** (green), **Dead-letter** (pink), **Banco** (gray — Cloud SQL ou Firestore), **Insights de negócio** (yellow).
+O grupo Monitores usa `manage_status` com `name:[ordem-servico]*`. Grupos sem dados (ex.: Pub/Sub/DLQ/negócio) são omitidos.
 
-## Cloud SQL (métricas GCP)
-
-Os widgets de Cloud SQL **não** vêm do sidecar da API: exigem a integração **Google Cloud Platform** no Datadog.
-
-1. Datadog → **Integrations** → **Google Cloud Platform** → conectar o projeto `vcosta-fiap-tech-challenge` (conta de serviço + roles de leitura de métricas, conforme o wizard).
-2. Aguarde alguns minutos até aparecerem métricas `gcp.cloudsql.database.*`.
-3. Reimporte o dashboard (ou confira os widgets Cloud SQL já existentes).
-
-Filtro padrão da instância da demo: `database_id:vcosta-fiap-tech-challenge:tech-challenge-pg`.
-
-Limite a coleta a tags/métricas necessárias — VMs GCE (nós GKE) **contam como host** no plano estudante.
-
-## Monitores
-
-Na UI: **Monitors** → **New Monitor**, ou importe o JSON:
-
-| Arquivo | Objetivo |
-|---------|----------|
-| [`monitor-erros-http.json`](monitor-erros-http.json) | Erros APM HTTP `service:api` |
-| [`monitor-falhas-os.json`](monitor-falhas-os.json) | Logs `status:error` ligados a OS |
-| [`monitor-health-uptime.json`](monitor-health-uptime.json) | Ausência de hits em `/health` |
-
-Ajuste o `@email` de notificação na UI para a conta estudante.
-
-Alternativa: **Synthetics** → HTTP check em `https://api.vcosta-fiap.online/health` a cada 1–5 min (pause após `tf-destroy`).
-
-## Correlação logs ↔ traces
-
-Logs JSON da API levam `RequestId` e, com `DD_LOGS_INJECTION=true`, `dd.trace_id` / `dd.span_id`. No painel de Logs, abra um log e use **View Trace**.

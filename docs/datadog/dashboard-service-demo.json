@@ -1,0 +1,604 @@
+{
+  "title": "[ordem-servico] dashboard",
+  "description": "Dashboard de `ordem-servico-service`: monitores, APIs (golden metrics), runtime, Pub/Sub/DLQ quando houver, Cloud SQL ou Firestore, e insights de negócio.",
+  "layout_type": "ordered",
+  "reflow_type": "auto",
+  "widgets": [
+    {
+      "definition": {
+        "title": "Monitores",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "manage_status",
+              "query": "name:[ordem-servico]*",
+              "display_format": "counts",
+              "color_preference": "background",
+              "hide_zero_counts": false,
+              "show_last_triggered": true,
+              "show_priority": true,
+              "show_status": true,
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "title": "Monitores [ordem-servico]",
+              "title_size": "16",
+              "title_align": "left"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "APIs (golden metrics)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Latência p95 (traffic latency)",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "p95:trace.aspnet_core.request{service:ordem-servico-service,env:prod}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Tráfego — hits",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Erros",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:trace.aspnet_core.request.errors{service:ordem-servico-service,env:prod}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Taxa de erro (errors / hits)",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "(sum:trace.aspnet_core.request.errors{service:ordem-servico-service,env:prod}.as_count() / sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod}.as_count())",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Health hits",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:trace.aspnet_core.request.hits{service:ordem-servico-service,env:prod,resource_name:get_/ordem-servico/health}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Top resources — latência p95",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "latency_p95",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Top resources — hits",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "hits",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Top resources — erros",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "apm_metrics",
+                      "name": "q1",
+                      "stat": "errors",
+                      "service": "ordem-servico-service",
+                      "group_by": [
+                        "resource_name"
+                      ],
+                      "query_filter": "env:prod"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Aplicação",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Runtime .NET — CPU %",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:runtime.dotnet.cpu.percent{service:ordem-servico-service,env:prod}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Runtime .NET — memória committed",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:runtime.dotnet.mem.committed{service:ordem-servico-service,env:prod}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Eventos de entrada (consume)",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Undelivered por subscription",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.subscription.num_undelivered_messages{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)} by {subscription_id}",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Ack message count",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.subscription.ack_message_count{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)} by {subscription_id}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Oldest unacked age (s)",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "max:gcp.pubsub.subscription.oldest_unacked_message_age{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)} by {subscription_id}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Nack requests",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.subscription.nack_requests{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)} by {subscription_id}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Dead-letter (DLQ)",
+        "background_color": "pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "dead_letter_message_count",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.subscription.dead_letter_message_count{project_id:vcosta-fiap-tech-challenge AND (subscription_id:ordem-servico-orcamento-gerado OR subscription_id:ordem-servico-orcamento-falhou OR subscription_id:ordem-servico-estoque-reservado OR subscription_id:ordem-servico-estoque-em-falta OR subscription_id:ordem-servico-cobranca-gerada OR subscription_id:ordem-servico-pagamento-confirmado OR subscription_id:ordem-servico-pagamento-recusado)} by {subscription_id}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Envios aos tópicos *-dlq",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.topic.send_request_count{project_id:vcosta-fiap-tech-challenge AND (topic_id:ordem-servico-orcamento-gerado-dlq OR topic_id:ordem-servico-orcamento-falhou-dlq OR topic_id:ordem-servico-estoque-reservado-dlq OR topic_id:ordem-servico-estoque-em-falta-dlq OR topic_id:ordem-servico-cobranca-gerada-dlq OR topic_id:ordem-servico-pagamento-confirmado-dlq OR topic_id:ordem-servico-pagamento-recusado-dlq)} by {topic_id}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Eventos de saída (publish)",
+        "background_color": "green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Publish send_request_count",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:gcp.pubsub.topic.send_request_count{project_id:vcosta-fiap-tech-challenge AND (topic_id:diagnostico-finalizado OR topic_id:ordem-servico-aprovada OR topic_id:ordem-servico-finalizada OR topic_id:ordem-servico-descartada)} by {topic_id}.as_count()",
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Mensagens retidas no tópico",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:gcp.pubsub.topic.num_retained_messages{project_id:vcosta-fiap-tech-challenge AND (topic_id:diagnostico-finalizado OR topic_id:ordem-servico-aprovada OR topic_id:ordem-servico-finalizada OR topic_id:ordem-servico-descartada)} by {topic_id}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Banco de dados (Cloud SQL)",
+        "background_color": "gray",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "CPU utilization",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:gcp.cloudsql.database.cpu.utilization{project_id:vcosta-fiap-tech-challenge,database_id:vcosta-fiap-tech-challenge:tech-challenge-pg}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Memory utilization",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:gcp.cloudsql.database.memory.utilization{project_id:vcosta-fiap-tech-challenge,database_id:vcosta-fiap-tech-challenge:tech-challenge-pg}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Connections",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:gcp.cloudsql.database.network.connections{project_id:vcosta-fiap-tech-challenge,database_id:vcosta-fiap-tech-challenge:tech-challenge-pg}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Disk utilization",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:gcp.cloudsql.database.disk.utilization{project_id:vcosta-fiap-tech-challenge,database_id:vcosta-fiap-tech-challenge:tech-challenge-pg}",
+                  "display_type": "line"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "title": "Insights de negócio",
+        "background_color": "yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Transições OS (todas)",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "service:ordem-servico-service env:prod \"movida para o status\""
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "AguardandoOrcamento",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "service:ordem-servico-service env:prod \"movida para o status AguardandoOrcamento\""
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "AguardandoPagamento",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "service:ordem-servico-service env:prod \"movida para o status AguardandoPagamento\""
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Entregue",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "service:ordem-servico-service env:prod \"movida para o status Entregue\""
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "title": "Descartada",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "service:ordem-servico-service env:prod \"movida para o status Descartada\""
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
