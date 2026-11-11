@@ -1,4 +1,5 @@
 using Application.Abstractions.Messaging;
+using Application.Time;
 using BuildingBlocks.Events;
 using BuildingBlocks.Messaging;
 using Domain.Entities;
@@ -65,7 +66,7 @@ public sealed class OrdemServicoIntegrationPublisher(IEventPublisher eventPublis
         var data = new OrdemServicoAprovadaData
         {
             OrdemServicoId = ordemServico.Id,
-            AprovadaEm = new DateTimeOffset(DateTime.SpecifyKind(ordemServico.AprovadaEm.Value, DateTimeKind.Utc)),
+            AprovadaEm = AprovacaoTimestamp.ToEventTimestamp(ordemServico.AprovadaEm.Value),
             Itens = itens
         };
 

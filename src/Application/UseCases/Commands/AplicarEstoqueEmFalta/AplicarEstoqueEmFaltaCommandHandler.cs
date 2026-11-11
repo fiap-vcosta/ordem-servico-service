@@ -1,5 +1,6 @@
 using Application.Abstractions.Gateways;
 using Application.Logging;
+using Application.Time;
 using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
@@ -24,7 +25,7 @@ public class AplicarEstoqueEmFaltaCommandHandler(
 
         if (ordemServico.Status is not (StatusOrdemServico.ChecandoEstoque or StatusOrdemServico.AguardandoPeca)
             || ordemServico.AprovadaEm is null
-            || new DateTimeOffset(DateTime.SpecifyKind(ordemServico.AprovadaEm.Value, DateTimeKind.Utc)) != request.AprovadaEm)
+            || !AprovacaoTimestamp.EqualsPersisted(ordemServico.AprovadaEm.Value, request.AprovadaEm))
         {
             return OrdemServicoResponse.From(ordemServico);
         }
