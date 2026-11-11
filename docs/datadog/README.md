@@ -10,6 +10,8 @@ Site: `us5.datadoghq.com`. Dashboard geral da Saga: repo `e2e` → `docs/datadog
 | [`monitor-erros-http.json`](monitor-erros-http.json) | Erros APM HTTP |
 | [`monitor-health-uptime.json`](monitor-health-uptime.json) | Hits em `GET /ordem-servico/health` (`notify_no_data: false`) |
 | [`monitor-falhas-os.json`](monitor-falhas-os.json) | Logs `status:error` ligados a OS |
+| [`monitor-dlq-pubsub.json`](monitor-dlq-pubsub.json) | DLQ das subscriptions que este serviço **consome** |
+| [`monitor-pubsub-nack.json`](monitor-pubsub-nack.json) | Nacks Pub/Sub deste serviço |
 
 ## Importar
 
