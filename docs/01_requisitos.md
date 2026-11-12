@@ -107,7 +107,7 @@ Objetivos desta sessão: infraestrutura escalável, automação de provisionamen
 * **RNF16 (CI/CD):** Pipeline no GitHub Actions que execute:
   * **RNF16.1 (CI):** Build da aplicação e execução dos testes automatizados (a cada push).
   * **RNF16.2 (CD):** Build e push da imagem no Artifact Registry a cada merge em `main`; deploy no GKE só via `workflow_dispatch`.
-* **RNF17 (Escalabilidade):** A API deve escalar horizontalmente no cluster conforme carga (HPA), demonstrável sob stress (`scripts/stress-hpa.sh`).
+* **RNF17 (Escalabilidade):** A API deve escalar horizontalmente no cluster conforme carga (HPA), demonstrável sob stress com o script do repo [`e2e`](https://github.com/fiap-vcosta/e2e) (`scripts/stress-hpa.sh`).
 * **RNF18 (Documentação):** `README.md` com descrição da solução, diagramas de arquitetura (C4 e infra/deploy), instruções de execução local e deploy na GCP, e link das collections de API.
 * **RNF19 (Segurança operacional):** Credenciais e chaves (Postgres, JWT) via Secrets do Kubernetes / secrets do Actions — não embutidas na imagem.
 * **RNF20 (Observabilidade operacional):** Manter endpoint de health para verificação da aplicação em runtime (alinhado ao RNF09).
