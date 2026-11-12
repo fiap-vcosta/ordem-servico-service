@@ -7,7 +7,7 @@ alwaysApply: false
 # Domínio Ordem de Serviço
 
 - Máquina de estados centralizada no agregado; adapters só disparam use cases.
-- Status fora da listagem da API: `Finalizada`, `AguardandoPagamento`, `Entregue`, `Descartada`. `AguardandoOrcamento` entra na listagem.
+- Status fora da listagem da API: `Finalizada`, `AguardandoPagamento`, `CobrancaExpirada`, `Entregue`, `Descartada`. `AguardandoOrcamento` entra na listagem.
 - Adicionar serviços/peças (`AdicionarItemServico`) **somente** em `Recebida` e `EmDiagnostico`; qualquer outro status é proibido.
 - Finalizar diagnóstico → `AguardandoOrcamento` (+ `versaoDiagnostico`); RF02 só ao aplicar `OrcamentoGerado`.
 - Estoque insuficiente → item `EstoqueEmFalta` e OS `AguardandoPeca` (já implementado).

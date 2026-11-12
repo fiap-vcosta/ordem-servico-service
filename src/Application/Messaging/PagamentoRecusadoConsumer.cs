@@ -27,7 +27,11 @@ public class PagamentoRecusadoConsumer(IServiceScopeFactory scopeFactory)
 
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         await mediator.Send(
-            new AplicarPagamentoRecusadoCommand { IdOrdemServico = envelope.Data.OrdemServicoId },
+            new AplicarPagamentoRecusadoCommand
+            {
+                IdOrdemServico = envelope.Data.OrdemServicoId,
+                Motivo = envelope.Data.Motivo
+            },
             cancellationToken);
 
         await IntegrationEventIdempotency.MarkProcessedAsync(

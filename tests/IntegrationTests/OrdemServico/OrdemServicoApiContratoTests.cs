@@ -46,6 +46,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         Assert.DoesNotContain("Descartada", statuses);
         Assert.DoesNotContain("Finalizada", statuses);
         Assert.DoesNotContain("AguardandoPagamento", statuses);
+        Assert.DoesNotContain("CobrancaExpirada", statuses);
         Assert.DoesNotContain("Entregue", statuses);
 
         var indexAguardando = ids.IndexOf(aguardandoId);

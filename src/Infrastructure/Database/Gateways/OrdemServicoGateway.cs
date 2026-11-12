@@ -11,6 +11,7 @@ public class OrdemServicoGateway(AppDbContext context) : IOrdemServicoGateway
     [
         StatusOrdemServico.Finalizada,
         StatusOrdemServico.AguardandoPagamento,
+        StatusOrdemServico.CobrancaExpirada,
         StatusOrdemServico.Entregue,
         StatusOrdemServico.Descartada
     ];

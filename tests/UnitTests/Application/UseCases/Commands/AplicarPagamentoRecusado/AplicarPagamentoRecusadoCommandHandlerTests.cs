@@ -10,22 +10,74 @@ namespace UnitTests.Application.UseCases.Commands.AplicarPagamentoRecusado;
 public class AplicarPagamentoRecusadoCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_WhenAguardandoPagamento_KeepsStatus()
+    public async Task Handle_WhenAguardandoPagamentoAndRecusado_KeepsStatus()
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
+        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
+
+        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+
+        // Act
+        var result = await handler.Handle(
+            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1, Motivo = "recusado" },
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.AguardandoPagamento, result.Status);
+        gateway.Verify(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenAguardandoPagamentoAndExpirado_GoesToCobrancaExpirada()
+    {
+        // Arrange
+        var gateway = new Mock<IOrdemServicoGateway>();
+        var ordem = CriarOrdemAguardandoPagamento();
+        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
+
+        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+
+        // Act
+        var result = await handler.Handle(
+            new AplicarPagamentoRecusadoCommand
+            {
+                IdOrdemServico = 1,
+                Motivo = OrdemServicoAggregateRoot.MotivoPagamentoExpirado
+            },
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.CobrancaExpirada, result.Status);
+        gateway.Verify(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenAlreadyCobrancaExpiradaAndExpirado_IsIdempotentNoOp()
+    {
+        // Arrange
+        var gateway = new Mock<IOrdemServicoGateway>();
+        var ordem = CriarOrdemAguardandoPagamento();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1 },
+            new AplicarPagamentoRecusadoCommand
+            {
+                IdOrdemServico = 1,
+                Motivo = OrdemServicoAggregateRoot.MotivoPagamentoExpirado
+            },
             CancellationToken.None);
 
         // Assert
-        Assert.Equal(StatusOrdemServico.AguardandoPagamento, result.Status);
+        Assert.Equal(StatusOrdemServico.CobrancaExpirada, result.Status);
+        gateway.Verify(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>()), Times.Never);
     }
 
     [Fact]
@@ -43,11 +95,12 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1 },
+            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1, Motivo = "recusado" },
             CancellationToken.None);
 
         // Assert
         Assert.Equal(StatusOrdemServico.Recebida, result.Status);
+        gateway.Verify(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>()), Times.Never);
     }
 
     [Fact]
@@ -61,7 +114,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
-            handler.Handle(new AplicarPagamentoRecusadoCommand { IdOrdemServico = 999 }, CancellationToken.None));
+            handler.Handle(
+                new AplicarPagamentoRecusadoCommand { IdOrdemServico = 999, Motivo = "recusado" },
+                CancellationToken.None));
     }
 
     private static OrdemServicoAggregateRoot CriarOrdemAguardandoPagamento()

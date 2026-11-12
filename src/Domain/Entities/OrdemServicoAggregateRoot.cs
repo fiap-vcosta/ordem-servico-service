@@ -16,12 +16,15 @@ public enum StatusOrdemServico
     EmExecucao,
     Finalizada,
     AguardandoPagamento,
+    CobrancaExpirada,
     Descartada,
     Entregue,
 }
 
 public class OrdemServicoAggregateRoot
 {
+    public const string MotivoPagamentoExpirado = "expirado";
+
     public int Id { get; private set; }
 
     public StatusOrdemServico Status { get; private set; }
@@ -184,6 +187,12 @@ public class OrdemServicoAggregateRoot
             return;
         }
 
+        if (Status is StatusOrdemServico.CobrancaExpirada)
+        {
+            Status = StatusOrdemServico.AguardandoPagamento;
+            return;
+        }
+
         if (Status is not StatusOrdemServico.Finalizada)
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode registrar cobrança gerada.");
@@ -203,11 +212,22 @@ public class OrdemServicoAggregateRoot
         EntregueEm = DateTime.UtcNow;
     }
 
-    public void RegistrarPagamentoRecusado()
+    public void RegistrarPagamentoRecusado(string motivo)
     {
+        if (Status is StatusOrdemServico.CobrancaExpirada
+            && string.Equals(motivo, MotivoPagamentoExpirado, StringComparison.Ordinal))
+        {
+            return;
+        }
+
         if (Status is not StatusOrdemServico.AguardandoPagamento)
         {
             throw new BusinessRuleException($"Ordem de Serviço {Id} com status {Status} não pode registrar pagamento recusado.");
+        }
+
+        if (string.Equals(motivo, MotivoPagamentoExpirado, StringComparison.Ordinal))
+        {
+            Status = StatusOrdemServico.CobrancaExpirada;
         }
     }
 
