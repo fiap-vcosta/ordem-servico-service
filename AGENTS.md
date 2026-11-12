@@ -20,7 +20,7 @@ Aplicação .NET 8 de gestão de oficina (clientes, veículos, serviços, estoqu
 | `src/Api` | Controllers, Requests/Validators, **Presenters**, ViewModels e filtro de Problem Details |
 | `tests/UnitTests` | Testes unitários do comportamento existente |
 | `tests/IntegrationTests` | Testes de integração HTTP (`WebApplicationFactory` + Testcontainers) |
-| `terraform/` | Cloud SQL db/user/secrets + Pub/Sub subscriptions/publisher IAM |
+| `terraform/` | Instância Cloud SQL própria + database/usuário/secrets + Pub/Sub subscriptions/publisher IAM |
 | `k8s/` | Deployment (Proxy + Datadog), Service, HPA, KSA, HTTPRoute `/ordem-servico` |
 | `.github/workflows/` | `ci` (dotnet+terraform), `build-push`, `deploy`, `tf-apply`, `tf-destroy` |
 

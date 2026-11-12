@@ -100,9 +100,9 @@ Objetivos desta sessão: infraestrutura escalável, automação de provisionamen
   * **RNF14.1:** Deployments e Services.
   * **RNF14.2:** ConfigMaps e Secrets para variáveis sensíveis.
   * **RNF14.3:** Horizontal Pod Autoscaler (HPA) por consumo de CPU e memória.
-* **RNF15 (Infraestrutura como Código):** Provisionamento com Terraform nos repos de infra da org (`infra-bootstrap`, `infra-db`, `infra-k8s`):
+* **RNF15 (Infraestrutura como Código):** Provisionamento com Terraform nos repos de infra da org e no Terraform de cada serviço:
   * **RNF15.1:** Cluster **GKE Autopilot** (`infra-k8s`).
-  * **RNF15.2:** Banco de dados Cloud SQL PostgreSQL (`infra-db`).
+  * **RNF15.2:** Banco de dados Cloud SQL PostgreSQL (instância própria no Terraform deste serviço).
   * **RNF15.3:** Rede, WIF e Artifact Registry na camada persistente (`infra-bootstrap`).
 * **RNF16 (CI/CD):** Pipeline no GitHub Actions que execute:
   * **RNF16.1 (CI):** Build da aplicação e execução dos testes automatizados (a cada push).

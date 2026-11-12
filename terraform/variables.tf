@@ -9,3 +9,15 @@ variable "region" {
   description = "Região primária."
   default     = "us-central1"
 }
+
+variable "db_instance_name" {
+  type        = string
+  description = "Nome da instância Cloud SQL deste serviço."
+  default     = "ordem-servico-service-pg"
+}
+
+variable "db_tier" {
+  type        = string
+  description = "Tier da instância Cloud SQL."
+  default     = "db-f1-micro"
+}
