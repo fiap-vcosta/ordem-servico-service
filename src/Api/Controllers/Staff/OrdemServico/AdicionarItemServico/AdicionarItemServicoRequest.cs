@@ -8,7 +8,7 @@ public class AdicionarItemServicoRequest
         public decimal Quantidade { get; init; }
     }
     
-    public int IdServico { get; init; }
-    public decimal ValorCobrado { get; init; }
+    public required int IdServico { get; init; }
+    public required decimal ValorCobrado { get; init; }
     public IList<ItemNecessario> ItensNecessarios { get; init; } = [];
 }

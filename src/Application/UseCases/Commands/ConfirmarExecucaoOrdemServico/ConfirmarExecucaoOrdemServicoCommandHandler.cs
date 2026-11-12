@@ -22,9 +22,12 @@ public class ConfirmarExecucaoOrdemServicoCommandHandler(
             throw new DomainNotFoundException($"Ordem de Serviço com id {request.IdOrdemServico} não encontrada");
         }
 
-        foreach (var servico in request.ServicosExecutados.Where(servico => ordemServico.Servicos.All(s => s.Id != servico.IdServico)))
+        var servicoInvalido = request.ServicosExecutados
+            .FirstOrDefault(servico => ordemServico.Servicos.All(s => s.Id != servico.IdServico));
+        if (servicoInvalido is not null)
         {
-            throw new DomainNotFoundException($"Serviço com id {servico.IdServico} não pertence à Ordem de Serviço {request.IdOrdemServico}");
+            throw new DomainNotFoundException(
+                $"Serviço com id {servicoInvalido.IdServico} não pertence à Ordem de Serviço {request.IdOrdemServico}");
         }
 
         ordemServico.ConfirmarExecucao(request.ServicosExecutados);

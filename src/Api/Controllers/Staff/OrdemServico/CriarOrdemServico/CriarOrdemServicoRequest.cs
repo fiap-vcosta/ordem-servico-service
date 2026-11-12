@@ -15,6 +15,6 @@ public class CriarOrdemServicoRequest
         public IList<ItemNecessario> ItensNecessarios { get; init; } = [];
     }
 
-    public int IdVeiculo { get; init; }
+    public required int IdVeiculo { get; init; }
     public IList<Servico> Servicos { get; init; } = [];
 }

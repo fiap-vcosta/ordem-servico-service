@@ -27,7 +27,7 @@ public class Servico
     
     public required ServicoCatalogo ServicoCatalogo { get; init; }
     
-    private readonly List<ItemNecessario> _itensNecessarios = new();
+    private readonly List<ItemNecessario> _itensNecessarios = [];
     public IReadOnlyCollection<ItemNecessario> ItensNecessarios => _itensNecessarios.AsReadOnly();
 
     public static Servico Criar(string nome, decimal valorCobrado, ServicoCatalogo servicoCatalogo)

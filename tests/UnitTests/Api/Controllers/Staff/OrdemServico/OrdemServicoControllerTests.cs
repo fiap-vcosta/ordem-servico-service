@@ -215,7 +215,11 @@ public class OrdemServicoControllerTests
         _adicionarValidatorMock.Setup(v => v.Validate(It.IsAny<AdicionarItemServicoRequest>())).Returns(validation);
 
         // Act
-        var result = await _controller.AdicionarItemServico(1, new AdicionarItemServicoRequest());
+        var result = await _controller.AdicionarItemServico(1, new AdicionarItemServicoRequest
+        {
+            IdServico = 0,
+            ValorCobrado = 0m
+        });
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);

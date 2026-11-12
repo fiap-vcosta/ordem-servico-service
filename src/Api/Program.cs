@@ -34,7 +34,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.Migrate();
+        await db.Database.MigrateAsync();
     }
 
     app.MapGet("/ordem-servico/health", async (AppDbContext appDbContext) =>
@@ -43,7 +43,7 @@ try
         return isDbOk ? Results.Ok("OK") : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
     });
 
-    app.Run();
+    await app.RunAsync();
 
     static void TryLoadLocalJwtPublicKey(WebApplicationBuilder webApplicationBuilder)
     {
@@ -69,7 +69,7 @@ catch (Exception ex)
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }
 
 public partial class Program;
