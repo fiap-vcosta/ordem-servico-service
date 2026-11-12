@@ -5,11 +5,11 @@ using MediatR;
 namespace Application.UseCases.Queries.GetOrdemServicoByTokenEDocumento;
 
 public class GetOrdemServicoByTokenEDocumentoQueryHandler(IOrdemServicoGateway ordemServicoGateway)
-    : IRequestHandler<GetOrdemServicoByTokenEDocumentoQuery, int>
+    : IRequestHandler<GetOrdemServicoByTokenEDocumentoQuery, Guid>
 {
     private const string TokenNaoEncontradoMessage = "Ordem de Serviço não encontrada para o token informado";
 
-    public async Task<int> Handle(
+    public async Task<Guid> Handle(
         GetOrdemServicoByTokenEDocumentoQuery request,
         CancellationToken cancellationToken)
     {

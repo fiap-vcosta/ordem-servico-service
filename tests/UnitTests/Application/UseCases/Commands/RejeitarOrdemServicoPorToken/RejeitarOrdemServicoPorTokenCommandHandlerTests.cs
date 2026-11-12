@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.UseCases.Commands.RejeitarOrdemServico;
 using Application.UseCases.Commands.RejeitarOrdemServicoPorToken;
 using Application.UseCases.Queries.GetOrdemServicoByTokenEDocumento;
@@ -24,12 +25,12 @@ public class RejeitarOrdemServicoPorTokenCommandHandlerTests
                 It.Is<GetOrdemServicoByTokenEDocumentoQuery>(q =>
                     q.TokenAprovacao == "token-ok" && q.DocumentoCliente == DocumentoJoaoSilva),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(9);
+            .ReturnsAsync(OrdemServicoTestIds.Of(9));
         mediator
             .Setup(m => m.Send(It.IsAny<RejeitarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RejeitarOrdemServicoCommandResponse
             {
-                Id = 9,
+                Id = OrdemServicoTestIds.Of(9),
                 Status = StatusOrdemServico.EmDiagnostico,
                 ValorTotal = 0m,
                 RecebidaEm = DateTime.UtcNow,
@@ -50,9 +51,9 @@ public class RejeitarOrdemServicoPorTokenCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        Assert.Equal(9, result.Id);
+        Assert.Equal(OrdemServicoTestIds.Of(9), result.Id);
         mediator.Verify(
-            m => m.Send(It.Is<RejeitarOrdemServicoCommand>(c => c.IdOrdemServico == 9), It.IsAny<CancellationToken>()),
+            m => m.Send(It.Is<RejeitarOrdemServicoCommand>(c => c.IdOrdemServico == OrdemServicoTestIds.Of(9)), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

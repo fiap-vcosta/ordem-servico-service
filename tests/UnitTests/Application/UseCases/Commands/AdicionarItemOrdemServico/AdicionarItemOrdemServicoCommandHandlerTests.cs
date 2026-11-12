@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AdicionarItemOrdemServico;
 using Domain.Entities;
@@ -21,7 +22,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var servico = new AdministrativoServicoDto(5, "OLE-001", "Troca de Óleo", 150m);
         var itemEstoque = new EstoqueItemDto(10, "FLT-001", "Filtro", "Unidade");
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         mockCatalog.Setup(r => r.GetServicoByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(servico);
         mockEstoqueCatalog.Setup(r => r.GetItemByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(itemEstoque);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
@@ -33,7 +34,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
 
         var command = new AdicionarItemOrdemServicoCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             IdServico = 5,
             ValorCobrado = 1000m,
             ItensNecessarios =
@@ -57,14 +58,14 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AdicionarItemOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
             new Mock<IAdministrativoCatalogGateway>().Object,
             new Mock<IEstoqueCatalogGateway>().Object);
 
-        var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = 999, IdServico = 1, ValorCobrado = 100m };
+        var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999), IdServico = 1, ValorCobrado = 100m };
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() => handler.Handle(command, CancellationToken.None));
@@ -77,7 +78,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         var mockCatalog = new Mock<IAdministrativoCatalogGateway>();
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CriarOrdemEmDiagnostico());
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(CriarOrdemEmDiagnostico());
         mockCatalog.Setup(r => r.GetServicoByIdAsync(999, It.IsAny<CancellationToken>())).ReturnsAsync((AdministrativoServicoDto?)null);
 
         var handler = new AdicionarItemOrdemServicoCommandHandler(
@@ -85,7 +86,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
             mockCatalog.Object,
             new Mock<IEstoqueCatalogGateway>().Object);
 
-        var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = 1, IdServico = 999, ValorCobrado = 100m };
+        var command = new AdicionarItemOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), IdServico = 999, ValorCobrado = 100m };
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() => handler.Handle(command, CancellationToken.None));
@@ -99,7 +100,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var mockCatalog = new Mock<IAdministrativoCatalogGateway>();
         var mockEstoqueCatalog = new Mock<IEstoqueCatalogGateway>();
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CriarOrdemEmDiagnostico());
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(CriarOrdemEmDiagnostico());
         mockCatalog.Setup(r => r.GetServicoByIdAsync(5, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AdministrativoServicoDto(5, "OLE-001", "Troca de Óleo", 150m));
         mockEstoqueCatalog.Setup(r => r.GetItemByIdAsync(10, It.IsAny<CancellationToken>()))
@@ -112,7 +113,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
 
         var command = new AdicionarItemOrdemServicoCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             IdServico = 5,
             ValorCobrado = 100m,
             ItensNecessarios =
@@ -130,7 +131,7 @@ public class AdicionarItemOrdemServicoCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com", Documento = "71284693031" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         ordem.EnviarParaDiagnostico();
         return ordem;
     }

@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AplicarEstoqueEmFalta;
 using Application.UseCases.Commands.AplicarEstoqueReservado;
@@ -18,7 +19,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemChecandoEstoqueComItem(100);
         var aprovadaEm = new DateTimeOffset(DateTime.SpecifyKind(ordem.AprovadaEm!.Value, DateTimeKind.Utc));
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarEstoqueEmFaltaCommandHandler(
@@ -29,7 +30,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
         var result = await handler.Handle(
             new AplicarEstoqueEmFaltaCommand
             {
-                IdOrdemServico = 1,
+                IdOrdemServico = OrdemServicoTestIds.Of(1),
                 AprovadaEm = aprovadaEm,
                 Itens = [new AplicarEstoqueItemStatus(100, StatusItemEstoque.EstoqueEmFalta)]
             },
@@ -46,7 +47,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemChecandoEstoqueComItem(100);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarEstoqueEmFaltaCommandHandler(
             gateway.Object,
@@ -56,7 +57,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
         var result = await handler.Handle(
             new AplicarEstoqueEmFaltaCommand
             {
-                IdOrdemServico = 1,
+                IdOrdemServico = OrdemServicoTestIds.Of(1),
                 AprovadaEm = DateTimeOffset.UtcNow.AddHours(-1),
                 Itens = [new AplicarEstoqueItemStatus(100, StatusItemEstoque.EstoqueEmFalta)]
             },
@@ -72,7 +73,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarEstoqueEmFaltaCommandHandler(
             gateway.Object,
@@ -83,7 +84,7 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
             handler.Handle(
                 new AplicarEstoqueEmFaltaCommand
                 {
-                    IdOrdemServico = 999,
+                    IdOrdemServico = OrdemServicoTestIds.Of(999),
                     AprovadaEm = DateTimeOffset.UtcNow,
                     Itens = []
                 },
@@ -95,13 +96,13 @@ public class AplicarEstoqueEmFaltaCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico(
             "Troca",
             100m,
             new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" },
-            [new ItemNecessario.CriarItemNecessarioParams(1, 1m, new ItemEstoqueOrdemServico { Id = itemId, Nome = "Pneu" })]);
+            [new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 1m, new ItemEstoqueOrdemServico { Id = itemId, Nome = "Pneu" })]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
         ordem.AprovarServicosSugeridos();

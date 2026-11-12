@@ -59,8 +59,8 @@ namespace Infrastructure.Migrations
                     b.Property<int>("IdItemOrdemServico")
                         .HasColumnType("integer");
 
-                    b.Property<int>("IdOrdemServico")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("IdOrdemServico")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Quantidade")
                         .HasPrecision(10, 3)
@@ -103,11 +103,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.OrdemServicoAggregateRoot", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("AprovadaEm")
                         .HasColumnType("timestamp with time zone");
@@ -196,8 +193,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("ExecucaoIniciadaEm")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("IdOrdemServico")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("IdOrdemServico")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Nome")
                         .IsRequired()

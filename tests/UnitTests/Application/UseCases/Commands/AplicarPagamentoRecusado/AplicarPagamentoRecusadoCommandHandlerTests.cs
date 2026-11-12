@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AplicarPagamentoRecusado;
 using Domain.Exceptions;
@@ -16,7 +17,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(
@@ -25,7 +26,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1, Motivo = "recusado" },
+            new AplicarPagamentoRecusadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), Motivo = "recusado" },
             CancellationToken.None);
 
         // Assert
@@ -39,7 +40,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(
@@ -50,7 +51,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         var result = await handler.Handle(
             new AplicarPagamentoRecusadoCommand
             {
-                IdOrdemServico = 1,
+                IdOrdemServico = OrdemServicoTestIds.Of(1),
                 Motivo = OrdemServicoAggregateRoot.MotivoPagamentoExpirado
             },
             CancellationToken.None);
@@ -67,7 +68,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
         ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(
             gateway.Object,
@@ -77,7 +78,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         var result = await handler.Handle(
             new AplicarPagamentoRecusadoCommand
             {
-                IdOrdemServico = 1,
+                IdOrdemServico = OrdemServicoTestIds.Of(1),
                 Motivo = OrdemServicoAggregateRoot.MotivoPagamentoExpirado
             },
             CancellationToken.None);
@@ -95,8 +96,8 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(
             gateway.Object,
@@ -104,7 +105,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoRecusadoCommand { IdOrdemServico = 1, Motivo = "recusado" },
+            new AplicarPagamentoRecusadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), Motivo = "recusado" },
             CancellationToken.None);
 
         // Assert
@@ -117,7 +118,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarPagamentoRecusadoCommandHandler(
             gateway.Object,
@@ -126,7 +127,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
             handler.Handle(
-                new AplicarPagamentoRecusadoCommand { IdOrdemServico = 999, Motivo = "recusado" },
+                new AplicarPagamentoRecusadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999), Motivo = "recusado" },
                 CancellationToken.None));
     }
 
@@ -141,7 +142,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
             100m,
             new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" },
             [
-                new ItemNecessario.CriarItemNecessarioParams(1, 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+                new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
             ]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
@@ -158,7 +159,7 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
             }
         ]);
         ordem.RegistrarCobrancaGerada();
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         return ordem;
     }
 }

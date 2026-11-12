@@ -15,13 +15,13 @@ public enum StatusItemEstoque
 public class ItemNecessario
 {
     public int Id {  get; private set; }
-    public int IdOrdemServico { get; private set; }
+    public Guid IdOrdemServico { get; private set; }
     public int IdItemOrdemServico { get; private set; }
     public StatusItemEstoque Status { get; private set; }
     public decimal Quantidade { get; init; }
     public required ItemEstoqueOrdemServico ItemEstoque { get; init; }
     
-    public record CriarItemNecessarioParams(int IdOrdemServico, decimal Quantidade, ItemEstoqueOrdemServico ItemEstoque);
+    public record CriarItemNecessarioParams(Guid IdOrdemServico, decimal Quantidade, ItemEstoqueOrdemServico ItemEstoque);
     public static ItemNecessario Criar(CriarItemNecessarioParams @params) => new()
     {
         IdOrdemServico = @params.IdOrdemServico,

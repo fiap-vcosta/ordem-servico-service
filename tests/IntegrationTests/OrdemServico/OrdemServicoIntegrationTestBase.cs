@@ -42,7 +42,7 @@ public abstract class OrdemServicoIntegrationTestBase
             new AuthenticationHeaderValue("Bearer", TestJwt.CreateClienteToken(documento));
 
 
-    protected async Task<int> CriarOrdemAsync(int idVeiculo, IEnumerable<object>? servicos = null)
+    protected async Task<Guid> CriarOrdemAsync(int idVeiculo, IEnumerable<object>? servicos = null)
     {
         object request = servicos is null
             ? new { IdVeiculo = idVeiculo }
@@ -55,7 +55,7 @@ public abstract class OrdemServicoIntegrationTestBase
         return body.Id;
     }
 
-    protected async Task AdicionarServicoAsync(int ordemId, int idServico, decimal valorCobrado, int? idItemEstoque = null, decimal quantidade = 0m)
+    protected async Task AdicionarServicoAsync(Guid ordemId, int idServico, decimal valorCobrado, int? idItemEstoque = null, decimal quantidade = 0m)
     {
         object request = idItemEstoque is null
             ? new { IdServico = idServico, ValorCobrado = valorCobrado, ItensNecessarios = Array.Empty<object>() }
@@ -70,13 +70,13 @@ public abstract class OrdemServicoIntegrationTestBase
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task FinalizarDiagnosticoAsync(int ordemId)
+    protected async Task FinalizarDiagnosticoAsync(Guid ordemId)
     {
         var response = await Client.PostAsync($"/ordem-servico/{ordemId}/finalizar-diagnostico", null);
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task AplicarOrcamentoGeradoAsync(int ordemId)
+    protected async Task AplicarOrcamentoGeradoAsync(Guid ordemId)
     {
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -94,25 +94,25 @@ public abstract class OrdemServicoIntegrationTestBase
         });
     }
 
-    protected async Task FinalizarDiagnosticoEAplicarOrcamentoAsync(int ordemId)
+    protected async Task FinalizarDiagnosticoEAplicarOrcamentoAsync(Guid ordemId)
     {
         await FinalizarDiagnosticoAsync(ordemId);
         await AplicarOrcamentoGeradoAsync(ordemId);
     }
 
-    protected async Task AprovarInternamenteAsync(int ordemId)
+    protected async Task AprovarInternamenteAsync(Guid ordemId)
     {
         var response = await Client.PostAsync($"/ordem-servico/{ordemId}/aprovar", null);
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task RejeitarInternamenteAsync(int ordemId)
+    protected async Task RejeitarInternamenteAsync(Guid ordemId)
     {
         var response = await Client.PostAsync($"/ordem-servico/{ordemId}/rejeitar", null);
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task AprovarParcialmenteAsync(int ordemId, params int[] idsServicosAprovados)
+    protected async Task AprovarParcialmenteAsync(Guid ordemId, params int[] idsServicosAprovados)
     {
         var response = await Client.PostAsJsonAsync($"/ordem-servico/{ordemId}/aprovar-parcialmente", new
         {
@@ -137,13 +137,13 @@ public abstract class OrdemServicoIntegrationTestBase
         AuthenticateAsStaff();
     }
 
-    protected async Task DescartarAsync(int ordemId)
+    protected async Task DescartarAsync(Guid ordemId)
     {
         var response = await Client.PostAsync($"/ordem-servico/{ordemId}/descartar", null);
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task ConfirmarExecucaoAsync(int ordemId, params int[] idsServicos)
+    protected async Task ConfirmarExecucaoAsync(Guid ordemId, params int[] idsServicos)
     {
         var response = await Client.PostAsJsonAsync($"/ordem-servico/{ordemId}/confirmar-execucao", new
         {
@@ -157,7 +157,7 @@ public abstract class OrdemServicoIntegrationTestBase
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task AplicarCobrancaEPagamentoAsync(int ordemId)
+    protected async Task AplicarCobrancaEPagamentoAsync(Guid ordemId)
     {
         await using var scope = Factory.Services.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -165,7 +165,7 @@ public abstract class OrdemServicoIntegrationTestBase
         await mediator.Send(new AplicarPagamentoConfirmadoCommand { IdOrdemServico = ordemId });
     }
 
-    protected async Task AplicarEstoqueReservadoAsync(int ordemId, params int[] itemEstoqueIds)
+    protected async Task AplicarEstoqueReservadoAsync(Guid ordemId, params int[] itemEstoqueIds)
     {
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -195,7 +195,7 @@ public abstract class OrdemServicoIntegrationTestBase
         });
     }
 
-    protected async Task AplicarEstoqueEmFaltaAsync(int ordemId, params int[] itemEstoqueIds)
+    protected async Task AplicarEstoqueEmFaltaAsync(Guid ordemId, params int[] itemEstoqueIds)
     {
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -225,7 +225,7 @@ public abstract class OrdemServicoIntegrationTestBase
         });
     }
 
-    protected async Task AssertStatusAsync(int ordemId, string expectedStatus)
+    protected async Task AssertStatusAsync(Guid ordemId, string expectedStatus)
     {
         var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
@@ -235,26 +235,26 @@ public abstract class OrdemServicoIntegrationTestBase
         Assert.Equal(expectedStatus, status);
     }
 
-    protected async Task AssertListagemContemOrdemComStatusAsync(int ordemId, string expectedStatus)
+    protected async Task AssertListagemContemOrdemComStatusAsync(Guid ordemId, string expectedStatus)
     {
         var response = await Client.GetAsync("/ordem-servico");
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
         var ordem = document.RootElement.EnumerateArray()
-            .FirstOrDefault(e => e.GetProperty("id").GetInt32() == ordemId);
+            .FirstOrDefault(e => e.GetProperty("id").GetGuid() == ordemId);
         Assert.Equal(JsonValueKind.Object, ordem.ValueKind);
         Assert.Equal(expectedStatus, ordem.GetProperty("status").GetString());
     }
 
-    protected async Task<int> GetPrimeiroServicoIdAsync(int ordemId)
+    protected async Task<int> GetPrimeiroServicoIdAsync(Guid ordemId)
     {
         var ids = await GetServicoIdsAsync(ordemId);
         Assert.NotEmpty(ids);
         return ids[0];
     }
 
-    protected async Task<int[]> GetServicoIdsAsync(int ordemId)
+    protected async Task<int[]> GetServicoIdsAsync(Guid ordemId)
     {
         var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
@@ -266,7 +266,7 @@ public abstract class OrdemServicoIntegrationTestBase
             .ToArray();
     }
 
-    protected async Task<int[]> GetServicoIdsPorStatusAsync(int ordemId, string status)
+    protected async Task<int[]> GetServicoIdsPorStatusAsync(Guid ordemId, string status)
     {
         var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
@@ -280,7 +280,7 @@ public abstract class OrdemServicoIntegrationTestBase
     }
 
     protected async Task<int> AdicionarServicoERetornarIdAsync(
-        int ordemId,
+        Guid ordemId,
         int idServico,
         decimal valorCobrado,
         int? idItemEstoque = null,
@@ -292,7 +292,7 @@ public abstract class OrdemServicoIntegrationTestBase
         return Assert.Single(idsDepois.Where(id => !idsAntes.Contains(id)));
     }
 
-    protected async Task<int> GetServicosCountAsync(int ordemId)
+    protected async Task<int> GetServicosCountAsync(Guid ordemId)
     {
         var response = await Client.GetAsync($"/ordem-servico/{ordemId}");
         response.EnsureSuccessStatusCode();
@@ -301,7 +301,7 @@ public abstract class OrdemServicoIntegrationTestBase
         return document.RootElement.GetProperty("servicos").GetArrayLength();
     }
 
-    protected async Task<string> GetTokenAprovacaoAsync(int ordemId)
+    protected async Task<string> GetTokenAprovacaoAsync(Guid ordemId)
     {
         await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -314,7 +314,7 @@ public abstract class OrdemServicoIntegrationTestBase
         return token;
     }
 
-    protected async Task ExecutarAteEntregueAsync(int ordemId)
+    protected async Task ExecutarAteEntregueAsync(Guid ordemId)
     {
         await using (var scope = Factory.Services.CreateAsyncScope())
         {
@@ -339,5 +339,5 @@ public abstract class OrdemServicoIntegrationTestBase
         await AssertStatusAsync(ordemId, "Entregue");
     }
 
-    protected sealed record IdResponse(int Id);
+    protected sealed record IdResponse(Guid Id);
 }

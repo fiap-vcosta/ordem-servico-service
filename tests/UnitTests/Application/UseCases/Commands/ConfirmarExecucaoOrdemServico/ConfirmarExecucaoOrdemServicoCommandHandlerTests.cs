@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.ConfirmarExecucaoOrdemServico;
 using Application.Abstractions.Gateways;
@@ -32,7 +33,7 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
 
         var command = new ConfirmarExecucaoOrdemServicoCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             ServicosExecutados =
             [
                 new ServicoExecutado
@@ -44,7 +45,7 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
             ]
         };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
 
         var handler = new ConfirmarExecucaoOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
@@ -86,14 +87,14 @@ public class ConfirmarExecucaoOrdemServicoCommandHandlerTests
 
         var command = new ConfirmarExecucaoOrdemServicoCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             ServicosExecutados = new List<ServicoExecutado>
             {
                 new() { IdServico = servicoId, IniciadoEm = DateTime.UtcNow.AddHours(-1), FinalizadoEm = DateTime.UtcNow }
             }
         };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         mockPublisher
             .Setup(p => p.PublishOrdemServicoFinalizadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))

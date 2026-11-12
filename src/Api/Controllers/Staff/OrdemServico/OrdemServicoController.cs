@@ -41,8 +41,8 @@ public class OrdemServicoController(
         return Ok(presenter.Present(response));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
     {
         var query = new GetOrdemServicoByIdQuery() { Id = id };
         var response = await mediator.Send(query);
@@ -84,16 +84,16 @@ public class OrdemServicoController(
         return Created(nameof(GetById), presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/descartar")]
-    public async Task<IActionResult> DescartarOrdemServico(int id)
+    [HttpPost("{id:guid}/descartar")]
+    public async Task<IActionResult> DescartarOrdemServico(Guid id)
     {
         var command = new DescartarOrdemServicoCommand() { IdOrdemServico = id };
         var response = await mediator.Send(command);
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/adicionar-servico")]
-    public async Task<IActionResult> AdicionarItemServico(int id, [FromBody] AdicionarItemServicoRequest request)
+    [HttpPost("{id:guid}/adicionar-servico")]
+    public async Task<IActionResult> AdicionarItemServico(Guid id, [FromBody] AdicionarItemServicoRequest request)
     {
         var validationResult = adicionarItemServicoRequestValidator.Validate(request);
         if (!validationResult.IsValid)
@@ -118,32 +118,32 @@ public class OrdemServicoController(
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/finalizar-diagnostico")]
-    public async Task<IActionResult> FinalizarDiagnostico(int id)
+    [HttpPost("{id:guid}/finalizar-diagnostico")]
+    public async Task<IActionResult> FinalizarDiagnostico(Guid id)
     {
         var command = new FinalizarDiagnosticoCommand() { IdOrdemServico = id };
         var response = await mediator.Send(command);
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/rejeitar")]
-    public async Task<IActionResult> RejeitarOrdemServico(int id)
+    [HttpPost("{id:guid}/rejeitar")]
+    public async Task<IActionResult> RejeitarOrdemServico(Guid id)
     {
         var command = new RejeitarOrdemServicoCommand() { IdOrdemServico = id };
         var response = await mediator.Send(command);
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/aprovar")]
-    public async Task<IActionResult> AprovarOrdemServico(int id)
+    [HttpPost("{id:guid}/aprovar")]
+    public async Task<IActionResult> AprovarOrdemServico(Guid id)
     {
         var command = new AprovarOrdemServicoCommand() { IdOrdemServico = id };
         var response = await mediator.Send(command);
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/aprovar-parcialmente")]
-    public async Task<IActionResult> AprovarServicosParcialmente(int id, [FromBody] AprovarServicosParcialmenteRequest request)
+    [HttpPost("{id:guid}/aprovar-parcialmente")]
+    public async Task<IActionResult> AprovarServicosParcialmente(Guid id, [FromBody] AprovarServicosParcialmenteRequest request)
     {
         var validationResult = aprovarServicosParcialmenteRequestValidator.Validate(request);
         if (!validationResult.IsValid)
@@ -161,8 +161,8 @@ public class OrdemServicoController(
         return Ok(presenter.Present(response));
     }
 
-    [HttpPost("{id:int}/confirmar-execucao")]
-    public async Task<IActionResult> ConfirmarExecucao(int id, [FromBody] ConfirmarExecucaoRequest request)
+    [HttpPost("{id:guid}/confirmar-execucao")]
+    public async Task<IActionResult> ConfirmarExecucao(Guid id, [FromBody] ConfirmarExecucaoRequest request)
     {
         var validationResult = confirmarExecucaoRequestValidator.Validate(request);
         if (!validationResult.IsValid)

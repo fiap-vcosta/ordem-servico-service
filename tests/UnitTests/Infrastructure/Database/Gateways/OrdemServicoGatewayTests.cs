@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Domain.Entities;
 using Domain.ValueObjects;
 using Infrastructure.Database;
@@ -38,7 +39,7 @@ public class OrdemServicoGatewayTests : IDisposable
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de óleo", 100m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 1m,
+            new ItemNecessario.CriarItemNecessarioParams(ordem.Id, 1m,
                 new ItemEstoqueOrdemServico { Id = 1, Codigo = "ITM-001", Nome = "Filtro", UnidadeMedida = "Unidade" })
         ]);
 
@@ -57,7 +58,7 @@ public class OrdemServicoGatewayTests : IDisposable
     public async Task GetByIdAsync_ReturnsNull_WhenOrdemServicoDoesNotExist()
     {
         // Arrange
-        var nonExistentId = 999;
+        var nonExistentId = OrdemServicoTestIds.Of(999);
 
         // Act
         var ordem = await _gateway.GetByIdAsync(nonExistentId);

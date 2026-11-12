@@ -14,7 +14,7 @@ public enum StatusItemOrdemServico
 public class Servico
 {
     public int Id {  get; private set; }
-    public int IdOrdemServico { get; private set; }
+    public Guid IdOrdemServico { get; private set; }
     public StatusItemOrdemServico Status { get; private set; }
     
     public DateTime? AprovadoEm { get; private set; }

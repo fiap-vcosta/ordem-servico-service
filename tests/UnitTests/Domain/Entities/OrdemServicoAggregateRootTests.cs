@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Domain.Exceptions;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -17,6 +18,7 @@ public class OrdemServicoAggregateRootTests
         var ordem = OrdemServicoAggregateRoot.Criar(cliente, veiculo);
 
         // Assert
+        Assert.NotEqual(Guid.Empty, ordem.Id);
         Assert.Equal(StatusOrdemServico.Recebida, ordem.Status);
         Assert.Equal(0, ordem.VersaoDiagnostico);
         Assert.Equal(cliente, ordem.Cliente);
@@ -179,7 +181,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
 
         // Act
@@ -413,7 +415,7 @@ public class OrdemServicoAggregateRootTests
         // Act
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
 
         // Assert
@@ -472,7 +474,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.AdicionarItemServico("Alinhamento", 150m, servicoCatalogo, []);
         ordem.FinalizarDiagnostico();
@@ -497,7 +499,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 10m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 10m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
@@ -520,7 +522,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 10m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 10m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
@@ -582,7 +584,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.AdicionarItemServico("Alinhamento", 150m, servicoCatalogo, []);
         ordem.FinalizarDiagnostico();
@@ -838,7 +840,7 @@ public class OrdemServicoAggregateRootTests
         ordem.EnviarParaDiagnostico();
         ordem.AdicionarItemServico("Troca de pneus", 200m, servicoCatalogo,
         [
-            new ItemNecessario.CriarItemNecessarioParams(1, 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+            new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 4m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
         ]);
         ordem.FinalizarDiagnostico();
         return ordem;

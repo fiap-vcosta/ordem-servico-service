@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         var ordensServico = modelBuilder.Entity<OrdemServicoAggregateRoot>();
         ordensServico.HasKey(os => os.Id);
+        ordensServico.Property(os => os.Id).ValueGeneratedNever();
         ordensServico.HasIndex(os => os.Status);
         ordensServico.Property(os => os.Status).HasConversion<string>().IsRequired();
         ordensServico.Property(os => os.RecebidaEm).IsRequired();

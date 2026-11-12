@@ -5,7 +5,7 @@ namespace Application.UseCases.Responses;
 public class ServicoOrdemServicoResponse
 {
     public int Id { get; init; }
-    public int IdOrdemServico { get; init; }
+    public Guid IdOrdemServico { get; init; }
     public StatusItemOrdemServico Status { get; init; }
     public DateTime? AprovadoEm { get; init; }
     public DateTime? RejeitadoEm { get; init; }

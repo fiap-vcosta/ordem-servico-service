@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Queries.GetOrdemServicoByTokenEDocumento;
 using Domain.Exceptions;
@@ -18,7 +19,7 @@ public class GetOrdemServicoByTokenEDocumentoQueryHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "João", Email = "joao@teste.com" },
             new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "VW", Modelo = "Gol" });
-        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, 7);
+        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, OrdemServicoTestIds.Of(7));
 
         var gateway = new Mock<IOrdemServicoGateway>();
         gateway
@@ -37,7 +38,7 @@ public class GetOrdemServicoByTokenEDocumentoQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        Assert.Equal(7, id);
+        Assert.Equal(OrdemServicoTestIds.Of(7), id);
     }
 
     [Fact]

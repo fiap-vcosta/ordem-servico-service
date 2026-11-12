@@ -22,7 +22,7 @@ public class OrdemServicoGateway(AppDbContext context) : IOrdemServicoGateway
         await context.SaveChangesAsync();
     }
 
-    public async Task<OrdemServicoAggregateRoot?> GetByIdAsync(int idOrdemServico)
+    public async Task<OrdemServicoAggregateRoot?> GetByIdAsync(Guid idOrdemServico)
     {
         return await QueryCompleta()
             .FirstOrDefaultAsync(os => os.Id == idOrdemServico);

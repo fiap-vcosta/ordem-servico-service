@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
 using Application.Abstractions.Services;
@@ -23,9 +24,9 @@ public class EnviarOrdemServicoParaDiagnosticoCommandHandlerTests
         var mediator = new Mock<IMediator>();
 
         var ordem = CriarOrdemBasica();
-        ReflectSetId(ordem, 7);
+        ReflectSetId(ordem, OrdemServicoTestIds.Of(7));
 
-        ordemServicoGateway.Setup(g => g.GetByIdAsync(7)).ReturnsAsync(ordem);
+        ordemServicoGateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(7))).ReturnsAsync(ordem);
         ordemServicoGateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         notificacaoService
             .Setup(n => n.NotificarUsuariosPorTipo("Mecanico", It.IsAny<string>()))
@@ -41,16 +42,16 @@ public class EnviarOrdemServicoParaDiagnosticoCommandHandlerTests
             NullLogger<EnviarOrdemServicoParaDiagnosticoCommandHandler>.Instance);
 
         // Act
-        await handler.Handle(new EnviarOrdemServicoParaDiagnosticoCommand { IdOrdemServico = 7 }, CancellationToken.None);
+        await handler.Handle(new EnviarOrdemServicoParaDiagnosticoCommand { IdOrdemServico = OrdemServicoTestIds.Of(7) }, CancellationToken.None);
 
         // Assert
         Assert.Equal(StatusOrdemServico.EmDiagnostico, ordem.Status);
         ordemServicoGateway.Verify(g => g.UpdateAsync(ordem), Times.Once);
         notificacaoService.Verify(
-            n => n.NotificarUsuariosPorTipo("Mecanico", It.Is<string>(s => s.Contains('7'))),
+            n => n.NotificarUsuariosPorTipo("Mecanico", It.Is<string>(s => s.Contains(OrdemServicoTestIds.Of(7).ToString()))),
             Times.Once);
         mediator.Verify(
-            m => m.Publish(It.Is<DomainEventNotification<OrdemServicoRecebidaDiagnosticoEvent>>(n => n.DomainEvent.IdOrdemServico == 7), It.IsAny<CancellationToken>()),
+            m => m.Publish(It.Is<DomainEventNotification<OrdemServicoRecebidaDiagnosticoEvent>>(n => n.DomainEvent.IdOrdemServico == OrdemServicoTestIds.Of(7)), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -59,7 +60,7 @@ public class EnviarOrdemServicoParaDiagnosticoCommandHandlerTests
     {
         // Arrange
         var ordemServicoGateway = new Mock<IOrdemServicoGateway>();
-        ordemServicoGateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        ordemServicoGateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
         var handler = new EnviarOrdemServicoParaDiagnosticoCommandHandler(
             ordemServicoGateway.Object,
             new Mock<INotificacaoService>().Object,
@@ -68,7 +69,7 @@ public class EnviarOrdemServicoParaDiagnosticoCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
-            handler.Handle(new EnviarOrdemServicoParaDiagnosticoCommand { IdOrdemServico = 999 }, CancellationToken.None));
+            handler.Handle(new EnviarOrdemServicoParaDiagnosticoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999) }, CancellationToken.None));
     }
 
     private static OrdemServicoAggregateRoot CriarOrdemBasica()
@@ -78,7 +79,7 @@ public class EnviarOrdemServicoParaDiagnosticoCommandHandlerTests
         return OrdemServicoAggregateRoot.Criar(cliente, veiculo);
     }
 
-    private static void ReflectSetId(OrdemServicoAggregateRoot ordem, int id)
+    private static void ReflectSetId(OrdemServicoAggregateRoot ordem, Guid id)
     {
         typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, id);
     }

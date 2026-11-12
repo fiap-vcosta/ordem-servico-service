@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Messaging;
 using Domain.Exceptions;
 using Application.UseCases.Commands.DescartarOrdemServico;
@@ -22,9 +23,9 @@ public class DescartarOrdemServicoCommandHandlerTests
         var veiculo = new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" };
         var ordemServico = OrdemServicoAggregateRoot.Criar(cliente, veiculo);
 
-        var command = new DescartarOrdemServicoCommand { IdOrdemServico = 1 };
+        var command = new DescartarOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         mockPublisher
             .Setup(p => p.PublishOrdemServicoDescartadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
@@ -52,13 +53,13 @@ public class DescartarOrdemServicoCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new DescartarOrdemServicoCommandHandler(
             mockOrdemServicoGateway.Object,
             new Mock<IOrdemServicoIntegrationPublisher>().Object,
             NullLogger<DescartarOrdemServicoCommandHandler>.Instance);
-        var command = new DescartarOrdemServicoCommand { IdOrdemServico = 999 };
+        var command = new DescartarOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999) };
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() => handler.Handle(command, CancellationToken.None));

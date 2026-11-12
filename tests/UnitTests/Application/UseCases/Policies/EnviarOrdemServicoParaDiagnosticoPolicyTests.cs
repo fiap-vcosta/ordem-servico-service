@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Events;
 using Application.UseCases.Commands.EnviarOrdemServicoParaDiagnostico;
 using Application.UseCases.Policies;
@@ -20,11 +21,11 @@ public class EnviarOrdemServicoParaDiagnosticoPolicyTests
         var policy = new EnviarOrdemServicoParaDiagnosticoPolicy(mediator.Object);
 
         // Act
-        await policy.Handle(new DomainEventNotification<OrdemServicoCriadaEvent>(new OrdemServicoCriadaEvent(7)), CancellationToken.None);
+        await policy.Handle(new DomainEventNotification<OrdemServicoCriadaEvent>(new OrdemServicoCriadaEvent(OrdemServicoTestIds.Of(7))), CancellationToken.None);
 
         // Assert
         mediator.Verify(
-            m => m.Send(It.Is<EnviarOrdemServicoParaDiagnosticoCommand>(c => c.IdOrdemServico == 7), It.IsAny<CancellationToken>()),
+            m => m.Send(It.Is<EnviarOrdemServicoParaDiagnosticoCommand>(c => c.IdOrdemServico == OrdemServicoTestIds.Of(7)), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

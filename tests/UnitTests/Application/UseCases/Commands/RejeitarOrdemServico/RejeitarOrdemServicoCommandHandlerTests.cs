@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.UseCases.Commands.RejeitarOrdemServico;
 using Application.Abstractions.Gateways;
 using Domain.Entities;
@@ -25,9 +26,9 @@ public class RejeitarOrdemServicoCommandHandlerTests
         ordemServico.FinalizarDiagnostico();
         ordemServico.AplicarOrcamentoGerado(1);
 
-        var command = new RejeitarOrdemServicoCommand { IdOrdemServico = 1 };
+        var command = new RejeitarOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new RejeitarOrdemServicoCommandHandler(mockOrdemServicoGateway.Object, NullLogger<RejeitarOrdemServicoCommandHandler>.Instance);

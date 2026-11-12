@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Domain.Exceptions;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -78,7 +79,7 @@ public class ServicoTests
         // Arrange
         var servico = Servico.Criar("Troca de óleo", 150m, _servicoCatalogo);
         var itemEstoque = new ItemEstoqueOrdemServico { Id = 21, Nome = "Óleo" };
-        servico.AdicionarItemNecessario(new ItemNecessario.CriarItemNecessarioParams(1, 2m, itemEstoque));
+        servico.AdicionarItemNecessario(new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 2m, itemEstoque));
         servico.Aprovar();
         servico.ItensNecessarios.First().AplicarStatusEstoque(StatusItemEstoque.EstoqueTravado);
 

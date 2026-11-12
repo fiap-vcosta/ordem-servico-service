@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AplicarPagamentoConfirmado;
 using Domain.Exceptions;
@@ -16,7 +17,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarPagamentoConfirmadoCommandHandler(
@@ -25,7 +26,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = 1 },
+            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -40,7 +41,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoPagamento();
         ordem.ConfirmarPagamentoRecebido();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarPagamentoConfirmadoCommandHandler(
             gateway.Object,
@@ -48,7 +49,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = 1 },
+            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -64,8 +65,8 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarPagamentoConfirmadoCommandHandler(
             gateway.Object,
@@ -73,7 +74,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = 1 },
+            new AplicarPagamentoConfirmadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -86,7 +87,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarPagamentoConfirmadoCommandHandler(
             gateway.Object,
@@ -94,7 +95,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
-            handler.Handle(new AplicarPagamentoConfirmadoCommand { IdOrdemServico = 999 }, CancellationToken.None));
+            handler.Handle(new AplicarPagamentoConfirmadoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999) }, CancellationToken.None));
     }
 
     private static OrdemServicoAggregateRoot CriarOrdemAguardandoPagamento()
@@ -108,7 +109,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
             100m,
             new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" },
             [
-                new ItemNecessario.CriarItemNecessarioParams(1, 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+                new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
             ]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
@@ -125,7 +126,7 @@ public class AplicarPagamentoConfirmadoCommandHandlerTests
             }
         ]);
         ordem.RegistrarCobrancaGerada();
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         return ordem;
     }
 }

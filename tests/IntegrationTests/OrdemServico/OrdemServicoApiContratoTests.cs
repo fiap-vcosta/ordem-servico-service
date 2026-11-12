@@ -36,7 +36,7 @@ public class OrdemServicoApiContratoTests(CustomWebApplicationFactory factory)
         listResponse.EnsureSuccessStatusCode();
         await using var stream = await listResponse.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
-        var ids = document.RootElement.EnumerateArray().Select(e => e.GetProperty("id").GetInt32()).ToList();
+        var ids = document.RootElement.EnumerateArray().Select(e => e.GetProperty("id").GetGuid()).ToList();
         var statuses = document.RootElement.EnumerateArray().Select(e => e.GetProperty("status").GetString()).ToList();
 
         // Assert
