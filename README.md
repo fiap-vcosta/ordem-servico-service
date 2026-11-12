@@ -153,7 +153,7 @@ Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service
 
 Pré-requisitos do `deploy`: cluster/Gateway do [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s), `tf-apply` deste repo e imagem do `build-push`.
 
-Manifests em [`k8s/`](k8s/): Deployment (Cloud SQL Proxy + Datadog), Service, HPA, KSA, HTTPRoute `/ordem-servico` e HealthCheckPolicy. O `HTTPRoute` expõe só o prefixo público; `/system/…` fica no cluster. JWT staff/cliente no ConfigMap valida JWKS em `https://vcosta-fiap.online/autenticacao/.well-known/jwks.json`. `Administrativo__BaseUrl` / `Estoque__BaseUrl` apontam para os Services do cluster.
+Manifests em [`k8s/`](k8s/): Deployment (Cloud SQL Proxy + Datadog), Service, HPA (`maxReplicas: 5`), KSA, HTTPRoute `/ordem-servico` e HealthCheckPolicy. O `HTTPRoute` expõe só o prefixo público; `/system/…` fica no cluster. JWT staff/cliente no ConfigMap valida JWKS em `https://vcosta-fiap.online/autenticacao/.well-known/jwks.json`. `Administrativo__BaseUrl` / `Estoque__BaseUrl` apontam para os Services do cluster. Stress do HPA na janela GCP: script no repo [`e2e`](https://github.com/fiap-vcosta/e2e) (`scripts/stress-hpa.sh`).
 
 Não há Job de migration: a app roda `db.Database.Migrate()` no start com o proxy já pronto.
 ---

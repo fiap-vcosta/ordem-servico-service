@@ -9,7 +9,7 @@ spec:
     kind: Deployment
     name: ordem-servico-service
   minReplicas: 1
-  maxReplicas: 2
+  maxReplicas: 5
   metrics:
     - type: ContainerResource
       containerResource:
