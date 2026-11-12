@@ -15,7 +15,7 @@ data:
   Jwt__Cliente__Audience: "cliente"
   Jwt__Cliente__JwksUrl: "https://vcosta-fiap.online/autenticacao/.well-known/jwks.json"
   Jwt__Cliente__RequireHttpsMetadata: "true"
-  CLOUD_SQL_CONNECTION_NAME: "vcosta-fiap-tech-challenge:us-central1:tech-challenge-pg"
+  CLOUD_SQL_CONNECTION_NAME: "vcosta-fiap-tech-challenge:us-central1:ordem-servico-service-pg"
   Administrativo__BaseUrl: "http://administrativo-service"
   Estoque__BaseUrl: "http://estoque-service"
   PubSub__ProjectId: "vcosta-fiap-tech-challenge"

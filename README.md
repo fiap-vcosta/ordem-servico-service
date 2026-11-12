@@ -6,7 +6,7 @@
 [![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
 [![Duplications](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
 
-API .NET 8 para ordens de serviço, clientes, veículos, catálogo de serviços e estoque. Clean Architecture, PostgreSQL, Docker Compose para dev local e GKE Autopilot na GCP. Cluster e banco são provisionados pelos repos [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s) e [`infra-db`](https://github.com/fiap-vcosta/infra-db); os manifests e o deploy moram aqui.
+API .NET 8 para ordens de serviço (diagnóstico, aprovação, execução, pagamento). Clean Architecture, PostgreSQL, Docker Compose para dev local e GKE Autopilot na GCP. Cluster em [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s); a instância Cloud SQL mora neste repo (`ordem-servico-service-pg`).
 
 ## Arquitetura
 
@@ -135,13 +135,13 @@ API local: http://localhost:5225
 
 ## Terraform (GCP)
 
-Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service`. Lê a instância Cloud SQL do [`infra-db`](https://github.com/fiap-vcosta/infra-db) e a SA de runtime do [`infra-bootstrap`](https://github.com/fiap-vcosta/infra-bootstrap). Tópicos vêm do [`infra-events`](https://github.com/fiap-vcosta/infra-events).
+Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service`. Cria a própria instância Cloud SQL (`ordem-servico-service-pg`); VPC e SA de runtime via [`infra-bootstrap`](https://github.com/fiap-vcosta/infra-bootstrap). Tópicos vêm do [`infra-events`](https://github.com/fiap-vcosta/infra-events). Decisão de sistema: [ADR no e2e](https://github.com/fiap-vcosta/e2e/blob/main/docs/adrs/001-instancia-cloud-sql-por-servico.md).
 
 | Recurso | Papel |
 |---------|--------|
-| Database `ordem_servico` | Banco do serviço |
-| Role `ordem_servico_app` + `REVOKE CONNECT … FROM PUBLIC` | Isolamento cross-database |
-| Usuário `ordem_servico` | Login da app com `database_roles = [ordem_servico_app]` |
+| Instância `ordem-servico-service-pg` | Cloud SQL PostgreSQL deste serviço (`db-f1-micro`) |
+| Database / usuário `ordem_servico` | Banco e login da app |
+| `grant.sql` (Data API) | `USAGE`/`CREATE` no schema `public` para o usuário da app |
 | Secrets SM | `ordem-servico-service-connection-string` |
 | Org secret | `SERVICE_AUTH_KEY` — shared secret da malha (`X-Service-Key` / `ServiceAuth__Key`) |
 | Pub/Sub subscriptions + DLQ | Consome orçamento/estoque/pagamento (7 pull subs) |
@@ -154,7 +154,7 @@ Root module: [`terraform/`](terraform/). State GCS prefix `ordem-servico-service
 | Workflow | Gatilho | Papel |
 |----------|---------|--------|
 | `build-push` | push em `main` | Imagem `ordem-servico-service` no Artifact Registry |
-| `tf-apply` / `tf-destroy` | `workflow_dispatch` | Database, usuário, role, secrets SM e subscriptions |
+| `tf-apply` / `tf-destroy` | `workflow_dispatch` | Instância SQL, database, usuário, secrets SM e subscriptions |
 | `deploy` | `workflow_dispatch` | Secret k8s (connection string SM + org `SERVICE_AUTH_KEY`/`DD_API_KEY`) + manifests + smoke `/ordem-servico/health` |
 
 Pré-requisitos do `deploy`: cluster/Gateway do [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s), `tf-apply` deste repo e imagem do `build-push`.
@@ -229,7 +229,6 @@ dotnet test tests/IntegrationTests/IntegrationTests.csproj   # requer Docker
 | Repo | Papel | Diagrama / doc-chave |
 |------|--------|----------------------|
 | [`infra-bootstrap`](https://github.com/fiap-vcosta/infra-bootstrap) | Rede, WIF, AR, zona DNS | Persistente |
-| [`infra-db`](https://github.com/fiap-vcosta/infra-db) | Cloud SQL | ADRs de banco |
-| [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s) | GKE + Gateway + Cloud Run auth | [Componentes](https://github.com/fiap-vcosta/infra-k8s#componentes-nuvem) |
-| [`api`](https://github.com/fiap-vcosta/api) | App + manifests + Requestly | [ER](docs/08_modelo-de-dados.md) · C4 (acima) |
-| [`auth`](https://github.com/fiap-vcosta/auth) | Imagem documento → JWT | Sequência no README |
+| [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s) | GKE + Gateway | [Componentes](https://github.com/fiap-vcosta/infra-k8s#componentes-nuvem) |
+| [`e2e`](https://github.com/fiap-vcosta/e2e) | Demo-up/down, BDD, ADR SQL 1:1 | [ADR SQL](https://github.com/fiap-vcosta/e2e/blob/main/docs/adrs/001-instancia-cloud-sql-por-servico.md) |
+| este repo | OS + Cloud SQL própria + manifests | [ER](docs/08_modelo-de-dados.md) · C4 (acima) |

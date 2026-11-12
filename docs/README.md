@@ -16,4 +16,4 @@ Comece pelo [`README.md`](../README.md) na raiz.
 | [`datadog/`](datadog/) | Dashboard JSON + monitores do serviço |
 | [`requestly/`](requestly/) | Collections e environments HTTP |
 
-Escolha do PostgreSQL e Cloud SQL: ADRs no repo [`infra-db`](https://github.com/fiap-vcosta/infra-db/tree/main/docs/adrs) (a ADR de engine foi migrada para lá).
+Instância Cloud SQL por serviço: [ADR no e2e](https://github.com/fiap-vcosta/e2e/blob/main/docs/adrs/001-instancia-cloud-sql-por-servico.md).

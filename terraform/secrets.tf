@@ -5,7 +5,7 @@ locals {
     "Database=${local.db_name}",
     "Username=${local.db_user}",
     "Password=${random_password.app.result}",
-    "Maximum Pool Size=15",
+    "Maximum Pool Size=4",
   ])
 }
 
@@ -25,5 +25,6 @@ resource "google_secret_manager_secret" "connection_string" {
 resource "google_secret_manager_secret_version" "connection_string" {
   secret      = google_secret_manager_secret.connection_string.id
   secret_data = local.connection_string
-}
 
+  depends_on = [google_sql_provision_script.grants]
+}

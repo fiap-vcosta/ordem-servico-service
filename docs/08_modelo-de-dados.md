@@ -1,6 +1,6 @@
 # Modelo de dados
 
-Esquema PostgreSQL da API (EF Core / Npgsql). Justificativa do banco relacional: [ADR 001 em `infra-db`](https://github.com/fiap-vcosta/infra-db/blob/main/docs/adrs/001-escolha-banco-de-dados.md). Instância Cloud SQL: [ADR 002 em `infra-db`](https://github.com/fiap-vcosta/infra-db/blob/main/docs/adrs/002-cloud-sql.md).
+Esquema PostgreSQL da OS (EF Core / Npgsql). Instância Cloud SQL própria deste serviço: [ADR no e2e](https://github.com/fiap-vcosta/e2e/blob/main/docs/adrs/001-instancia-cloud-sql-por-servico.md).
 
 Fonte de verdade do mapeamento: [`AppDbContext`](../src/Infrastructure/Database/AppDbContext.cs) e o snapshot de migrations.
 

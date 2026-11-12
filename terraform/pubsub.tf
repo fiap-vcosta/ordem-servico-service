@@ -1,18 +1,9 @@
-data "terraform_remote_state" "infra_bootstrap" {
-  backend = "gcs"
-
-  config = {
-    bucket = "vcosta-fiap-tech-challenge-tfstate"
-    prefix = "infra-bootstrap"
-  }
-}
-
 data "google_project" "current" {
   project_id = var.project_id
 }
 
 locals {
-  runtime_sa_email = data.terraform_remote_state.infra_bootstrap.outputs.runtime_service_account_emails["ordem-servico-service"]
+  runtime_sa_email = data.terraform_remote_state.bootstrap.outputs.runtime_service_account_emails["ordem-servico-service"]
   pubsub_agent     = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 
   consume = {
