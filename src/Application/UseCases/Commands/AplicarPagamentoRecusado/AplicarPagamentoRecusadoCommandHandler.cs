@@ -1,12 +1,15 @@
 using Application.Abstractions.Gateways;
+using Application.Logging;
 using Domain.Exceptions;
 using Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.UseCases.Commands.AplicarPagamentoRecusado;
 
 public class AplicarPagamentoRecusadoCommandHandler(
-    IOrdemServicoGateway ordemServicoGateway
+    IOrdemServicoGateway ordemServicoGateway,
+    ILogger<AplicarPagamentoRecusadoCommandHandler> logger
 ) : IRequestHandler<AplicarPagamentoRecusadoCommand, OrdemServicoResponse>
 {
     public async Task<OrdemServicoResponse> Handle(AplicarPagamentoRecusadoCommand request, CancellationToken cancellationToken)
@@ -28,8 +31,15 @@ public class AplicarPagamentoRecusadoCommandHandler(
             return OrdemServicoResponse.From(ordemServico);
         }
 
+        var statusAnterior = ordemServico.Status;
         ordemServico.RegistrarPagamentoRecusado(request.Motivo);
         await ordemServicoGateway.UpdateAsync(ordemServico);
+
+        if (ordemServico.Status != statusAnterior)
+        {
+            logger.LogStatusMovido(ordemServico.Id, ordemServico.Status);
+        }
+
         return OrdemServicoResponse.From(ordemServico);
     }
 }
