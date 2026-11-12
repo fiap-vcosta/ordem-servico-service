@@ -9,6 +9,6 @@ Canon: [docs/01_requisitos.md](docs/01_requisitos.md).
 
 - Não TDD de feature futura; não inventar requisitos fora de `docs/01`.
 - Aprovação externa: localiza OS por **token opaco** **e** exige **JWT cliente** (CPF); ownership CPF JWT == cliente da OS; **mesmos** use cases de aprovar/rejeitar; sem status arbitrário na borda.
-- Listagem OS: excluir Finalizada, AguardandoPagamento, Entregue, Descartada; ordenação evolutiva em `docs/01`.
+- Listagem OS: excluir Finalizada, AguardandoPagamento, CobrancaExpirada, Entregue, Descartada; ordenação evolutiva em `docs/01`.
 - Fora de escopo: Guid, cloud, SMTP/parser de e-mail, ItemEstoque saldo 0 como contorno.
 - Clean Architecture: Presenters, Gateways, UseCases; Domain limpo de ORM.

@@ -60,5 +60,5 @@ Collections Requestly: [`docs/requestly/`](docs/requestly/) (ver [`docs/07_api.m
 
 - Clean Architecture: Presenters, Gateways, UseCases; Domain sem ORM
 - Aprovação/rejeição: **JWT cliente + token opaco**; ownership por CPF; **mesmos** use cases
-- Listagem de OS: excluir Finalizada, Entregue, Descartada; ordem evolutiva em `docs/01`
+- Listagem de OS: excluir Finalizada, AguardandoPagamento, CobrancaExpirada, Entregue, Descartada; ordem evolutiva em `docs/01`
 - Detalhes: [docs/01_requisitos.md](docs/01_requisitos.md)

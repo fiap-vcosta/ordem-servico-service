@@ -305,7 +305,8 @@ public class OrdemServicoAggregateRootTests
         var ordem = CriarOrdem();
 
         // Act & Assert
-        Assert.Throws<BusinessRuleException>(() => ordem.RegistrarPagamentoRecusado());
+        Assert.Throws<BusinessRuleException>(() =>
+            ordem.RegistrarPagamentoRecusado("recusado"));
     }
 
     [Fact]
@@ -688,17 +689,85 @@ public class OrdemServicoAggregateRootTests
     }
 
     [Fact]
-    public void RegistrarPagamentoRecusado_WhenAguardandoPagamento_KeepsStatus()
+    public void RegistrarPagamentoRecusado_WhenAguardandoPagamentoAndRecusado_KeepsStatus()
     {
         // Arrange
         var ordem = CriarOrdemFinalizada();
         ordem.RegistrarCobrancaGerada();
 
         // Act
-        ordem.RegistrarPagamentoRecusado();
+        ordem.RegistrarPagamentoRecusado("recusado");
 
         // Assert
         Assert.Equal(StatusOrdemServico.AguardandoPagamento, ordem.Status);
+    }
+
+    [Fact]
+    public void RegistrarPagamentoRecusado_WhenAguardandoPagamentoAndExpirado_SetsCobrancaExpirada()
+    {
+        // Arrange
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+
+        // Act
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.CobrancaExpirada, ordem.Status);
+    }
+
+    [Fact]
+    public void RegistrarPagamentoRecusado_WhenAlreadyCobrancaExpiradaAndExpirado_IsIdempotent()
+    {
+        // Arrange
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Act
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.CobrancaExpirada, ordem.Status);
+    }
+
+    [Fact]
+    public void RegistrarCobrancaGerada_WhenCobrancaExpirada_SetsAguardandoPagamento()
+    {
+        // Arrange
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Act
+        ordem.RegistrarCobrancaGerada();
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.AguardandoPagamento, ordem.Status);
+    }
+
+    [Fact]
+    public void ConfirmarPagamentoRecebido_WhenCobrancaExpirada_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.ConfirmarPagamentoRecebido());
+    }
+
+    [Fact]
+    public void Discard_WhenCobrancaExpirada_ThrowsBusinessRuleException()
+    {
+        // Arrange
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+
+        // Act & Assert
+        Assert.Throws<BusinessRuleException>(() => ordem.Descartar());
     }
 
     [Fact]

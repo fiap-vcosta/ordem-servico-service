@@ -20,7 +20,10 @@ public class AplicarCobrancaGeradaCommandHandler(
             throw new DomainNotFoundException($"Ordem de Serviço com id {request.IdOrdemServico} não encontrada");
         }
 
-        if (ordemServico.Status is not (StatusOrdemServico.Finalizada or StatusOrdemServico.AguardandoPagamento))
+        if (ordemServico.Status is not (
+            StatusOrdemServico.Finalizada
+            or StatusOrdemServico.AguardandoPagamento
+            or StatusOrdemServico.CobrancaExpirada))
         {
             return OrdemServicoResponse.From(ordemServico);
         }

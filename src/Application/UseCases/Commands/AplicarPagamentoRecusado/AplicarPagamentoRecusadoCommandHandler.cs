@@ -17,12 +17,19 @@ public class AplicarPagamentoRecusadoCommandHandler(
             throw new DomainNotFoundException($"Ordem de Serviço com id {request.IdOrdemServico} não encontrada");
         }
 
+        if (ordemServico.Status is StatusOrdemServico.CobrancaExpirada
+            && string.Equals(request.Motivo, OrdemServicoAggregateRoot.MotivoPagamentoExpirado, StringComparison.Ordinal))
+        {
+            return OrdemServicoResponse.From(ordemServico);
+        }
+
         if (ordemServico.Status is not StatusOrdemServico.AguardandoPagamento)
         {
             return OrdemServicoResponse.From(ordemServico);
         }
 
-        ordemServico.RegistrarPagamentoRecusado();
+        ordemServico.RegistrarPagamentoRecusado(request.Motivo);
+        await ordemServicoGateway.UpdateAsync(ordemServico);
         return OrdemServicoResponse.From(ordemServico);
     }
 }

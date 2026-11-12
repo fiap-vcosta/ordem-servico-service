@@ -58,6 +58,31 @@ public class AplicarCobrancaGeradaCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenCobrancaExpirada_GoesToAguardandoPagamento()
+    {
+        // Arrange
+        var gateway = new Mock<IOrdemServicoGateway>();
+        var ordem = CriarOrdemFinalizada();
+        ordem.RegistrarCobrancaGerada();
+        ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
+        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
+
+        var handler = new AplicarCobrancaGeradaCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarCobrancaGeradaCommandHandler>.Instance);
+
+        // Act
+        var result = await handler.Handle(
+            new AplicarCobrancaGeradaCommand { IdOrdemServico = 1 },
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(StatusOrdemServico.AguardandoPagamento, result.Status);
+        gateway.Verify(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>()), Times.Once);
+    }
+
+    [Fact]
     public async Task Handle_WhenWrongStatus_IsIdempotentNoOp()
     {
         // Arrange

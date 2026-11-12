@@ -178,7 +178,7 @@ Nomes, payloads e chaves de idempotência: [eventos](https://github.com/fiap-vco
   * **RF02.2:** Se não houver `Sugerido` e houver `Aprovado`, a OS transita para `ChecandoEstoque`, grava `aprovadaEm` e publica `OrdemServicoAprovada`.
   * **RF02.3:** Se não houver `Sugerido` nem `Aprovado`, a OS transita para `Entregue`.
   * **RF02.4:** `OrcamentoFalhou` em `AguardandoOrcamento` devolve a OS a `EmDiagnostico`. Uma nova finalização incrementa `versaoDiagnostico` (a primeira vale 1) e publica outro `DiagnosticoFinalizado`.
-* **RF05 (Máquina de estados da OS):** *(substitui o fluxo do RF05 de Maio/2025)* A ordem do enum, que também é a prioridade da listagem, é: `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca`, `LiberadaParaExecucao`, `EmExecucao`, `Finalizada`, `AguardandoPagamento`, `Descartada`, `Entregue`.
+* **RF05 (Máquina de estados da OS):** *(substitui o fluxo do RF05 de Maio/2025)* A ordem do enum, que também é a prioridade da listagem, é: `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca`, `LiberadaParaExecucao`, `EmExecucao`, `Finalizada`, `AguardandoPagamento`, `CobrancaExpirada`, `Descartada`, `Entregue`.
   * `Recebida` → `EmDiagnostico` ou `Descartada`.
   * `EmDiagnostico` → `AguardandoOrcamento` ou `Descartada`.
   * `AguardandoOrcamento` → `AguardandoAprovacao`, `ChecandoEstoque`, `Entregue`, `EmDiagnostico` ou `Descartada`.
@@ -188,15 +188,16 @@ Nomes, payloads e chaves de idempotência: [eventos](https://github.com/fiap-vco
   * `LiberadaParaExecucao` → `EmExecucao`, `Finalizada` ou `Descartada`.
   * `EmExecucao` → `EmExecucao` ou `Finalizada`.
   * `Finalizada` → `AguardandoPagamento`.
-  * `AguardandoPagamento` → `Entregue`.
-* **RF10 (Descarte):** *(substitui o RF10 de Maio/2025)* A OS pode ser descartada em `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca` e `LiberadaParaExecucao`. O descarte publica `OrdemServicoDescartada`. Não pode ser descartada em `EmExecucao`, `Finalizada`, `AguardandoPagamento` nem `Entregue`.
+  * `AguardandoPagamento` → `Entregue` ou `CobrancaExpirada`.
+  * `CobrancaExpirada` → `AguardandoPagamento`.
+* **RF10 (Descarte):** *(substitui o RF10 de Maio/2025)* A OS pode ser descartada em `Recebida`, `EmDiagnostico`, `AguardandoOrcamento`, `AguardandoAprovacao`, `ChecandoEstoque`, `AguardandoPeca` e `LiberadaParaExecucao`. O descarte publica `OrdemServicoDescartada`. Não pode ser descartada em `EmExecucao`, `Finalizada`, `AguardandoPagamento`, `CobrancaExpirada` nem `Entregue`.
 * **RF16 (Pagamento e entrega):** *(substitui o RF16 de Maio/2025)* A execução que conclui todos os serviços transita para `Finalizada` e publica `OrdemServicoFinalizada`. Execução parcial permanece em `EmExecucao` e não publica esse evento.
-  * **RF16.1:** `CobrancaGerada` em `Finalizada` transita para `AguardandoPagamento`. Uma nova `CobrancaGerada` com a OS já em `AguardandoPagamento` mantém o status.
-  * **RF16.2:** `PagamentoRecusado` mantém `AguardandoPagamento`.
+  * **RF16.1:** `CobrancaGerada` em `Finalizada` ou em `CobrancaExpirada` transita para `AguardandoPagamento`. Uma nova `CobrancaGerada` com a OS já em `AguardandoPagamento` mantém o status.
+  * **RF16.2:** `PagamentoRecusado` com motivo `recusado` mantém `AguardandoPagamento`. Com motivo `expirado` transita para `CobrancaExpirada`.
   * **RF16.3:** `PagamentoConfirmado` em `AguardandoPagamento` transita para `Entregue`. Este serviço não expõe confirmação de pagamento por staff.
   * O caminho RF02.3 continua indo a `Entregue` sem cobrança.
 * **RF20 (Listagem de OS):** *(substitui RF20.1 e RF20.2)*
-  * **RF20.1:** Não incluir OS em `Finalizada`, `AguardandoPagamento`, `Entregue` ou `Descartada`.
+  * **RF20.1:** Não incluir OS em `Finalizada`, `AguardandoPagamento`, `CobrancaExpirada`, `Entregue` ou `Descartada`.
   * **RF20.2:** Prioridade pelo valor do enum, do maior para o menor, e depois as mais antigas (`RecebidaEm`). `AguardandoOrcamento` fica imediatamente acima de `EmDiagnostico`.
 
 ### 11. Estoque, aprovação e paths
