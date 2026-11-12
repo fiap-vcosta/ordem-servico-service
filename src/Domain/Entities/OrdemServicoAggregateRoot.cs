@@ -45,7 +45,7 @@ public class OrdemServicoAggregateRoot
     public required ClienteOrdemServico Cliente { get; init; }
     public required VeiculoOrdemServico Veiculo { get; init; }
 
-    private readonly List<Servico> _servicos = new();
+    private readonly List<Servico> _servicos = [];
     public IReadOnlyCollection<Servico> Servicos => _servicos.AsReadOnly();
 
     public IEnumerable<ItemNecessario> ItensNecessariosParaExecucao => _servicos

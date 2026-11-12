@@ -1,5 +1,11 @@
 # Gestão de Oficina Mecânica
 
+[![Quality Gate](https://sonarcloud.io/api/project_badges/quality_gate?project=fiap-vcosta_ordem-servico-service)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
+[![Duplications](https://sonarcloud.io/api/project_badges/measure?project=fiap-vcosta_ordem-servico-service&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=fiap-vcosta_ordem-servico-service)
+
 API .NET 8 para ordens de serviço, clientes, veículos, catálogo de serviços e estoque. Clean Architecture, PostgreSQL, Docker Compose para dev local e GKE Autopilot na GCP. Cluster e banco são provisionados pelos repos [`infra-k8s`](https://github.com/fiap-vcosta/infra-k8s) e [`infra-db`](https://github.com/fiap-vcosta/infra-db); os manifests e o deploy moram aqui.
 
 ## Arquitetura

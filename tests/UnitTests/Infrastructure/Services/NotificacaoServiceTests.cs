@@ -9,8 +9,23 @@ public class NotificacaoServiceTests
     {
         // Arrange
         var service = new NotificacaoService();
+        var originalOut = Console.Out;
+        using var writer = new StringWriter();
+        Console.SetOut(writer);
 
-        // Act && Assert method completes without exception
-        await service.NotificarUsuariosPorTipo("Mecanico", "Teste de notificação");
+        try
+        {
+            // Act
+            await service.NotificarUsuariosPorTipo("Mecanico", "Teste de notificação");
+
+            // Assert
+            var output = writer.ToString();
+            Assert.Contains("[Notificacao]<Mecanico>", output, StringComparison.Ordinal);
+            Assert.Contains("Teste de notificação", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
     }
 }

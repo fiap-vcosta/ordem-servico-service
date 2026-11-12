@@ -11,8 +11,23 @@ public class SmtpServiceTests
         var service = new SmtpService();
         var email = "teste@teste.com";
         var conteudo = "Teste de corpo";
+        var originalOut = Console.Out;
+        using var writer = new StringWriter();
+        Console.SetOut(writer);
 
-        // Act && Assert method completes without exception
-        await service.EnviarEmail(email, conteudo);
+        try
+        {
+            // Act
+            await service.EnviarEmail(email, conteudo);
+
+            // Assert
+            var output = writer.ToString();
+            Assert.Contains($"[SMTP]<{email}>", output, StringComparison.Ordinal);
+            Assert.Contains(conteudo, output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
     }
 }
