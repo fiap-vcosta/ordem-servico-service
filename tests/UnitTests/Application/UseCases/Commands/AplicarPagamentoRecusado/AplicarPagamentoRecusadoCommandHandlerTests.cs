@@ -3,6 +3,7 @@ using Application.UseCases.Commands.AplicarPagamentoRecusado;
 using Domain.Exceptions;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace UnitTests.Application.UseCases.Commands.AplicarPagamentoRecusado;
@@ -18,7 +19,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
-        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+        var handler = new AplicarPagamentoRecusadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarPagamentoRecusadoCommandHandler>.Instance);
 
         // Act
         var result = await handler.Handle(
@@ -39,7 +42,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
-        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+        var handler = new AplicarPagamentoRecusadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarPagamentoRecusadoCommandHandler>.Instance);
 
         // Act
         var result = await handler.Handle(
@@ -64,7 +69,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
 
-        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+        var handler = new AplicarPagamentoRecusadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarPagamentoRecusadoCommandHandler>.Instance);
 
         // Act
         var result = await handler.Handle(
@@ -91,7 +98,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
         gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
 
-        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+        var handler = new AplicarPagamentoRecusadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarPagamentoRecusadoCommandHandler>.Instance);
 
         // Act
         var result = await handler.Handle(
@@ -110,7 +119,9 @@ public class AplicarPagamentoRecusadoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
-        var handler = new AplicarPagamentoRecusadoCommandHandler(gateway.Object);
+        var handler = new AplicarPagamentoRecusadoCommandHandler(
+            gateway.Object,
+            NullLogger<AplicarPagamentoRecusadoCommandHandler>.Instance);
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
