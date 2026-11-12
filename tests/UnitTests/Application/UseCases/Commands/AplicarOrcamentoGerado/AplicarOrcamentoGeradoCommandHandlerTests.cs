@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.AplicarOrcamentoGerado;
@@ -18,7 +19,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
@@ -28,7 +29,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoGeradoCommand { IdOrdemServico = 1, VersaoDiagnostico = 1 },
+            new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 1 },
             CancellationToken.None);
 
         // Assert
@@ -45,7 +46,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoSoComAprovados();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         publisher
             .Setup(p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))
@@ -58,7 +59,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoGeradoCommand { IdOrdemServico = 1, VersaoDiagnostico = 2 },
+            new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 2 },
             CancellationToken.None);
 
         // Assert
@@ -75,7 +76,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoSoComRejeitados();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
@@ -85,7 +86,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoGeradoCommand { IdOrdemServico = 1, VersaoDiagnostico = 2 },
+            new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 2 },
             CancellationToken.None);
 
         // Assert
@@ -103,7 +104,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
         ordem.AplicarOrcamentoGerado(1);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
@@ -112,7 +113,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoGeradoCommand { IdOrdemServico = 1, VersaoDiagnostico = 1 },
+            new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 1 },
             CancellationToken.None);
 
         // Assert
@@ -127,7 +128,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
         var ordem = CriarOrdemAguardandoOrcamentoComSugerido();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
@@ -136,7 +137,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoGeradoCommand { IdOrdemServico = 1, VersaoDiagnostico = 99 },
+            new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 99 },
             CancellationToken.None);
 
         // Assert
@@ -150,7 +151,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var publisher = new Mock<IOrdemServicoIntegrationPublisher>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarOrcamentoGeradoCommandHandler(
             gateway.Object,
@@ -160,7 +161,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
             handler.Handle(
-                new AplicarOrcamentoGeradoCommand { IdOrdemServico = 999, VersaoDiagnostico = 1 },
+                new AplicarOrcamentoGeradoCommand { IdOrdemServico = OrdemServicoTestIds.Of(999), VersaoDiagnostico = 1 },
                 CancellationToken.None));
     }
 
@@ -218,7 +219,7 @@ public class AplicarOrcamentoGeradoCommandHandlerTests
         var veiculo = new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" };
         var ordem = OrdemServicoAggregateRoot.Criar(cliente, veiculo);
         ordem.EnviarParaDiagnostico();
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         return ordem;
     }
 }

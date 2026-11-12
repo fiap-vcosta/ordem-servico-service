@@ -5,7 +5,7 @@ namespace Application.UseCases.Responses;
 public class ItemNecessarioResponse
 {
     public int Id { get; init; }
-    public int IdOrdemServico { get; init; }
+    public Guid IdOrdemServico { get; init; }
     public int IdItemOrdemServico { get; init; }
     public StatusItemEstoque Status { get; init; }
     public decimal Quantidade { get; init; }

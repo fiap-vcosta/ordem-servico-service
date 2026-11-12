@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using BuildingBlocks.Events;
 using BuildingBlocks.Messaging;
 using Domain.Entities;
@@ -237,7 +238,7 @@ public class OrdemServicoIntegrationPublisherTests
             new ServicoCatalogo { Id = 1, Codigo = "MTR-001", Nome = "Troca" },
             [
                 new ItemNecessario.CriarItemNecessarioParams(
-                    0,
+                    OrdemServicoTestIds.Of(0),
                     2m,
                     new ItemEstoqueOrdemServico { Id = 100, Codigo = "PEC", Nome = "Peça", UnidadeMedida = "Unidade" })
             ]);

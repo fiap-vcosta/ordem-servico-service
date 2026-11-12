@@ -6,7 +6,7 @@ namespace Api.ViewModels.OrdemServico;
 public record ItemNecessarioViewModel
 {
     public required int Id { get; init; }
-    public required int IdOrdemServico { get; init; }
+    public required Guid IdOrdemServico { get; init; }
     public required int IdItemOrdemServico { get; init; }
     public required StatusItemEstoque Status { get; init; }
     public required decimal Quantidade { get; init; }

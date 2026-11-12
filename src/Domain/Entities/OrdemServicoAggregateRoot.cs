@@ -25,7 +25,7 @@ public class OrdemServicoAggregateRoot
 {
     public const string MotivoPagamentoExpirado = "expirado";
 
-    public int Id { get; private set; }
+    public Guid Id { get; private set; }
 
     public StatusOrdemServico Status { get; private set; }
 
@@ -56,6 +56,7 @@ public class OrdemServicoAggregateRoot
     {
         return new OrdemServicoAggregateRoot
         {
+            Id = Guid.NewGuid(),
             Cliente = cliente,
             Veiculo = veiculo,
             Status = StatusOrdemServico.Recebida,

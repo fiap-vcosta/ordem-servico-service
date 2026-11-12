@@ -56,7 +56,7 @@ erDiagram
     }
 
     OrdensServico {
-        int Id PK
+        uuid Id PK
         text Status
         timestamptz RecebidaEm
         timestamptz EntregueEm
@@ -73,7 +73,7 @@ erDiagram
 
     ItensServicos {
         int Id PK
-        int IdOrdemServico FK
+        uuid IdOrdemServico FK
         text Status
         text Nome
         numeric ValorCobrado
@@ -88,7 +88,7 @@ erDiagram
 
     ItemNecessario {
         int Id PK
-        int IdOrdemServico FK
+        uuid IdOrdemServico FK
         int IdItemOrdemServico FK
         text Status
         numeric Quantidade

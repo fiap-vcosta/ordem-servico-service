@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.UseCases.Commands.AprovarOrdemServico;
 using Application.UseCases.Commands.AprovarOrdemServicoPorToken;
 using Application.UseCases.Queries.GetOrdemServicoByTokenEDocumento;
@@ -24,12 +25,12 @@ public class AprovarOrdemServicoPorTokenCommandHandlerTests
                 It.Is<GetOrdemServicoByTokenEDocumentoQuery>(q =>
                     q.TokenAprovacao == "token-ok" && q.DocumentoCliente == DocumentoJoaoSilva),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(7);
+            .ReturnsAsync(OrdemServicoTestIds.Of(7));
         mediator
             .Setup(m => m.Send(It.IsAny<AprovarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AprovarOrdemServicoCommandResponse
             {
-                Id = 7,
+                Id = OrdemServicoTestIds.Of(7),
                 Status = StatusOrdemServico.ChecandoEstoque,
                 ValorTotal = 100m,
                 RecebidaEm = DateTime.UtcNow,
@@ -51,9 +52,9 @@ public class AprovarOrdemServicoPorTokenCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        Assert.Equal(7, result.Id);
+        Assert.Equal(OrdemServicoTestIds.Of(7), result.Id);
         mediator.Verify(
-            m => m.Send(It.Is<AprovarOrdemServicoCommand>(c => c.IdOrdemServico == 7), It.IsAny<CancellationToken>()),
+            m => m.Send(It.Is<AprovarOrdemServicoCommand>(c => c.IdOrdemServico == OrdemServicoTestIds.Of(7)), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

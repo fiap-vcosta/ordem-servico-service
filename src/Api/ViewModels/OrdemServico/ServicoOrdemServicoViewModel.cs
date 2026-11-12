@@ -6,7 +6,7 @@ namespace Api.ViewModels.OrdemServico;
 public record ServicoOrdemServicoViewModel
 {
     public required int Id { get; init; }
-    public required int IdOrdemServico { get; init; }
+    public required Guid IdOrdemServico { get; init; }
     public required StatusItemOrdemServico Status { get; init; }
     public DateTime? AprovadoEm { get; init; }
     public DateTime? RejeitadoEm { get; init; }

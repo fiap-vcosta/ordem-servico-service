@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Api.Presenters.OrdemServico;
 using Api.ViewModels.OrdemServico;
 using Application.UseCases;
@@ -17,7 +18,7 @@ public class OrdemServicoPresenterTests
         // Arrange
         var response = new OrdemServicoResponse
         {
-            Id = 3,
+            Id = OrdemServicoTestIds.Of(3),
             Status = StatusOrdemServico.AguardandoAprovacao,
             ValorTotal = 250m,
             RecebidaEm = DateTime.UtcNow,
@@ -29,7 +30,7 @@ public class OrdemServicoPresenterTests
                 new ServicoOrdemServicoResponse
                 {
                     Id = 10,
-                    IdOrdemServico = 3,
+                    IdOrdemServico = OrdemServicoTestIds.Of(3),
                     Status = StatusItemOrdemServico.Sugerido,
                     Nome = "Troca",
                     ValorCobrado = 150m,
@@ -39,7 +40,7 @@ public class OrdemServicoPresenterTests
                         new ItemNecessarioResponse
                         {
                             Id = 20,
-                            IdOrdemServico = 3,
+                            IdOrdemServico = OrdemServicoTestIds.Of(3),
                             IdItemOrdemServico = 10,
                             Status = StatusItemEstoque.EstoqueNaoChecado,
                             Quantidade = 2m,
@@ -59,7 +60,7 @@ public class OrdemServicoPresenterTests
                 new ItemNecessarioResponse
                 {
                     Id = 21,
-                    IdOrdemServico = 3,
+                    IdOrdemServico = OrdemServicoTestIds.Of(3),
                     IdItemOrdemServico = 10,
                     Status = StatusItemEstoque.EstoqueDisponivel,
                     Quantidade = 1m,
@@ -101,7 +102,7 @@ public class OrdemServicoPresenterTests
         // Arrange
         var response = new CriarOrdemServicoCommandResponse
         {
-            Id = 5,
+            Id = OrdemServicoTestIds.Of(5),
             Status = StatusOrdemServico.Recebida,
             ValorTotal = 0m,
             RecebidaEm = DateTime.UtcNow,
@@ -149,7 +150,7 @@ public class OrdemServicoPresenterTests
         {
             new()
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.Recebida,
                 ValorTotal = 0m,
                 RecebidaEm = DateTime.UtcNow,
@@ -165,6 +166,6 @@ public class OrdemServicoPresenterTests
 
         // Assert
         Assert.Single(viewModels);
-        Assert.Equal(1, viewModels[0].Id);
+        Assert.Equal(OrdemServicoTestIds.Of(1), viewModels[0].Id);
     }
 }

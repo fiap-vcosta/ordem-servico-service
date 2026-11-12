@@ -1,4 +1,4 @@
 
 namespace Domain.Events;
 
-public record OrdemServicoCriadaEvent(int IdOrdemServico);
+public record OrdemServicoCriadaEvent(Guid IdOrdemServico);

@@ -5,7 +5,7 @@ namespace Application.UseCases;
 
 public class OrdemServicoResponse
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public StatusOrdemServico Status { get; init; }
     public decimal ValorTotal { get; init; }
     public DateTime RecebidaEm { get; init; }

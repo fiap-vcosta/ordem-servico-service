@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Events;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AdicionarItemOrdemServico;
@@ -31,15 +32,15 @@ public class CriarOrdemServicoCommandHandlerTests
         mockOrdemServicoGateway
             .Setup(r => r.CriarAsync(It.IsAny<OrdemServicoAggregateRoot>()))
             .Callback<OrdemServicoAggregateRoot>(os =>
-                typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(os, 10))
+                typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(os, OrdemServicoTestIds.Of(10)))
             .Returns(Task.CompletedTask);
 
         var ordemPersistida = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "João", Email = "joao@test.com", Documento = "12345678901" },
             new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordemPersistida, 10);
+        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordemPersistida, OrdemServicoTestIds.Of(10));
         ordemPersistida.EnviarParaDiagnostico();
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(ordemPersistida);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(10))).ReturnsAsync(ordemPersistida);
         mockMediator
             .Setup(m => m.Publish(It.IsAny<DomainEventNotification<OrdemServicoCriadaEvent>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -55,7 +56,7 @@ public class CriarOrdemServicoCommandHandlerTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(10, result.Id);
+        Assert.Equal(OrdemServicoTestIds.Of(10), result.Id);
         Assert.Equal(StatusOrdemServico.EmDiagnostico, result.Status);
         Assert.Equal(cliente.Nome, result.Cliente.Nome);
         Assert.Equal(veiculo.Placa, result.Veiculo.Placa);
@@ -85,26 +86,26 @@ public class CriarOrdemServicoCommandHandlerTests
         mockOrdemServicoGateway
             .Setup(r => r.CriarAsync(It.IsAny<OrdemServicoAggregateRoot>()))
             .Callback<OrdemServicoAggregateRoot>(os =>
-                typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(os, 20))
+                typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(os, OrdemServicoTestIds.Of(20)))
             .Returns(Task.CompletedTask);
 
         var ordemPersistida = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "João", Email = "joao@test.com", Documento = "12345678901" },
             new VeiculoOrdemServico { Placa = "ABC-1234", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordemPersistida, 20);
+        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordemPersistida, OrdemServicoTestIds.Of(20));
         ordemPersistida.EnviarParaDiagnostico();
         ordemPersistida.AdicionarItemServico(
             "Troca de Óleo",
             150m,
             new ServicoCatalogo { Id = 1, Nome = "Troca de Óleo", Codigo = "MTR-001" },
             []);
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(20)).ReturnsAsync(ordemPersistida);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(20))).ReturnsAsync(ordemPersistida);
 
         mockMediator
             .Setup(m => m.Send(It.IsAny<AdicionarItemOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AdicionarItemOrdemServicoCommandResponse
             {
-                Id = 20,
+                Id = OrdemServicoTestIds.Of(20),
                 Status = StatusOrdemServico.Recebida,
                 ValorTotal = 150m,
                 RecebidaEm = DateTime.UtcNow,
@@ -148,7 +149,7 @@ public class CriarOrdemServicoCommandHandlerTests
         mockMediator.Verify(
             m => m.Send(
                 It.Is<AdicionarItemOrdemServicoCommand>(c =>
-                    c.IdOrdemServico == 20 &&
+                    c.IdOrdemServico == OrdemServicoTestIds.Of(20) &&
                     c.IdServico == 1 &&
                     c.ValorCobrado == 150m &&
                     c.ItensNecessarios.Count == 1),

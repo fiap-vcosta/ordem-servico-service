@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.AprovarOrdemServico;
 using Application.Abstractions.Gateways;
@@ -27,9 +28,9 @@ public class AprovarOrdemServicoCommandHandlerTests
         ordemServico.FinalizarDiagnostico();
         ordemServico.AplicarOrcamentoGerado(1);
 
-        var command = new AprovarOrdemServicoCommand { IdOrdemServico = 1 };
+        var command = new AprovarOrdemServicoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         mockPublisher
             .Setup(p => p.PublishOrdemServicoAprovadaAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))

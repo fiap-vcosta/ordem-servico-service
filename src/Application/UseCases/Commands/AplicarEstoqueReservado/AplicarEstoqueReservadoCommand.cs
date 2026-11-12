@@ -4,7 +4,7 @@ namespace Application.UseCases.Commands.AplicarEstoqueReservado;
 
 public class AplicarEstoqueReservadoCommand : IRequest<OrdemServicoResponse>
 {
-    public required int IdOrdemServico { get; init; }
+    public required Guid IdOrdemServico { get; init; }
 
     public required DateTimeOffset AprovadaEm { get; init; }
 

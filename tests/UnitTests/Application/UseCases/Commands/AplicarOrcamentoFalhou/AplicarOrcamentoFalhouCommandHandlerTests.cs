@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AplicarOrcamentoFalhou;
 using Domain.Exceptions;
@@ -16,7 +17,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoOrcamento();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarOrcamentoFalhouCommandHandler(
@@ -25,7 +26,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoFalhouCommand { IdOrdemServico = 1, VersaoDiagnostico = 1 },
+            new AplicarOrcamentoFalhouCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 1 },
             CancellationToken.None);
 
         // Assert
@@ -39,7 +40,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoOrcamento();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarOrcamentoFalhouCommandHandler(
             gateway.Object,
@@ -47,7 +48,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarOrcamentoFalhouCommand { IdOrdemServico = 1, VersaoDiagnostico = 99 },
+            new AplicarOrcamentoFalhouCommand { IdOrdemServico = OrdemServicoTestIds.Of(1), VersaoDiagnostico = 99 },
             CancellationToken.None);
 
         // Assert
@@ -60,7 +61,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarOrcamentoFalhouCommandHandler(
             gateway.Object,
@@ -69,7 +70,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
             handler.Handle(
-                new AplicarOrcamentoFalhouCommand { IdOrdemServico = 999, VersaoDiagnostico = 1 },
+                new AplicarOrcamentoFalhouCommand { IdOrdemServico = OrdemServicoTestIds.Of(999), VersaoDiagnostico = 1 },
                 CancellationToken.None));
     }
 
@@ -85,7 +86,7 @@ public class AplicarOrcamentoFalhouCommandHandlerTests
             new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" },
             []);
         ordem.FinalizarDiagnostico();
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         return ordem;
     }
 }

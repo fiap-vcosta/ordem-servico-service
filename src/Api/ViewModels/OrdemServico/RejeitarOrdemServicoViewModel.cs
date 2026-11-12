@@ -4,7 +4,7 @@ namespace Api.ViewModels.OrdemServico;
 
 public record RejeitarOrdemServicoViewModel
 {
-    public required int Id { get; init; }
+    public required Guid Id { get; init; }
     public required StatusOrdemServico Status { get; init; }
     public required decimal ValorTotal { get; init; }
     public required DateTime RecebidaEm { get; init; }

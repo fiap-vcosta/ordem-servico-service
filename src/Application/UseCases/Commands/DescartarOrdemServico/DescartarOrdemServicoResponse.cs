@@ -5,7 +5,7 @@ namespace Application.UseCases.Commands.DescartarOrdemServico;
 
 public class DescartarOrdemServicoResponse
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public StatusOrdemServico Status { get; init; }
     public DateTime RecebidaEm { get; init; }
     public DateTime DescartadaEm { get; init; }

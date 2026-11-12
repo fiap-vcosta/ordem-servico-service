@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.UseCases.Commands.AplicarCobrancaGerada;
 using Domain.Exceptions;
@@ -16,7 +17,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemFinalizada();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarCobrancaGeradaCommandHandler(
@@ -25,7 +26,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarCobrancaGeradaCommand { IdOrdemServico = 1 },
+            new AplicarCobrancaGeradaCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -40,7 +41,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
         var gateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemFinalizada();
         ordem.RegistrarCobrancaGerada();
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarCobrancaGeradaCommandHandler(
@@ -49,7 +50,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarCobrancaGeradaCommand { IdOrdemServico = 1 },
+            new AplicarCobrancaGeradaCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -65,7 +66,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
         var ordem = CriarOrdemFinalizada();
         ordem.RegistrarCobrancaGerada();
         ordem.RegistrarPagamentoRecusado(OrdemServicoAggregateRoot.MotivoPagamentoExpirado);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         gateway.Setup(g => g.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AplicarCobrancaGeradaCommandHandler(
@@ -74,7 +75,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarCobrancaGeradaCommand { IdOrdemServico = 1 },
+            new AplicarCobrancaGeradaCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -90,8 +91,8 @@ public class AplicarCobrancaGeradaCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
-        gateway.Setup(g => g.GetByIdAsync(1)).ReturnsAsync(ordem);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AplicarCobrancaGeradaCommandHandler(
             gateway.Object,
@@ -99,7 +100,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new AplicarCobrancaGeradaCommand { IdOrdemServico = 1 },
+            new AplicarCobrancaGeradaCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) },
             CancellationToken.None);
 
         // Assert
@@ -112,7 +113,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
     {
         // Arrange
         var gateway = new Mock<IOrdemServicoGateway>();
-        gateway.Setup(g => g.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        gateway.Setup(g => g.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AplicarCobrancaGeradaCommandHandler(
             gateway.Object,
@@ -120,7 +121,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
-            handler.Handle(new AplicarCobrancaGeradaCommand { IdOrdemServico = 999 }, CancellationToken.None));
+            handler.Handle(new AplicarCobrancaGeradaCommand { IdOrdemServico = OrdemServicoTestIds.Of(999) }, CancellationToken.None));
     }
 
     private static OrdemServicoAggregateRoot CriarOrdemFinalizada()
@@ -134,7 +135,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
             100m,
             new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" },
             [
-                new ItemNecessario.CriarItemNecessarioParams(1, 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
+                new ItemNecessario.CriarItemNecessarioParams(OrdemServicoTestIds.Of(1), 1m, new ItemEstoqueOrdemServico { Id = 100, Nome = "Pneu" })
             ]);
         ordem.FinalizarDiagnostico();
         ordem.AplicarOrcamentoGerado(1);
@@ -150,7 +151,7 @@ public class AplicarCobrancaGeradaCommandHandlerTests
                 FinalizadoEm = DateTime.UtcNow
             }
         ]);
-        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty("Id")!.SetValue(ordem, OrdemServicoTestIds.Of(1));
         return ordem;
     }
 }

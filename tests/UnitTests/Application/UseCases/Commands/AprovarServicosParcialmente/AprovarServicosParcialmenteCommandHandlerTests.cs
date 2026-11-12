@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.AprovarServicosParcialmente;
 using Domain.Exceptions;
@@ -21,7 +22,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         var ordem = CriarOrdemAguardandoAprovacaoComDoisServicos();
         var idPrimeiro = ordem.Servicos.First().Id;
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
 
         var handler = new AprovarServicosParcialmenteCommandHandler(
@@ -30,7 +31,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
             NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
         var command = new AprovarServicosParcialmenteCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             IdServicosAprovados = [idPrimeiro]
         };
 
@@ -53,7 +54,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
         var ordem = CriarOrdemAguardandoAprovacaoComDoisServicos();
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordem);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordem);
 
         var handler = new AprovarServicosParcialmenteCommandHandler(
             mockOrdemServicoGateway.Object,
@@ -61,7 +62,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
             NullLogger<AprovarServicosParcialmenteCommandHandler>.Instance);
         var command = new AprovarServicosParcialmenteCommand
         {
-            IdOrdemServico = 1,
+            IdOrdemServico = OrdemServicoTestIds.Of(1),
             IdServicosAprovados = [999]
         };
 
@@ -74,7 +75,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
     {
         // Arrange
         var mockOrdemServicoGateway = new Mock<IOrdemServicoGateway>();
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((OrdemServicoAggregateRoot?)null);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(999))).ReturnsAsync((OrdemServicoAggregateRoot?)null);
 
         var handler = new AprovarServicosParcialmenteCommandHandler(
             mockOrdemServicoGateway.Object,
@@ -83,7 +84,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainNotFoundException>(() =>
-            handler.Handle(new AprovarServicosParcialmenteCommand { IdOrdemServico = 999, IdServicosAprovados = [1] }, CancellationToken.None));
+            handler.Handle(new AprovarServicosParcialmenteCommand { IdOrdemServico = OrdemServicoTestIds.Of(999), IdServicosAprovados = [1] }, CancellationToken.None));
     }
 
     private static OrdemServicoAggregateRoot CriarOrdemAguardandoAprovacaoComDoisServicos()
@@ -91,7 +92,7 @@ public class AprovarServicosParcialmenteCommandHandlerTests
         var ordem = OrdemServicoAggregateRoot.Criar(
             new ClienteOrdemServico { Id = 1, Nome = "Maria", Email = "maria@teste.com" },
             new VeiculoOrdemServico { Placa = "XYZ-9876", Marca = "Toyota", Modelo = "Corolla" });
-        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, 1);
+        typeof(OrdemServicoAggregateRoot).GetProperty(nameof(OrdemServicoAggregateRoot.Id))!.SetValue(ordem, OrdemServicoTestIds.Of(1));
 
         var catalogo = new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
         ordem.EnviarParaDiagnostico();

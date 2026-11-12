@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Application.Abstractions.Gateways;
 using Application.Abstractions.Messaging;
 using Application.UseCases.Commands.FinalizarDiagnostico;
@@ -25,9 +26,9 @@ public class FinalizarDiagnosticoCommandHandlerTests
         var servicoCatalogo = new ServicoCatalogo { Id = 1, Nome = "Serviço", Codigo = "SVR-001" };
         ordemServico.AdicionarItemServico("Troca", 100m, servicoCatalogo, []);
 
-        var command = new FinalizarDiagnosticoCommand { IdOrdemServico = 1 };
+        var command = new FinalizarDiagnosticoCommand { IdOrdemServico = OrdemServicoTestIds.Of(1) };
 
-        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ordemServico);
+        mockOrdemServicoGateway.Setup(r => r.GetByIdAsync(OrdemServicoTestIds.Of(1))).ReturnsAsync(ordemServico);
         mockOrdemServicoGateway.Setup(r => r.UpdateAsync(It.IsAny<OrdemServicoAggregateRoot>())).Returns(Task.CompletedTask);
         mockPublisher
             .Setup(p => p.PublishDiagnosticoFinalizadoAsync(It.IsAny<OrdemServicoAggregateRoot>(), It.IsAny<CancellationToken>()))

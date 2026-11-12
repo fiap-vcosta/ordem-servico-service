@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using Api.Contracts.Validation;
 using Domain.Exceptions;
 using Api.Controllers.Staff.OrdemServico;
@@ -54,7 +55,7 @@ public class OrdemServicoControllerTests
         // Arrange
         var response = new OrdemServicoResponse
         {
-            Id = 1,
+            Id = OrdemServicoTestIds.Of(1),
             Status = StatusOrdemServico.Recebida,
             ValorTotal = 0m,
             RecebidaEm = DateTime.UtcNow,
@@ -86,7 +87,7 @@ public class OrdemServicoControllerTests
             .ReturnsAsync((OrdemServicoResponse?)null);
 
         // Act
-        var result = await _controller.GetById(999);
+        var result = await _controller.GetById(OrdemServicoTestIds.Of(999));
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
@@ -98,7 +99,7 @@ public class OrdemServicoControllerTests
         // Arrange
         var response = new OrdemServicoResponse
         {
-            Id = 1,
+            Id = OrdemServicoTestIds.Of(1),
             Status = StatusOrdemServico.Recebida,
             ValorTotal = 0m,
             RecebidaEm = DateTime.UtcNow,
@@ -113,7 +114,7 @@ public class OrdemServicoControllerTests
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetById(1);
+        var result = await _controller.GetById(OrdemServicoTestIds.Of(1));
 
         // Assert
         var ok = Assert.IsType<OkObjectResult>(result);
@@ -145,7 +146,7 @@ public class OrdemServicoControllerTests
 
         var response = new CriarOrdemServicoCommandResponse
         {
-            Id = 1,
+            Id = OrdemServicoTestIds.Of(1),
             Status = StatusOrdemServico.Recebida,
             ValorTotal = 0m,
             RecebidaEm = DateTime.UtcNow,
@@ -203,7 +204,7 @@ public class OrdemServicoControllerTests
             .ThrowsAsync(new DomainNotFoundException("não encontrada"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<DomainNotFoundException>(() => _controller.DescartarOrdemServico(999));
+        await Assert.ThrowsAsync<DomainNotFoundException>(() => _controller.DescartarOrdemServico(OrdemServicoTestIds.Of(999)));
     }
 
     [Fact]
@@ -215,7 +216,7 @@ public class OrdemServicoControllerTests
         _adicionarValidatorMock.Setup(v => v.Validate(It.IsAny<AdicionarItemServicoRequest>())).Returns(validation);
 
         // Act
-        var result = await _controller.AdicionarItemServico(1, new AdicionarItemServicoRequest
+        var result = await _controller.AdicionarItemServico(OrdemServicoTestIds.Of(1), new AdicionarItemServicoRequest
         {
             IdServico = 0,
             ValorCobrado = 0m
@@ -233,7 +234,7 @@ public class OrdemServicoControllerTests
 
         var response = new AdicionarItemOrdemServicoCommandResponse
         {
-            Id = 1,
+            Id = OrdemServicoTestIds.Of(1),
             Status = StatusOrdemServico.EmDiagnostico,
             ValorTotal = 100m,
             RecebidaEm = DateTime.UtcNow,
@@ -260,7 +261,7 @@ public class OrdemServicoControllerTests
         };
 
         // Act
-        var result = await _controller.AdicionarItemServico(1, request);
+        var result = await _controller.AdicionarItemServico(OrdemServicoTestIds.Of(1), request);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -278,7 +279,7 @@ public class OrdemServicoControllerTests
             .Setup(m => m.Send(It.IsAny<FinalizarDiagnosticoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FinalizarDiagnosticoCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.AguardandoAprovacao,
                 ValorTotal = 100m,
                 RecebidaEm = DateTime.UtcNow,
@@ -288,7 +289,7 @@ public class OrdemServicoControllerTests
             });
 
         // Act
-        var result = await _controller.FinalizarDiagnostico(1);
+        var result = await _controller.FinalizarDiagnostico(OrdemServicoTestIds.Of(1));
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -302,7 +303,7 @@ public class OrdemServicoControllerTests
             .Setup(m => m.Send(It.IsAny<AprovarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AprovarOrdemServicoCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.ChecandoEstoque,
                 ValorTotal = 100m,
                 RecebidaEm = DateTime.UtcNow,
@@ -313,7 +314,7 @@ public class OrdemServicoControllerTests
             });
 
         // Act
-        var result = await _controller.AprovarOrdemServico(1);
+        var result = await _controller.AprovarOrdemServico(OrdemServicoTestIds.Of(1));
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -327,7 +328,7 @@ public class OrdemServicoControllerTests
             .Setup(m => m.Send(It.IsAny<RejeitarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RejeitarOrdemServicoCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.EmDiagnostico,
                 ValorTotal = 0m,
                 RecebidaEm = DateTime.UtcNow,
@@ -338,7 +339,7 @@ public class OrdemServicoControllerTests
             });
 
         // Act
-        var result = await _controller.RejeitarOrdemServico(1);
+        var result = await _controller.RejeitarOrdemServico(OrdemServicoTestIds.Of(1));
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -375,7 +376,7 @@ public class OrdemServicoControllerTests
         _aprovarParcialValidatorMock.Setup(v => v.Validate(It.IsAny<AprovarServicosParcialmenteRequest>())).Returns(validation);
 
         // Act
-        var result = await _controller.AprovarServicosParcialmente(1, new AprovarServicosParcialmenteRequest());
+        var result = await _controller.AprovarServicosParcialmente(OrdemServicoTestIds.Of(1), new AprovarServicosParcialmenteRequest());
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -390,7 +391,7 @@ public class OrdemServicoControllerTests
             .Setup(m => m.Send(It.IsAny<AprovarServicosParcialmenteCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AprovarServicosParcialmenteCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.EmDiagnostico,
                 ValorTotal = 100m,
                 RecebidaEm = DateTime.UtcNow,
@@ -400,7 +401,7 @@ public class OrdemServicoControllerTests
             });
 
         // Act
-        var result = await _controller.AprovarServicosParcialmente(1, new AprovarServicosParcialmenteRequest { IdsServicosAprovados = [1] });
+        var result = await _controller.AprovarServicosParcialmente(OrdemServicoTestIds.Of(1), new AprovarServicosParcialmenteRequest { IdsServicosAprovados = [1] });
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -417,7 +418,7 @@ public class OrdemServicoControllerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _controller.AprovarServicosParcialmente(1, new AprovarServicosParcialmenteRequest { IdsServicosAprovados = [1] }));
+            _controller.AprovarServicosParcialmente(OrdemServicoTestIds.Of(1), new AprovarServicosParcialmenteRequest { IdsServicosAprovados = [1] }));
     }
 
     [Fact]
@@ -429,7 +430,7 @@ public class OrdemServicoControllerTests
         _confirmarExecucaoValidatorMock.Setup(v => v.Validate(It.IsAny<ConfirmarExecucaoRequest>())).Returns(validation);
 
         // Act
-        var result = await _controller.ConfirmarExecucao(1, new ConfirmarExecucaoRequest());
+        var result = await _controller.ConfirmarExecucao(OrdemServicoTestIds.Of(1), new ConfirmarExecucaoRequest());
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -442,7 +443,7 @@ public class OrdemServicoControllerTests
         _confirmarExecucaoValidatorMock.Setup(v => v.Validate(It.IsAny<ConfirmarExecucaoRequest>())).Returns(new ValidationResult());
         var response = new OrdemServicoResponse
         {
-            Id = 1,
+            Id = OrdemServicoTestIds.Of(1),
             Status = StatusOrdemServico.Finalizada,
             ValorTotal = 100m,
             RecebidaEm = DateTime.UtcNow,
@@ -456,7 +457,7 @@ public class OrdemServicoControllerTests
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.ConfirmarExecucao(1, new ConfirmarExecucaoRequest
+        var result = await _controller.ConfirmarExecucao(OrdemServicoTestIds.Of(1), new ConfirmarExecucaoRequest
         {
             ServicosExecutados = [new ServicoExecutado { IdServico = 1, IniciadoEm = DateTime.UtcNow.AddHours(-1), FinalizadoEm = DateTime.UtcNow }]
         });
@@ -479,7 +480,7 @@ public class OrdemServicoControllerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _controller.ConfirmarExecucao(1, new ConfirmarExecucaoRequest
+            _controller.ConfirmarExecucao(OrdemServicoTestIds.Of(1), new ConfirmarExecucaoRequest
             {
                 ServicosExecutados = [new ServicoExecutado { IdServico = 1, IniciadoEm = DateTime.UtcNow.AddHours(-1), FinalizadoEm = DateTime.UtcNow }]
             }));
@@ -493,7 +494,7 @@ public class OrdemServicoControllerTests
             .Setup(m => m.Send(It.IsAny<DescartarOrdemServicoCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DescartarOrdemServicoResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.Descartada,
                 RecebidaEm = DateTime.UtcNow,
                 DescartadaEm = DateTime.UtcNow,
@@ -503,7 +504,7 @@ public class OrdemServicoControllerTests
             });
 
         // Act
-        var result = await _controller.DescartarOrdemServico(1);
+        var result = await _controller.DescartarOrdemServico(OrdemServicoTestIds.Of(1));
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -518,7 +519,7 @@ public class OrdemServicoControllerTests
             .ThrowsAsync(new InvalidOperationException("x"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.FinalizarDiagnostico(1));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.FinalizarDiagnostico(OrdemServicoTestIds.Of(1)));
     }
 
     [Fact]

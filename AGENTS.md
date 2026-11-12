@@ -26,6 +26,8 @@ Aplicação .NET 8 de gestão de oficina (clientes, veículos, serviços, estoqu
 
 Dependências apontam para dentro: Api → Application → Domain; Infrastructure implementa ports.
 
+`OrdemServico.Id` e as FKs `IdOrdemServico` são `Guid` (gerado em `OrdemServicoAggregateRoot.Criar()`); `Servico.Id` e `ItemNecessario.Id` continuam `int`.
+
 Não adicionar comentários narrativos no código. Comentários só são aceitáveis quando explicam intenção, restrição ou trade-off que o código não comunica; marcadores AAA nos testes continuam obrigatórios.
 
 Responses/ViewModels devem ser reutilizados quando o shape e a semântica forem iguais entre endpoints; não criar DTO por verbo HTTP por simetria de pasta.

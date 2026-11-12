@@ -1,3 +1,4 @@
+using UnitTests.Support;
 using System.Security.Claims;
 using BuildingBlocks.Http.Auth;
 using Api.Controllers.Business.OrdemServico;
@@ -56,7 +57,7 @@ public class OrdemServicoBusinessControllerTests
             .Setup(m => m.Send(It.IsAny<AprovarOrdemServicoPorTokenCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AprovarOrdemServicoCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.ChecandoEstoque,
                 ValorTotal = 100m,
                 RecebidaEm = DateTime.UtcNow,
@@ -88,7 +89,7 @@ public class OrdemServicoBusinessControllerTests
             .Setup(m => m.Send(It.IsAny<RejeitarOrdemServicoPorTokenCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RejeitarOrdemServicoCommandResponse
             {
-                Id = 1,
+                Id = OrdemServicoTestIds.Of(1),
                 Status = StatusOrdemServico.EmDiagnostico,
                 ValorTotal = 0m,
                 RecebidaEm = DateTime.UtcNow,
