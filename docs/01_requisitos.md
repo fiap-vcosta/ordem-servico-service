@@ -3,7 +3,8 @@
 Índice: [`docs/README.md`](README.md) · README: [`README.md`](../README.md).  
 Referência Clean Architecture: https://github.com/proferickmuller/soat-cleanarch-csharp
 
-Onde um requisito da sessão mais recente **substitui** outro da sessão anterior, prevalece o mais recente.
+Onde um requisito da sessão mais recente **substitui** outro da sessão anterior, prevalece o mais recente.  
+**Paths atuais** (prefixo `/ordem-servico`, sem `/api`): sessão **Outubro/2026**. Sessões anteriores preservam o histórico (incluindo paths `/api/...` legados).
 
 ---
 

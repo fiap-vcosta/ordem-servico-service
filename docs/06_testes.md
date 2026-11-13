@@ -36,10 +36,9 @@ Não escrevemos testes de feature ainda não implementada.
 
 Cobre fluxos HTTP reais contra a API em memória com banco efêmero, por exemplo:
 
-- Cadastros e autenticação
 - Criação de OS com serviços/peças (incluindo listas vazias)
 - Listagem (ordenação + exclusões)
-- Aprovação/rejeição **sem** JWT (token público)
+- Aprovação/rejeição com JWT cliente + token opaco
 - Fluxos ponta a ponta do ciclo da OS
 
 ```bash
@@ -57,13 +56,13 @@ Exercitam a API **já em execução** (Docker ou `dotnet run`), fora da suite .N
 | | |
 |--|--|
 | Guia | [`07_api.md`](07_api.md) |
-| Exploratória | [`requestly/tech-challenge.requestly.json`](requestly/tech-challenge.requestly.json) |
-| Suites Runner | [`requestly/tech-challenge-e2e-tests.requestly.json`](requestly/tech-challenge-e2e-tests.requestly.json) |
+| Canônico (sistema) | [`e2e/docs/requestly/`](https://github.com/fiap-vcosta/e2e/tree/main/docs/requestly) |
+| Pasta local | [`requestly/`](requestly/) (não é a fonte de verdade do sistema) |
 | Environments | Docker · Local · **GCP-Gateway** (`https://vcosta-fiap.online`) |
 
-Importar no [Requestly](https://requestly.com/), escolher o environment, rodar login (seed `admin` / `admin`) e as pastas de fluxo no Collection Runner. Alternativa visual: Swagger.
+Importar no [Requestly](https://requestly.com/) a partir do **e2e**, escolher o environment e as pastas de fluxo. Alternativa visual: Swagger (`http://localhost:8083/swagger` no Compose deste serviço).
 
-Aprovação como **ator cliente**: token opaco na query **+** JWT cliente (Bearer); ownership por CPF. Suite `12-gateway-cliente-aprovar` cobre o caminho feliz na entrada oficial (preencher `tokenAprovacao` a partir do banco entre finalizar diagnóstico e aprovar).
+Aprovação como **ator cliente**: token opaco na query **+** JWT cliente (Bearer via `autenticacao-service`); ownership por documento. Preencher `tokenAprovacao` a partir do banco entre finalizar diagnóstico e aprovar.
 
 ---
 
